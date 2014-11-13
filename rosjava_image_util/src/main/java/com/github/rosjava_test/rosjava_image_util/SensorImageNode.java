@@ -18,10 +18,11 @@ import org.ros.node.topic.Subscriber;
 public class SensorImageNode extends AbstractNodeMain {
 
 	private Publisher<std_msgs.String> status_publisher ;
+	private Publisher<sensor_msgs.CompressedImage> com_image_publisher ;
 
-	private String nodeName = "rosjava_test/compressed_image_node" ;
-	private String raw_topic_name = this.nodeName + "/raw";
-	private String com_topic_name = this.nodeName + "/compressed";
+	private String nodeName = "sensor_image_node" ;
+	private String raw_topic_name = this.nodeName + "/image/in/raw";
+	private String com_topic_name = this.nodeName + "/image/in/compressed";
 	
 	public SensorImageNode (){
 		this(null,null,null);
@@ -43,6 +44,7 @@ public class SensorImageNode extends AbstractNodeMain {
 	public void onStart(final ConnectedNode connectedNode) {
 
 		this.status_publisher = connectedNode.newPublisher(this.nodeName + "/status/string", std_msgs.String._TYPE);
+		this.com_image_publisher = connectedNode.newPublisher(this.nodeName + "/image/out/compressed", std_msgs.String._TYPE);
 		
 		Subscriber<sensor_msgs.Image> raw_image_subscriber = connectedNode.newSubscriber(
 				this.raw_topic_name, sensor_msgs.Image._TYPE);
