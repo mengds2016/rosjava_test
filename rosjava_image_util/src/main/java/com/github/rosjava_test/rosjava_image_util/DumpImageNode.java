@@ -6,8 +6,23 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import org.ros.node.ConnectedNode;
+
 public class DumpImageNode extends SensorImageNode{
 
+	public DumpImageNode (){
+		super(null,null,null);
+	}
+	
+	@Override
+	public void onStart(final ConnectedNode connectedNode) {
+		String nodeName = connectedNode.getParameterTree().getString(
+				"ROSJAVA_IMAGE_UTIL_DUMP_NODE_NAME",
+				this.nodeName); 
+		updateTopicName(nodeName,null,null);
+		super.onStart(connectedNode);
+	}
+	
 	@Override
 	protected void rawImageFunction(BufferedImage buf){
 		try {
