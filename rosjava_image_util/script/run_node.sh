@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 NODE=$1;
 
@@ -7,4 +7,5 @@ then
     NODE=DumpImageNode;
 fi
 
-`rospack find rosjava_test`/rosjava_image_util/build/install/rosjava_image_util/bin/rosjava_image_util com.github.rosjava_test.rosjava_image_util.$NODE;
+echo ${@:1};
+`rospack find rosjava_test`/rosjava_image_util/build/install/rosjava_image_util/bin/rosjava_image_util com.github.rosjava_test.rosjava_image_util.$NODE ${@:1};

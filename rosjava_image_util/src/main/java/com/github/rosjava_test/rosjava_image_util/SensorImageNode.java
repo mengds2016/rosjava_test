@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteOrder;
@@ -26,9 +25,9 @@ public class SensorImageNode extends AbstractNodeMain {
 	public Publisher<std_msgs.String> status_publisher ;
 	public Publisher<sensor_msgs.CompressedImage> com_image_publisher ;
 
-	private String nodeName = "sensor_image_node" ;
-	private String raw_topic_name = this.nodeName + "/image/in/raw";
-	private String com_topic_name = this.nodeName + "/image/in/compressed";
+	protected String nodeName = "sensor_image_node" ;
+	protected String raw_topic_name = this.nodeName + "/image/in/raw";
+	protected String com_topic_name = this.nodeName + "/image/in/compressed";
 	
 	public SensorImageNode (){
 		this(null,null,null);
@@ -36,7 +35,15 @@ public class SensorImageNode extends AbstractNodeMain {
 	
 	public SensorImageNode ( String nodeName, String raw_topic_name, String com_topic_name ){
 		super();
-		if ( nodeName != null ) this.nodeName = nodeName ;
+		updateTopicName(nodeName, raw_topic_name, com_topic_name);
+	}
+	
+	protected void updateTopicName(String nodeName, String raw_topic_name, String com_topic_name ){
+		if ( nodeName != null ) {
+			this.nodeName = nodeName ;
+			this.raw_topic_name = this.nodeName + "/image/in/raw";
+			this.com_topic_name = this.nodeName + "/image/in/compressed";
+		}
 		if ( raw_topic_name != null ) this.raw_topic_name = raw_topic_name;
 		if ( com_topic_name != null ) this.com_topic_name = com_topic_name;
 	}
