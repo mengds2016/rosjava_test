@@ -6,11 +6,11 @@ import org.ros.node.ConnectedNode;
 
 public class ImageWindowNode extends SensorImageNode{
 
-	private ImageWindowSample window;
+	private ImageWindowSampleFrame window;
 	
 	public ImageWindowNode (){
 		super("image_window_node",null,null);
-		this.window = new ImageWindowSample();
+		this.window = new ImageWindowSampleFrame();
 	}
 	
 	@Override

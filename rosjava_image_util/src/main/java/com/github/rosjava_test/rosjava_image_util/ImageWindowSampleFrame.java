@@ -18,7 +18,7 @@ import javax.swing.JPanel;
 
 import org.ros.node.topic.Publisher;
 
-public class ImageWindowSample extends JFrame implements ActionListener {
+public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
 
 	private static int W = 480, H = 640;
@@ -35,7 +35,7 @@ public class ImageWindowSample extends JFrame implements ActionListener {
 	private Publisher<std_msgs.Float32MultiArray> command_publisher;
 	private Publisher<std_msgs.String> event_publisher;
 
-	public ImageWindowSample() {
+	public ImageWindowSampleFrame() {
 		this.camera_layout = new BorderLayout();
 		this.outer_layout = new BorderLayout();
 		this.camera_pane = new JPanel();
@@ -45,41 +45,40 @@ public class ImageWindowSample extends JFrame implements ActionListener {
 		this.commandView = new CommandView();
 		this.cameraView = new CameraView(this.commandView);
 
-		Dimension min = new Dimension(W, 50);
-
 		this.camera_pane.add(this.cameraView, BorderLayout.CENTER);
 
-		JButton west = new JButton();
-		west.setActionCommand("west");
-		west.setName("west");
-		west.addActionListener(this);
-		west.setText("◀");
-		// west.setPreferredSize(min);
-		this.camera_pane.add(west, BorderLayout.WEST);
-
-		JButton east = new JButton();
-		east.setActionCommand("east");
-		east.setName("east");
-		east.setText("▶");
-		east.addActionListener(this);
-		// east.setPreferredSize(min);
-		this.camera_pane.add(east, BorderLayout.EAST);
-
-		JButton north = new JButton();
-		north.setActionCommand("north");
-		north.setName("north");
-		north.addActionListener(this);
-		north.setPreferredSize(min);
-		north.setText("▲");
-		this.camera_pane.add(north, BorderLayout.NORTH);
-
-		JButton south = new JButton();
-		south.setActionCommand("south");
-		south.setName("south");
-		south.addActionListener(this);
-		south.setPreferredSize(min);
-		south.setText("▼");
-		this.camera_pane.add(south, BorderLayout.SOUTH);
+//		Dimension min = new Dimension(W, 50);
+//		JButton west = new JButton();
+//		west.setActionCommand("west");
+//		west.setName("west");
+//		west.addActionListener(this);
+//		west.setText("◀");
+//		// west.setPreferredSize(min);
+//		this.camera_pane.add(west, BorderLayout.WEST);
+//
+//		JButton east = new JButton();
+//		east.setActionCommand("east");
+//		east.setName("east");
+//		east.setText("▶");
+//		east.addActionListener(this);
+//		// east.setPreferredSize(min);
+//		this.camera_pane.add(east, BorderLayout.EAST);
+//
+//		JButton north = new JButton();
+//		north.setActionCommand("north");
+//		north.setName("north");
+//		north.addActionListener(this);
+//		north.setPreferredSize(min);
+//		north.setText("▲");
+//		this.camera_pane.add(north, BorderLayout.NORTH);
+//
+//		JButton south = new JButton();
+//		south.setActionCommand("south");
+//		south.setName("south");
+//		south.addActionListener(this);
+//		south.setPreferredSize(min);
+//		south.setText("▼");
+//		this.camera_pane.add(south, BorderLayout.SOUTH);
 
 		this.add(this.camera_pane);
 		this.add(this.commandView, BorderLayout.SOUTH);
@@ -112,7 +111,7 @@ public class ImageWindowSample extends JFrame implements ActionListener {
 	}
 
 	public static void main(String[] args) {
-		new ImageWindowSample().repaint();
+		new ImageWindowSampleFrame().repaint();
 	}
 
 	@Override
