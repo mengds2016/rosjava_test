@@ -23,6 +23,10 @@ public class SensorImageNode extends AbstractNodeMain {
 	private String raw_topic_name = this.nodeName + "/raw";
 	private String com_topic_name = this.nodeName + "/compressed";
 	
+	public SensorImageNode (){
+		this(null,null,null);
+	}
+	
 	public SensorImageNode ( String nodeName, String raw_topic_name, String com_topic_name ){
 		super();
 		if ( nodeName != null ) this.nodeName = nodeName ;
@@ -83,7 +87,7 @@ public class SensorImageNode extends AbstractNodeMain {
 					if ( start > 0 ){
 						System.out.println(" jpeg header detected "
 								+ start);
-						InputStream bais = new ByteArrayInputStream(buffer.array());  
+						InputStream bais = new ByteArrayInputStream(data, start, data.length - start);
 						BufferedImage buf = ImageIO.read(bais);
 						comImageFunction(buf);
 					}
