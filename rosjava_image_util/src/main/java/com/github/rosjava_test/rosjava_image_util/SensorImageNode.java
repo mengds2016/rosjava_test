@@ -2,7 +2,6 @@ package com.github.rosjava_test.rosjava_image_util;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.InputStream;
 
 import javax.imageio.ImageIO;
@@ -16,7 +15,7 @@ import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
 
-public class CompressedImageNode extends AbstractNodeMain {
+public class SensorImageNode extends AbstractNodeMain {
 
 	private Publisher<std_msgs.String> status_publisher ;
 
@@ -24,7 +23,7 @@ public class CompressedImageNode extends AbstractNodeMain {
 	private String raw_topic_name = this.nodeName + "/raw";
 	private String com_topic_name = this.nodeName + "/compressed";
 	
-	public CompressedImageNode ( String nodeName, String raw_topic_name, String com_topic_name ){
+	public SensorImageNode ( String nodeName, String raw_topic_name, String com_topic_name ){
 		super();
 		if ( nodeName != null ) this.nodeName = nodeName ;
 		if ( raw_topic_name != null ) this.raw_topic_name = raw_topic_name;
@@ -47,7 +46,7 @@ public class CompressedImageNode extends AbstractNodeMain {
 			@Override
 			public void onNewMessage(sensor_msgs.Image image) {
 				if ( !image.getEncoding().contains("rgb8") ){
-					System.out.println( "[" + CompressedImageNode.this.nodeName + "] invalid encoding " + image.getEncoding() ) ;
+					System.out.println( "[" + SensorImageNode.this.nodeName + "] invalid encoding " + image.getEncoding() ) ;
 					return ;
 				}
 				try {
@@ -63,6 +62,7 @@ public class CompressedImageNode extends AbstractNodeMain {
 							buf.setRGB(i, j, rgb) ;
 						}
 					}
+					rawImageFunction(buf);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -85,7 +85,7 @@ public class CompressedImageNode extends AbstractNodeMain {
 								+ start);
 						InputStream bais = new ByteArrayInputStream(buffer.array());  
 						BufferedImage buf = ImageIO.read(bais);
-						ImageIO.write(buf, "test.jpg", new File("test.jpg"));
+						comImageFunction(buf);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -94,6 +94,9 @@ public class CompressedImageNode extends AbstractNodeMain {
 		}, 1);
 	}
 
+	protected void rawImageFunction(BufferedImage buf){};
+	protected void comImageFunction(BufferedImage buf){};
+	
 	
 	//File tmp = new File("tmp");
 	//write(tmp.getAbsolutePath(), buffer.array(),
