@@ -26,4 +26,14 @@ public class DumpImageNode extends SensorImageNode{
 		}
 	};
 
+	@Override
+	protected void stringFunction(String buf){
+		System.out.println("  | publish " + buf + " --> " + this.com_image_publisher.getTopicName());
+		try {
+			publishCompressedImage(buf);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	};
+
 }
