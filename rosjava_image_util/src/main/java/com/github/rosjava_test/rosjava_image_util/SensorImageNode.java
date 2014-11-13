@@ -104,26 +104,6 @@ public class SensorImageNode extends AbstractNodeMain {
 	protected void comImageFunction(BufferedImage buf){};
 	
 	
-	//File tmp = new File("tmp");
-	//write(tmp.getAbsolutePath(), buffer.array(),
-	//		start);
-//	public static void write(String path, byte[] data, int offset) {
-//		try {
-//			OutputStream out = new FileOutputStream(path);
-//			for ( int i=0 ; i<offset ; i++ ){
-//				if ( offset == data[i] ) {
-//					System.out.println(i) ;
-//				}
-//			}
-//			out.write(data, offset, data.length - offset);
-//			out.close();
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//	}
-	
 	public static BufferedImage monoImage(byte[] data, int w, int h) {
 		BufferedImage buf = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
 		//int step = data.length / (w * h);
