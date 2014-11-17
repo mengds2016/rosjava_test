@@ -1,0 +1,12 @@
+<launch>
+  <node pkg="audio_play" type="audio_play"
+	name="local_audio_play" output="screen">
+    <remap from="/audio" to="/audio_out" />
+    <param name="dst" value="alsasink"/>
+  </node>
+  <node pkg="audio_capture" type="audio_capture"
+	name="local_audio_capture" output="screen">
+    <remap from="/audio" to="/audio_in" />
+    <param name="bitrate" value="128"/>
+  </node>
+</launch>
