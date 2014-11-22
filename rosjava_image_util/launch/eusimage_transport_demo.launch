@@ -1,19 +1,56 @@
 <launch>
+  <!--
+  <param name="/sensor_image_node/com_image_pub_topic_name"
+	 value="/image_window_node/left/image/in/compressed" />
+  <param name="/sensor_image_node/command_string_topic_name"
+	 value="/sensor_image_node/left/command/string" />
   <node pkg="rosjava_test" type="run_node.sh"
-	name="sample_image_node" output="screen" args="DumpImageNode" />
+	name="sensor_image_node_left" output="screen" args="DumpImageNode" />
+
+  <param name="/sensor_image_node/com_image_pub_topic_name"
+	 value="/image_window_node/right/image/in/compressed" />
+  <param name="/sensor_image_node/command_string_topic_name"
+	 value="/sensor_image_node/right/command/string" />
+  <node pkg="rosjava_test" type="run_node.sh"
+	name="sensor_image_node_right" output="screen" args="DumpImageNode" />
+  -->
+  <node pkg="rosjava_test" type="run_node.sh"
+	name="sensor_image_node_left" output="screen" args="DumpImageNode" >
+    <env name="com_image_pub_topic_name"
+	 value="/image_window_node/left/image/in/compressed" />
+    <env name="command_string_topic_name"
+	 value="/sensor_image_node/left/command/string" />
+  </node>
+
+  <node pkg="rosjava_test" type="run_node.sh"
+	name="sensor_image_node_right" output="screen" args="DumpImageNode" >
+    <env name="com_image_pub_topic_name"
+	 value="/image_window_node/right/image/in/compressed" />
+    <env name="command_string_topic_name"
+	 value="/sensor_image_node/right/command/string" />
+  </node>
+
   <!--
   <node pkg="image_view" type="image_view" name="image_view"
 	output="screen" args="image:=/sensor_image_node/image/out _image_transport:=compressed" />
   -->
-  <node pkg="rosjava_test" type="aria-viewer.l" name="aria_viewer"
-	output="screen" />
   <node pkg="rosjava_test" type="run_node.sh"
 	name="image_window_node" output="screen" args="ImageWindowNode" >
-    <param name="/left/com_image_sub_topic_name"
-	   value="/sensor_image_node/image/out/compressed" />
   </node>
+
+  <node pkg="rosjava_test" type="aria-viewer.l" name="aria_viewer_left"
+	output="screen" >
+    <remap from="/sensor_image_node/command/string"
+	   to="/sensor_image_node/left/command/string" />
+  </node>
+  <node pkg="rosjava_test" type="aria-viewer.l" name="aria_viewer_right"
+	output="screen" >
+    <remap from="/sensor_image_node/command/string"
+	   to="/sensor_image_node/right/command/string" />
+  </node>
+
   <!--
-  <node pkg="image_transport" type="republish" name="rosjava_test_image_transport"
+      <node pkg="image_transport" type="republish" name="rosjava_test_image_transport"
 	args="compressed in:=/sensor_image_node/image/out compressed out:=/image_window_node/left/image/in" />
   -->
 </launch>
