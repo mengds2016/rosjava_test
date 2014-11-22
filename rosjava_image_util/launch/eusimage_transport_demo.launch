@@ -8,7 +8,12 @@
   <node pkg="rosjava_test" type="aria-viewer.l" name="aria_viewer"
 	output="screen" />
   <node pkg="rosjava_test" type="run_node.sh"
-	name="image_window_node" output="screen" args="ImageWindowNode" />
+	name="image_window_node" output="screen" args="ImageWindowNode" >
+    <param name="/left/com_image_sub_topic_name"
+	   value="/sensor_image_node/image/out/compressed" />
+  </node>
+  <!--
   <node pkg="image_transport" type="republish" name="rosjava_test_image_transport"
-	args="compressed in:=/sensor_image_node/image/out compressed out:=/image_window_node/image/in" />
+	args="compressed in:=/sensor_image_node/image/out compressed out:=/image_window_node/left/image/in" />
+  -->
 </launch>
