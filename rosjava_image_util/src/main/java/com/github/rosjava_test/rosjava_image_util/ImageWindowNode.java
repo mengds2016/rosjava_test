@@ -9,7 +9,7 @@ public class ImageWindowNode extends SensorImageNode{
 	private ImageWindowSampleFrame window;
 	
 	public ImageWindowNode (){
-		super("image_window_node",null,null);
+		super("image_window_node");
 		this.window = new ImageWindowSampleFrame();
 	}
 	
@@ -18,26 +18,26 @@ public class ImageWindowNode extends SensorImageNode{
 		String nodeName = connectedNode.getParameterTree().getString(
 				"ROSJAVA_IMAGE_UTIL_WINDOW_NODE_NAME",
 				this.nodeName); 
-		updateTopicName(nodeName,null,null);
+		updateTopics(nodeName,null);
 		super.onStart(connectedNode);
 	}
 
 	@Override
-	protected void rawImageFunction(BufferedImage buf){
+	protected void rawImageFunction(BufferedImage buf, String tag){
 		if ( this.window != null && buf != null ) {
-			this.window.updateImage(buf);
+			this.window.setLeftImage(buf);
 		}
 	};
 	
 	@Override
-	protected void comImageFunction(BufferedImage buf){
+	protected void comImageFunction(BufferedImage buf, String tag){
 		if ( this.window != null && buf != null ) {
-			this.window.updateImage(buf);
+			this.window.setLeftImage(buf);
 		}
 	};
 
 	@Override
-	protected void stringFunction(String buf){
+	protected void stringFunction(String buf, String tag){
 	};
 
 }

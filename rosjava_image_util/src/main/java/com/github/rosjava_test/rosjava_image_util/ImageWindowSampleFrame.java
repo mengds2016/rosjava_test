@@ -21,13 +21,13 @@ import org.ros.node.topic.Publisher;
 public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
 
-	private static int W = 480, H = 640;
+	private static int W = 480*2, H = 640;
 
 	private BorderLayout camera_layout;
 	private BorderLayout outer_layout;
 	private JPanel camera_pane;
 
-	public CameraView cameraView;
+	public CameraView leftCameraView, rightCameraView;
 	public CommandView commandView;
 
 	private float pan = 0;
@@ -43,9 +43,11 @@ public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 		this.getContentPane().setLayout(this.outer_layout);
 
 		this.commandView = new CommandView();
-		this.cameraView = new CameraView(this.commandView);
+		this.leftCameraView = new CameraView(this.commandView);
+		this.rightCameraView = new CameraView(this.commandView);
 
-		this.camera_pane.add(this.cameraView, BorderLayout.CENTER);
+		this.camera_pane.add(this.leftCameraView, BorderLayout.CENTER);
+		this.camera_pane.add(this.rightCameraView, BorderLayout.EAST);
 
 //		Dimension min = new Dimension(W, 50);
 //		JButton west = new JButton();
@@ -105,8 +107,13 @@ public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 		this.event_publisher = event;
 	}
 	
-	public void updateImage(BufferedImage i){
-		this.cameraView.camera.setImage(i);
+	public void setLeftImage(BufferedImage i){
+		this.leftCameraView.camera.setImage(i);
+		this.repaint();
+	}
+	
+	public void setRightImage(BufferedImage i){
+		this.rightCameraView.camera.setImage(i);
 		this.repaint();
 	}
 
