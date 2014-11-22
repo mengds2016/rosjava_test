@@ -4,7 +4,7 @@ import javax.sound.sampled.*;
 
 public class MicTest extends Thread {
 
-	public static final int SAMPLE_RATE = 8000;
+	public static final int SAMPLE_RATE = 16000;
 	public static final int TIME_STEP = 100;
 	public static final int BUFFER_SIZE = (int)(SAMPLE_RATE * (TIME_STEP/1000.0));
 	private TargetDataLine targetDataLine;
