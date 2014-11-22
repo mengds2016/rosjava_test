@@ -2,9 +2,12 @@
 
 (ros::roseus "eus_animeface")
 
+(defvar *inpath* "aria.jpg")
+(defvar *outpath* "out.jpg")
+
 (defun detect-animeface
-  (&key (inpath "aria.jpg")
-	(outpath "out.jpg")
+  (&key (inpath *inpath*)
+	(outpath *outpath*)
 	(root-dir (format nil "~A/rosjava_image_util/script"
 			  (ros::rospack-find "rosjava_test")))
 	ret)
@@ -15,6 +18,70 @@
 		(not (substringp "eof" buf)))
       (push (read-from-string (format nil "(~A)" buf)) ret))
     ret))
+
+(defun set-inpath-callback (msg) (setq *inpath* (send msg :data)))
+(defun set-outpath-callback (msg) (setq *outpath* (send msg :data)))
+
+(defun request-callback (msg)
+  (setq *inpath* (send msg :data))
+  (let* ((ret (detect-animeface))
+	 (face (assoc :face ret))
+	 (reye (find-if #'(lambda (d) (find :right d)) ret))
+	 (leye (find-if #'(lambda (d) (find :left d)) ret))
+	 )
+    (if face
+	(ros::publish "/eus_animeface/face/rectangle"
+		      (instance std_msgs::int32multiarray :init
+				:data (integer-vector
+				       (or (nth 1 face) 0)
+				       (or (nth 2 face) 0)
+				       (or (nth 3 face) 0)
+				       (or (nth 4 face) 0)))))
+    (if reye
+	(ros::publish "/eus_animeface/eyes/right/rectangle"
+		      (instance std_msgs::int32multiarray :init
+				:data (integer-vector
+				       (or (nth 2 reye) 0)
+				       (or (nth 3 reye) 0)
+				       (or (nth 4 reye) 0)
+				       (or (nth 5 reye) 0)))))
+    (if leye
+	(ros::publish "/eus_animeface/eyes/left/rectangle"
+		      (instance std_msgs::int32multiarray :init
+				:data (integer-vector
+				       (or (nth 2 leye) 0)
+				       (or (nth 3 leye) 0)
+				       (or (nth 4 leye) 0)
+				       (or (nth 5 leye) 0)))))
+    ))
+
+(ros::advertise "/eus_animeface/face/rectangle"
+		std_msgs::int32multiarray)
+(ros::advertise "/eus_animeface/eyes/right/rectangle"
+		std_msgs::int32multiarray)
+(ros::advertise "/eus_animeface/eyes/left/rectangle"
+		std_msgs::int32multiarray)
+
+(ros::subscribe "/eus_animeface/set_inpath/string"
+		std_msgs::String
+		#'set-inpath-callback
+		1)
+(ros::subscribe "/eus_animeface/set_outpath/string"
+		std_msgs::String
+		#'set-outpath-callback
+		1)
+(ros::subscribe "/eus_animeface/detect_request/string"
+		std_msgs::String
+		#'request-callback
+		1)
+
+
+(ros::rate 10)
+(do-until-key
+ (if (not (ros::ok)) (return-from nil nil))
+ (ros::spin-once)
+ (ros::sleep)
+ )
 
 
 ;; (defun read-all-animeface
