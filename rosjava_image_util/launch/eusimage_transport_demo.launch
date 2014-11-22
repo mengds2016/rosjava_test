@@ -38,11 +38,8 @@
 	name="image_window_node" output="screen" args="ImageWindowNode" >
   </node>
 
-  <node pkg="rosjava_test" type="aria-viewer.l" name="aria_viewer_left"
-	output="screen" >
-    <remap from="/sensor_image_node/command/string"
-	   to="/sensor_image_node/left/command/string" />
-  </node>
+  <node pkg="rosjava_test" type="publish_aria_image_path.sh"
+	name="aria_image_viewer_left" />
   <node pkg="rosjava_test" type="aria-viewer.l" name="aria_viewer_right"
 	output="screen" >
     <remap from="/sensor_image_node/command/string"
