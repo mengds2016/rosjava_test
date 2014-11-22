@@ -58,4 +58,6 @@ foreach my $face (@{$results}) {
     last;
 }
 
+print "eof\n";
+
 $im->write(file => $outpath, type=>'jpeg');
