@@ -43,8 +43,8 @@ public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 		this.getContentPane().setLayout(this.outer_layout);
 
 		this.commandView = new CommandView();
-		this.leftCameraView = new CameraView(this.commandView);
-		this.rightCameraView = new CameraView(this.commandView);
+		this.leftCameraView = new CameraView(this.commandView, (W-4)/2, H-20);
+		this.rightCameraView = new CameraView(this.commandView, (W-4)/2, H-20);
 
 		this.camera_pane.add(this.leftCameraView, BorderLayout.CENTER);
 		this.camera_pane.add(this.rightCameraView, BorderLayout.EAST);
@@ -169,10 +169,10 @@ public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 		private JLabel prompt;
 		private Publisher<std_msgs.String> event_publisher;
 
-		public CameraView(JLabel prompt) {
+		public CameraView(JLabel prompt, int w, int h) {
 			this.prompt = prompt;
 			this.out = new GridLayout(1, 1);
-			this.camera = new ImagePanel();
+			this.camera = new ImagePanel(w, h);
 			this.setLayout(this.out);
 			this.add(this.camera);
 			this.addMouseListener(this);

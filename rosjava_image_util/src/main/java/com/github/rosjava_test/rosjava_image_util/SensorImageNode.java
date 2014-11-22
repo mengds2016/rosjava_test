@@ -199,11 +199,11 @@ public class SensorImageNode extends AbstractNodeMain {
 		public Subscriber<sensor_msgs.CompressedImage> com_image_subscriber;
 		
 		public String nodeName;
-		public String raw_topic_name;
-		public String com_topic_name;
-		public String status_topic_name;
-		public String out_com_topic_name;
-		public String command_topic_name;
+		public String raw_image_sub_topic_name;
+		public String com_image_sub_topic_name;
+		public String status_string_topic_name;
+		public String com_image_pub_topic_name;
+		public String command_string_topic_name;
 		
 		public SensorImageTopics (){
 			this("sensor_image_node");
@@ -216,23 +216,34 @@ public class SensorImageNode extends AbstractNodeMain {
 		
 		protected void updateTopicName(String nodeName){
 			this.nodeName = nodeName ;
-			this.raw_topic_name = this.nodeName + "/image/in/raw";
-			this.com_topic_name = this.nodeName + "/image/in/compressed";
-			this.status_topic_name = this.nodeName + "/status/string";
-			this.out_com_topic_name = this.nodeName + "/image/out/compressed";
-			this.command_topic_name = this.nodeName + "/command/string";
+			this.raw_image_sub_topic_name = this.nodeName + "/image/in/raw";
+			this.com_image_sub_topic_name = this.nodeName + "/image/in/compressed";
+			this.status_string_topic_name = this.nodeName + "/status/string";
+			this.com_image_pub_topic_name = this.nodeName + "/image/out/compressed";
+			this.command_string_topic_name = this.nodeName + "/command/string";
+		}
+
+		protected void updateTopicNameFromRosParam(final ConnectedNode connectedNode) {
+			this.raw_image_sub_topic_name = connectedNode.getParameterTree().getString(
+					this.nodeName + "/raw_image_sub_topic_name", this.raw_image_sub_topic_name);
+			this.com_image_sub_topic_name = connectedNode.getParameterTree().getString(
+					this.nodeName + "/com_image_sub_topic_name", this.com_image_sub_topic_name);
+			this.status_string_topic_name = connectedNode.getParameterTree().getString(
+					this.nodeName + "/status_string_topic_name", this.status_string_topic_name);
+			this.com_image_pub_topic_name = connectedNode.getParameterTree().getString(
+					this.nodeName + "com_image_pub_image_util/com_topic_name", this.com_image_pub_topic_name);
+			this.command_string_topic_name = connectedNode.getParameterTree().getString(
+					this.nodeName + "/command_string_topic_name", this.command_string_topic_name);
 		}
 		
 		public void onStart(final ConnectedNode connectedNode) {
-
-			this.status_publisher = connectedNode.newPublisher(this.status_topic_name, std_msgs.String._TYPE);
-			this.com_image_publisher = connectedNode.newPublisher(this.out_com_topic_name, sensor_msgs.CompressedImage._TYPE);
-			
-			this.command_subscriber =  connectedNode.newSubscriber(this.command_topic_name, std_msgs.String._TYPE);
-			
-			this.raw_image_subscriber = connectedNode.newSubscriber(this.raw_topic_name, sensor_msgs.Image._TYPE);
-			this.com_image_subscriber = connectedNode.newSubscriber(this.com_topic_name, sensor_msgs.CompressedImage._TYPE);
-			}
+			updateTopicNameFromRosParam(connectedNode);
+			this.status_publisher = connectedNode.newPublisher(this.status_string_topic_name, std_msgs.String._TYPE);
+			this.com_image_publisher = connectedNode.newPublisher(this.com_image_pub_topic_name, sensor_msgs.CompressedImage._TYPE);
+			this.command_subscriber =  connectedNode.newSubscriber(this.command_string_topic_name, std_msgs.String._TYPE);
+			this.raw_image_subscriber = connectedNode.newSubscriber(this.raw_image_sub_topic_name, sensor_msgs.Image._TYPE);
+			this.com_image_subscriber = connectedNode.newSubscriber(this.com_image_sub_topic_name, sensor_msgs.CompressedImage._TYPE);
+		}
 	}
 	
 }
