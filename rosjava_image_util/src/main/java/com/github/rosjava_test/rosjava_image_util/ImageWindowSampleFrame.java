@@ -100,7 +100,7 @@ public class ImageWindowSampleFrame extends JFrame {
 		private BufferedImage image;
 		public String name;
 		public int x=0, y=0, w=100, h=100;	
-		public boolean flush=true;
+		public boolean flush=false;
 		
 		public void setImage(BufferedImage i) {
 			this.image = i;
@@ -225,6 +225,8 @@ public class ImageWindowSampleFrame extends JFrame {
 
 		private JLabel prompt;
 		private Publisher<std_msgs.String> event_publisher;
+		
+		ImageData selected;
 
 		public ImageView(JLabel prompt, int w, int h) {
 			this.prompt = prompt;
@@ -241,29 +243,36 @@ public class ImageWindowSampleFrame extends JFrame {
 		}
 		
 		
-//		public boolean update_selected_movie(int x, int y) {
-//			for (int i = MainFrame.movie.size()-1 ; i>=0 ; i--  ) {
-//				Movie mov = MainFrame.movie.get(i) ;
-//				if (x > mov.x && x < mov.x + mov.width && y > mov.y
-//						&& y < mov.y + mov.height) {
-//					this.selected_movie = mov;
-//					this.selected_movie.selected = true;
-//					//System.out.println( "selected" ) ;
-//					return true ;
-//				}
-//				mov.selected = false ;
-//			}
-//			return false ;
-//		}
+		public boolean updateSelectedImage(int x, int y) {
+			ImageData selected = null;
+			for (int i = this.pane.images.size()-1 ; i>=0 ; i--  ) {
+				ImageData img = this.pane.images.get(i) ;
+				if ( selected != null ){
+					img.flush = false;
+				} else if (x > img.x && x < img.x + img.w && y > img.y
+						&& y < img.y + img.h) {
+					selected = img;
+					selected.flush = true;
+				} else {
+					img.flush = false;
+				}
+			}
+			this.selected = selected;
+			return (selected != null) ;
+		}
 
 		@Override
-		public void mouseClicked(MouseEvent arg0) {
+		public void mouseClicked(MouseEvent e) {
 			System.out.println("clicked");
-			if (this.event_publisher != null) {
-				std_msgs.String msg = this.event_publisher.newMessage();
-				msg.setData("clicked");
-				this.event_publisher.publish(msg);
+//			if (this.event_publisher != null) {
+//				std_msgs.String msg = this.event_publisher.newMessage();
+//				msg.setData("clicked");
+//				this.event_publisher.publish(msg);
+//			}
+			if ( updateSelectedImage(e.getX(), e.getY())){
+				System.out.println(" selected -> " + this.selected);
 			}
+			repaint();
 		}
 
 		@Override
