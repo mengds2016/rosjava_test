@@ -100,6 +100,7 @@ public class ImageWindowSampleFrame extends JFrame {
 		private BufferedImage image;
 		public String name;
 		public int x=0, y=0, w=100, h=100;	
+		public boolean flush=true;
 		
 		public void setImage(BufferedImage i) {
 			this.image = i;
@@ -131,6 +132,10 @@ public class ImageWindowSampleFrame extends JFrame {
 			BufferedImage i = this.image;
 			if (i != null) {
 				g.drawImage(i, this.x, this.y, this.w, this.h, null);
+			}
+			if ( this.flush ){
+				g.setColor(Color.GREEN);
+				g.drawRect(this.x, this.y, this.w, this.h);
 			}
 		}
 		
