@@ -26,6 +26,24 @@
                 std_msgs::string
                 1)
 
+(defun calc-eye-position
+  nil
+  (let* ((reye (send *robot* :get-val 'eyer_end_link_lk))
+	 (leye (send *robot* :get-val 'eyel_end_link_lk))
+	 (init (send-all (list reye leye) :worldcoords))
+	 (reye-faces (flatten (send-all (send reye :bodies) :faces)))
+	 (leye-faces (flatten (send-all (send leye :bodies) :faces)))
+	 (reye-vertices (flatten (send-all reye-faces :vertices)))
+	 (leye-vertices (flatten (send-all leye-faces :vertices)))
+	 )
+    ;;(send-all (list reye leye) :draw-on :flush t :color #F(0 1 0))
+    ;;(send-all
+    (list
+     (scale (/ 1.0 (length reye-vertices)) (reduce #'v+ reye-vertices))
+     (scale (/ 1.0 (length leye-vertices)) (reduce #'v+ leye-vertices)))
+    ;;:draw-on :flush t :color #F(1 0 0))
+    ))
+
 (defun point-to-screen
   (v
    &key
