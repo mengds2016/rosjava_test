@@ -59,6 +59,14 @@ foreach my $face (@{$results}) {
 	ymax => $face->{eyes}->{right}->{y} + $face->{eyes}->{right}->{height},
 	color => $red
     );
+    print ":chin $face->{chin}->{x} $face->{chin}->{y} $face->{chin}->{width} $face->{chin}->{height}\n";
+    $im->box(
+	xmin => $face->{chin}->{x},
+	ymin => $face->{chin}->{y},
+	xmax => $face->{chin}->{x} + $face->{chin}->{width},
+	ymax => $face->{chin}->{y} + $face->{chin}->{height},
+	color => $blue
+    );
     last;
 }
 
