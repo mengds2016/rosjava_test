@@ -101,6 +101,7 @@ public class ImageWindowSampleFrame extends JFrame {
 		public String name;
 		public int x=0, y=0, w=100, h=100;	
 		public boolean flush=false;
+		private Publisher<std_msgs.Int32MultiArray> rect_publisher;
 		
 		public void setImage(BufferedImage i) {
 			this.image = i;
@@ -110,6 +111,16 @@ public class ImageWindowSampleFrame extends JFrame {
 
 		public BufferedImage getImage() {
 			return this.image;
+		}
+		
+		public void clickUpdate(int x, int y){
+			this.x = x - this.w/2 ;
+			this.y = y - this.h/2;
+			if ( this.rect_publisher != null ){
+				std_msgs.Int32MultiArray msg = this.rect_publisher.newMessage();
+				msg.setData(new int[]{this.w, this.h, this.w, this.h});
+				this.rect_publisher.publish(msg);
+			}
 		}
 		
 		public void drawBackground(Graphics g, int panel_w, int panel_h) {
@@ -138,7 +149,7 @@ public class ImageWindowSampleFrame extends JFrame {
 				g.drawRect(this.x, this.y, this.w, this.h);
 			}
 		}
-		
+				
 //		public void red_filter(int col) {
 //			if (this.image == null) {
 //				return;
@@ -272,8 +283,7 @@ public class ImageWindowSampleFrame extends JFrame {
 //			}
 			if ( updateSelectedImage(e.getX(), e.getY())){
 				System.out.println(" selected -> " + this.selected);
-				this.selected.x = e.getX() - this.selected.w/2;
-				this.selected.y = e.getY() - this.selected.h/2;
+				this.selected.clickUpdate(e.getX(), e.getY());
 			}
 			repaint();
 		}
@@ -298,37 +308,13 @@ public class ImageWindowSampleFrame extends JFrame {
 		public void mouseDragged(MouseEvent e) {
 			if ( updateSelectedImage(e.getX(), e.getY())){
 				System.out.println(" drag selected -> " + this.selected);
-				this.selected.x = e.getX() - this.selected.w/2;
-				this.selected.y = e.getY() - this.selected.h/2;
+				this.selected.clickUpdate(e.getX(), e.getY());
 			}
 			repaint();
-//			if (this.selected_movie != null && this.selected_movie.selected ) {
 //				switch (this.mode) {
 //				case MouseEvent.BUTTON1:
-//					this.selected_movie.x += e.getX() - this.lx ;
-//					this.selected_movie.y += e.getY() - this.ly ;
-//					this.selected_movie.update_values() ;
-//					this.lx = e.getX();
-//					this.ly = e.getY();
-//					break;
 //				case MouseEvent.BUTTON2:
-//					this.selected_movie.inW += e.getX() - this.mx ;
-//					this.selected_movie.inH += e.getY() - this.my ;
-//					this.selected_movie.update_values() ;
-//					this.mx = e.getX();
-//					this.my = e.getY();
-//					break;
 //				case MouseEvent.BUTTON3:
-//					this.selected_movie.width += e.getX() - this.rx ;
-//					this.selected_movie.height += e.getY() - this.ry ;
-//					this.selected_movie.inW = this.selected_movie.width ;
-//					this.selected_movie.inH = this.selected_movie.height ;
-//					this.selected_movie.update_values() ;
-//					this.rx = e.getX();
-//					this.ry = e.getY();
-//					break;
-//				}
-//			}
 		}
 
 		@Override
