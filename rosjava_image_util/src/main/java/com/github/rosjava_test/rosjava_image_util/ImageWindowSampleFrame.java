@@ -193,6 +193,13 @@ public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 			}
 		}
 		
+		public void draw(Graphics g) {
+			BufferedImage i = this.image;
+			if (i != null) {
+				g.drawImage(i, this.x, this.y, this.w, this.h, null);
+			}
+		}
+		
 //		public void red_filter(int col) {
 //			if (this.image == null) {
 //				return;
@@ -245,6 +252,9 @@ public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 		@Override
 		public void paintComponent(Graphics g) {
 			this.bgImage.drawBackground(g, (this.w = this.getWidth()), (this.h = this.getHeight()));
+			for ( ImageData d : this.images ){
+				d.draw(g);
+			}
 		}
 
 		@Override
