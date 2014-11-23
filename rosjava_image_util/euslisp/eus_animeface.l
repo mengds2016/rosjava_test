@@ -32,6 +32,7 @@
 	 (width (nth 1 frame))
 	 (scale (/ 1.0 (or width 1)))
 	 (face (assoc :face ret))
+	 (chin (assoc :chin ret))
 	 (reye (find-if #'(lambda (d) (find :right d)) ret))
 	 (leye (find-if #'(lambda (d) (find :left d)) ret))
 	 (buf (vector 0 0 0 0)))
@@ -47,6 +48,20 @@
 			      :data (coerce buf integer-vector)))
       (if width
 	  (ros::publish "/eus_animeface/face/rectangle/normalize"
+			(instance std_msgs::float32multiarray :init
+				  :data (map float-vector
+					     #'(lambda (v) (* v scale))
+					     buf))))))
+    ;;
+    (cond
+     (chin
+      (dotimes (i (length (cdr chin)))
+	(setf (aref buf i) (nth i (cdr chin))))
+      (ros::publish "/eus_animeface/chin/rectangle"
+		    (instance std_msgs::int32multiarray :init
+			      :data (coerce buf integer-vector)))
+      (if width
+	  (ros::publish "/eus_animeface/chin/rectangle/normalize"
 			(instance std_msgs::float32multiarray :init
 				  :data (map float-vector
 					     #'(lambda (v) (* v scale))
@@ -87,12 +102,16 @@
 		std_msgs::int32multiarray)
 (ros::advertise "/eus_animeface/eyes/left/rectangle"
 		std_msgs::int32multiarray)
+(ros::advertise "/eus_animeface/chin/rectangle"
+		std_msgs::int32multiarray)
 
 (ros::advertise "/eus_animeface/face/rectangle/normalize"
 		std_msgs::float32multiarray)
 (ros::advertise "/eus_animeface/eyes/right/rectangle/normalize"
 		std_msgs::float32multiarray)
 (ros::advertise "/eus_animeface/eyes/left/rectangle/normalize"
+		std_msgs::float32multiarray)
+(ros::advertise "/eus_animeface/chin/rectangle/normalize"
 		std_msgs::float32multiarray)
 
 (ros::advertise "/eus_animeface/feedback/outputpath"
