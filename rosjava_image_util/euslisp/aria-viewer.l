@@ -15,12 +15,63 @@
 (send *irtviewer* :resize 400 556)
 (send *irtviewer* :draw-objects)
 
+(send *viewer* :adjust-viewport
+      (send *viewer* :viewsurface :width)
+      (send *viewer* :viewsurface :height))
+
 (send-all (send *robot* :joint-list) :min-angle -10000)
 (send-all (send *robot* :joint-list) :max-angle 10000)
 
 (ros::advertise "/sensor_image_node/command/string"
                 std_msgs::string
                 1)
+
+(defun point-to-screen
+  (v
+   &key
+   (eye (send *viewer* :get-val 'geometry::eye))
+   (vc (send eye :get-val 'geometry::viewcoords))
+   (pm (send eye :projection))
+   (ir (send *viewer* :viewport :worldrot))
+   (ip (send *viewer* :viewport :worldpos))
+   ;;
+   (vv (v+ (transform (send vc :worldrot) v)
+	   (send vc :worldpos)))
+   (vv1 (geo::homogenize vv))
+   (vp (transform pm vv1))
+   (nvp (float-vector (/ (aref vp 0) (aref vp 3))
+		      (/ (aref vp 1) (aref vp 3))
+		      (/ (aref vp 2) (aref vp 3))))
+   (nvp_ (v+ (transform ir nvp) ip))
+   )
+  ;;(format t "~A ~A ~A ~A~%" vv vv1 vp nvp)
+  nvp_
+  )
+
+(defun screen-to-point
+  (nvp_
+   &key
+   (gain 0.0)
+   (eye (send *viewer* :get-val 'geometry::eye))
+   (null-dir (send eye :view-direction))
+   (vc (send eye :get-val 'geometry::viewcoords))
+   (pm (send eye :projection))
+   (ir (send *viewer* :viewport :worldrot))
+   (ip (send *viewer* :viewport :worldpos))
+   ;;
+   (nvp (transform (pseudo-inverse ir) (v- nvp_ ip)))
+   (vp (concatenate float-vector nvp '(1)))
+   (vv1 (transform (pseudo-inverse pm) vp))
+   (vv (float-vector (/ (aref vv1 0) (aref vv1 3))
+		     (/ (aref vv1 1) (aref vv1 3))
+		     (/ (aref vv1 2) (aref vv1 3))))
+   (v (transform (pseudo-inverse (send vc :worldrot))
+		 (v- vv (send vc :worldpos))))
+   ;; (ans (send *viewer* :point-to-screen v))
+   )
+  ;; (format t "~A ~A ~A ~A~%" vv vv1 vp nvp)
+  (v+ v (scale gain null-dir))
+  )
 
 (defun draw-normalize-rectangle
   (nvec &key
@@ -36,17 +87,15 @@
 
 (defun draw-shoulder-line
   (&key
-   (init (send *viewer* :adjust-viewport
-	       (send *viewer* :viewsurface :width)
-	       (send *viewer* :viewsurface :height)))
    (shoulder-pos-list
     (send *robot* :arms :shoulder-p :child-link :worldpos))
    (shoulder-pos-screen-list
     (mapcar
      #'(lambda (pos)
-	 (let ((spos (send *viewer* :point-to-screen pos)))
-		;;(send *viewer* :viewport :ndc-point-to-screen
-		;;(scale (/ 1.0 (aref pos 2)) pos))))
+	 (let ((spos (point-to-screen pos)))
+	   ;;(send *viewer* :point-to-screen pos)))
+	   ;;(send *viewer* :viewport :ndc-point-to-screen
+	   ;;(scale (/ 1.0 (aref pos 2)) pos))))
 	   (integer-vector (round (aref spos 0))
 			   (round (aref spos 1)))))
      shoulder-pos-list))
@@ -72,6 +121,9 @@
   (if (>= (length (send msg :data)) 2)
       (send *irtviewer* :resize (aref (send msg :data) 0)
 	    (aref (send msg :data) 1)))
+  (send *viewer* :adjust-viewport
+	(send *viewer* :viewsurface :width)
+	(send *viewer* :viewsurface :height))
   (if flush (send *viewer* :draw-objects)))
 
 (ros::subscribe "/aria_viewer/window_size"
@@ -118,3 +170,8 @@
 			 :data *tmp_image_path*))
  )
 
+#|
+
+
+(v+ (transform (send *viewer* :viewport :worldrot) v)
+    (send *viewer* :viewport :worldpos))
