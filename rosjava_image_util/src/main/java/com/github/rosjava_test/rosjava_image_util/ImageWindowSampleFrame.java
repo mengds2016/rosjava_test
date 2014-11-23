@@ -5,22 +5,19 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.ros.node.topic.Publisher;
 
-public class ImageWindowSampleFrame extends JFrame implements ActionListener {
+public class ImageWindowSampleFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 
 	private static int W = 480*2, H = 640;
@@ -31,11 +28,6 @@ public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 
 	public ImageView leftCameraView, rightCameraView;
 	public CommandView commandView;
-
-	private float pan = 0;
-	private float tlt = 0;
-	private Publisher<std_msgs.Float32MultiArray> command_publisher;
-	private Publisher<std_msgs.String> event_publisher;
 
 	public ImageWindowSampleFrame() {
 		this.camera_layout = new BorderLayout();
@@ -51,39 +43,6 @@ public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 		this.camera_pane.add(this.leftCameraView, BorderLayout.CENTER);
 		this.camera_pane.add(this.rightCameraView, BorderLayout.EAST);
 
-//		Dimension min = new Dimension(W, 50);
-//		JButton west = new JButton();
-//		west.setActionCommand("west");
-//		west.setName("west");
-//		west.addActionListener(this);
-//		west.setText("◀");
-//		// west.setPreferredSize(min);
-//		this.camera_pane.add(west, BorderLayout.WEST);
-//
-//		JButton east = new JButton();
-//		east.setActionCommand("east");
-//		east.setName("east");
-//		east.setText("▶");
-//		east.addActionListener(this);
-//		// east.setPreferredSize(min);
-//		this.camera_pane.add(east, BorderLayout.EAST);
-//
-//		JButton north = new JButton();
-//		north.setActionCommand("north");
-//		north.setName("north");
-//		north.addActionListener(this);
-//		north.setPreferredSize(min);
-//		north.setText("▲");
-//		this.camera_pane.add(north, BorderLayout.NORTH);
-//
-//		JButton south = new JButton();
-//		south.setActionCommand("south");
-//		south.setName("south");
-//		south.addActionListener(this);
-//		south.setPreferredSize(min);
-//		south.setText("▼");
-//		this.camera_pane.add(south, BorderLayout.SOUTH);
-
 		this.add(this.camera_pane);
 		this.add(this.commandView, BorderLayout.SOUTH);
 
@@ -97,18 +56,6 @@ public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 		setVisible(true);
 	}
 
-	public void setCommandPublisher(
-			Publisher<std_msgs.Float32MultiArray> command) {
-		this.command_publisher = command;
-		std_msgs.Float32MultiArray com = this.command_publisher.newMessage();
-		com.setData(new float[] { this.pan, this.tlt });
-		this.command_publisher.publish(com);
-	}
-
-	public void setEventPublisher(Publisher<std_msgs.String> event) {
-		this.event_publisher = event;
-	}
-	
 	public void setLeftImage(BufferedImage i){
 		this.leftCameraView.camera.setImage(i);
 		this.repaint();
@@ -123,32 +70,6 @@ public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 		new ImageWindowSampleFrame().repaint();
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		String cm = arg0.getActionCommand();
-		if (cm.contentEquals("north")) {
-			tlt += 5;
-		} else if (cm.contains("south")) {
-			tlt -= 5;
-		} else if (cm.contains("east")) {
-			pan -= 5;
-		} else if (cm.contains("west")) {
-			pan += 5;
-		}
-		if (this.command_publisher != null) {
-			std_msgs.Float32MultiArray com = this.command_publisher
-					.newMessage();
-			com.setData(new float[] { this.pan, this.tlt });
-			this.command_publisher.publish(com);
-		}
-		if (this.event_publisher != null) {
-			std_msgs.String msg = this.event_publisher.newMessage();
-			msg.setData(cm);
-			this.event_publisher.publish(msg);
-		}
-	}
-	
-	
 	// Comand View class
 	//
 	public class CommandView extends JLabel{
