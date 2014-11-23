@@ -171,16 +171,11 @@ public class SensorImageNode extends AbstractNodeMain {
 	
 	public static BufferedImage monoImage(byte[] data, int w, int h) {
 		BufferedImage buf = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-		//int step = data.length / (w * h);
 		int offset = data.length - w * h;
 		System.out.println(offset);
 		for (int i = 0; i < w; i++) {
 			for (int j = 0; j < h; j++) {
 				int val = 0;
-				// for (int k = step - 1; k >= 0; k--) {
-				// val = val << 8;
-				// val = (val + data[k + step * (i + j * w)]);
-				// }
 				val = data[offset + (i + j * w)] & 0xff;
 				int col = val << 16 | val << 8 | val;
 				buf.setRGB(i, j, col);
