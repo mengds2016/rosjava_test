@@ -28,11 +28,11 @@
 	(h (send *irtviewer* :height))
 	(vec (scale scale nvec))
 	(flush t))
-  (send *irtviewer* :viewer :viewsurface :draw-rectangle
+  (send *viewer* :viewsurface :draw-rectangle
 	(integer-vector (round (aref vec 0))
 			(max 0 (- (- h (round (aref vec 1))) (round (aref vec 3)))))
 	(round (aref vec 2)) (round (aref vec 3)))
-  (if flush (send *irtviewer* :viewer :viewsurface :flush)))
+  (if flush (send *viewer* :viewsurface :flush)))
 
 (defvar *left-elbow* (float-vector 0 0 0 0))
 (defvar *right-elbow* (float-vector 0 0 0 0))
@@ -78,12 +78,12 @@
  (x::window-main-one)
  (send *viewer* :draw-objects :flush nil)
  ;;
- (send *irtviewer* :viewer :viewsurface :color #f(1 0 0))
+ (send *viewer* :viewsurface :color #f(1 0 0))
  (draw-normalize-rectangle *face* :flush nil)
- (send *irtviewer* :viewer :viewsurface :color #f(0 1 0))
+ (send *viewer* :viewsurface :color #f(0 1 0))
  (draw-normalize-rectangle *right-eye* :flush nil)
  (draw-normalize-rectangle *left-eye* :flush nil)
- (send *irtviewer* :viewer :viewsurface :color #f(0 0 1))
+ (send *viewer* :viewsurface :color #f(0 0 1))
  (draw-normalize-rectangle *right-elbow* :flush nil)
  (draw-normalize-rectangle *left-elbow* :flush nil)
  ;;
