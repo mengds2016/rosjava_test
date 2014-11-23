@@ -105,7 +105,7 @@ public class ImageWindowSampleFrame extends JFrame {
 		public String name;
 		public int x=0, y=0, w=100, h=100;	
 		public boolean flush=false;
-		private Publisher<std_msgs.Int32MultiArray> rect_publisher;
+		public Publisher<std_msgs.Int32MultiArray> rect_publisher;
 		
 		public void setImage(BufferedImage i) {
 			this.image = i;
@@ -122,7 +122,7 @@ public class ImageWindowSampleFrame extends JFrame {
 			this.y = y - this.h/2;
 			if ( this.rect_publisher != null ){
 				std_msgs.Int32MultiArray msg = this.rect_publisher.newMessage();
-				msg.setData(new int[]{this.w, this.h, this.w, this.h});
+				msg.setData(new int[]{this.x, this.y, this.w, this.h});
 				this.rect_publisher.publish(msg);
 			}
 		}
