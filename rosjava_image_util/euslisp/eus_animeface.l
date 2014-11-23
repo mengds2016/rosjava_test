@@ -22,13 +22,16 @@
 (defun set-inpath-callback (msg) (setq *inpath* (send msg :data)))
 (defun set-outpath-callback (msg) (setq *outpath* (send msg :data)))
 
+(defvar *request-cnt*)
 (defun request-callback (msg)
-  (setq *inpath* (send msg :data))
-  (let* ((ret (detect-animeface))
+  (if (probe-file (send msg :data))
+      (setq *inpath* (send msg :data)))
+  (let* ((ret (detect-animeface :inpath *inpath* :outpath *outpath*))
 	 (face (assoc :face ret))
 	 (reye (find-if #'(lambda (d) (find :right d)) ret))
-	 (leye (find-if #'(lambda (d) (find :left d)) ret))
-	 )
+	 (leye (find-if #'(lambda (d) (find :left d)) ret)))
+    (ros::publish "/eus_animeface/feedback/outputpath"
+		  (instance std_msgs::string :init :data *outpath*))
     (if face
 	(ros::publish "/eus_animeface/face/rectangle"
 		      (instance std_msgs::int32multiarray :init
@@ -61,6 +64,8 @@
 		std_msgs::int32multiarray)
 (ros::advertise "/eus_animeface/eyes/left/rectangle"
 		std_msgs::int32multiarray)
+(ros::advertise "/eus_animeface/feedback/outputpath"
+		std_msgs::string)
 
 (ros::subscribe "/eus_animeface/set_inpath/string"
 		std_msgs::String
