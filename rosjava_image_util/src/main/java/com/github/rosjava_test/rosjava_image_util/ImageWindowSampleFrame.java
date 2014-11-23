@@ -77,6 +77,10 @@ public class ImageWindowSampleFrame extends JFrame {
 		this.rightCameraView.pane.setBgImage(i);
 		this.repaint();
 	}
+	
+	public ArrayList<ImageData> getImageDataList(){
+		return this.leftCameraView.pane.getImageList();
+	}
 
 	public static void main(String[] args) {
 		new ImageWindowSampleFrame().repaint();
@@ -201,6 +205,10 @@ public class ImageWindowSampleFrame extends JFrame {
 			img.name = name;
 			this.images.add(img);
 		}
+		
+		public ArrayList<ImageData> getImageList(){
+			return this.images;
+		}
 
 		public void setBgImage(BufferedImage i) {
 			this.bgImage.setImage(i);
@@ -230,13 +238,11 @@ public class ImageWindowSampleFrame extends JFrame {
 		private static final long serialVersionUID = 3L;
 		
 		private GridLayout out;
-		//final public String topic_raw, topic_compressed;
 		final public ImagePanel pane;
 		public int w, h;
-
 		private JLabel prompt;
 		
-		ImageData selected;
+		private ImageData selected;
 
 		public ImageView(JLabel prompt, int w, int h) {
 			this.prompt = prompt;
