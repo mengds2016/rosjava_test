@@ -17,6 +17,7 @@
     (while (and (setq buf (read-line in))
 		(not (substringp "eof" buf)))
       (push (read-from-string (format nil "(~A)" buf)) ret))
+    (close in)
     ret))
 
 (defun set-inpath-callback (msg) (setq *inpath* (send msg :data)))
