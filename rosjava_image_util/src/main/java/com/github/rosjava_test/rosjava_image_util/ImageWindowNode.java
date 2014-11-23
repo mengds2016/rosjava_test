@@ -29,6 +29,7 @@ public class ImageWindowNode extends SensorImageNode{
 		
 		for (ImageData d : this.window.getImageDataList()){
 			d.rect_publisher = connectedNode.newPublisher("/image_window_node/" + d.name + "/rect", std_msgs.Int32MultiArray._TYPE);
+			d.rect_normal_publisher = connectedNode.newPublisher("/image_window_node/" + d.name + "/rect/normalize", std_msgs.Float32MultiArray._TYPE);
 		}
 		
 		super.onStart(connectedNode);

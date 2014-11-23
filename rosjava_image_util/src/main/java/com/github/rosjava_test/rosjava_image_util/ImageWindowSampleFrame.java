@@ -106,7 +106,8 @@ public class ImageWindowSampleFrame extends JFrame {
 		public int x=0, y=0, w=100, h=100;	
 		public boolean flush=false;
 		public Publisher<std_msgs.Int32MultiArray> rect_publisher;
-		
+		public Publisher<std_msgs.Float32MultiArray> rect_normal_publisher;
+
 		public void setImage(BufferedImage i) {
 			this.image = i;
 			this.w = this.image.getWidth();
@@ -117,13 +118,19 @@ public class ImageWindowSampleFrame extends JFrame {
 			return this.image;
 		}
 		
-		public void clickUpdate(int x, int y){
+		public void clickUpdate(int x, int y, int w, int h){
 			this.x = x - this.w/2 ;
 			this.y = y - this.h/2;
 			if ( this.rect_publisher != null ){
 				std_msgs.Int32MultiArray msg = this.rect_publisher.newMessage();
 				msg.setData(new int[]{this.x, this.y, this.w, this.h});
 				this.rect_publisher.publish(msg);
+			}
+			if ( this.rect_normal_publisher != null ){
+				std_msgs.Float32MultiArray msg = this.rect_normal_publisher.newMessage();
+				float scale = 1.0f / w ;
+				msg.setData(new float[]{this.x * scale, this.y * scale, this.w * scale, this.h * scale});
+				this.rect_normal_publisher.publish(msg);
 			}
 		}
 		
@@ -278,7 +285,7 @@ public class ImageWindowSampleFrame extends JFrame {
 			System.out.println("clicked");
 			if ( updateSelectedImage(e.getX(), e.getY())){
 				System.out.println(" selected -> " + this.selected);
-				this.selected.clickUpdate(e.getX(), e.getY());
+				this.selected.clickUpdate(e.getX(), e.getY(), this.pane.getWidth(), this.pane.getHeight());
 			}
 			repaint();
 		}
@@ -303,7 +310,7 @@ public class ImageWindowSampleFrame extends JFrame {
 		public void mouseDragged(MouseEvent e) {
 			if ( updateSelectedImage(e.getX(), e.getY())){
 				System.out.println(" drag selected -> " + this.selected);
-				this.selected.clickUpdate(e.getX(), e.getY());
+				this.selected.clickUpdate(e.getX(), e.getY(), this.pane.getWidth(), this.pane.getHeight());
 			}
 			repaint();
 //				switch (this.mode) {
