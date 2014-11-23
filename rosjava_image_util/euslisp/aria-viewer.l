@@ -100,7 +100,7 @@
   (send *viewer* :viewsurface :draw-rectangle
 	(integer-vector (round (aref vec 0))
 			(max 0 (- (- h (round (aref vec 1))) (round (aref vec 3)))))
-	(round (aref vec 2)) (round (aref vec 3)))
+	(max 5 (round (aref vec 2))) (max 5 (round (aref vec 3))))
   (if flush (send *viewer* :viewsurface :flush)))
 
 (defun draw-shoulder-line
@@ -130,6 +130,7 @@
 (defvar *left-eye* (float-vector 0 0 0 0))
 (defvar *right-eye* (float-vector 0 0 0 0))
 (defvar *face* (float-vector 0 0 0 0))
+(defvar *chin* (float-vector 0 0 0 0))
 
 (defun copy-rect-callback (vec msg)
   (dotimes (i (min (length (send msg :data)) (length vec)))
@@ -163,6 +164,9 @@
 (ros::subscribe "/eus_animeface/face/rectangle/normalize"
 		std_msgs::float32multiarray
 		#'copy-rect-callback *face*)
+(ros::subscribe "/eus_animeface/chin/rectangle/normalize"
+		std_msgs::float32multiarray
+		#'copy-rect-callback *chin*)
 
 (ros::rate 5)
 (do-until-key
@@ -177,6 +181,7 @@
  (send *viewer* :viewsurface :color #f(0 1 0))
  (draw-normalize-rectangle *right-eye* :flush nil)
  (draw-normalize-rectangle *left-eye* :flush nil)
+ (draw-normalize-rectangle *chin* :flush nil)
  (send *viewer* :viewsurface :color #f(0 0 1))
  (draw-normalize-rectangle *right-elbow* :flush nil)
  (draw-normalize-rectangle *left-elbow* :flush nil)
