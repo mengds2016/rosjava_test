@@ -30,6 +30,10 @@ my $results = detect_animeface($im);
 my $blue = Imager::Color->new(0, 0, 255);
 my $red = Imager::Color->new(255, 0, 0);
 
+my $width = $im->getwidth();
+my $height = $im->getheight();
+print ":frame $width $height\n";
+
 foreach my $face (@{$results}) {
     print ":face $face->{face}->{x} $face->{face}->{y} $face->{face}->{width} $face->{face}->{height}\n";
     $im->box(
