@@ -107,6 +107,7 @@ public class ImageWindowSampleFrame extends JFrame {
 		public boolean flush=false;
 		public Publisher<std_msgs.Int32MultiArray> rect_publisher;
 		public Publisher<std_msgs.Float32MultiArray> rect_normal_publisher;
+		public float scale_factor=1.0f;
 
 		public void setImage(BufferedImage i) {
 			this.image = i;
@@ -118,7 +119,7 @@ public class ImageWindowSampleFrame extends JFrame {
 			return this.image;
 		}
 		
-		public void clickUpdate(int x, int y, int w, int h){
+		public void clickUpdate(int x, int y, int w, int h, float scale){
 			this.x = x - this.w/2 ;
 			this.y = y - this.h/2;
 			if ( this.rect_publisher != null ){
@@ -128,7 +129,7 @@ public class ImageWindowSampleFrame extends JFrame {
 			}
 			if ( this.rect_normal_publisher != null ){
 				std_msgs.Float32MultiArray msg = this.rect_normal_publisher.newMessage();
-				float scale = 1.0f / w ;
+				//float scale = 1.0f / w ;
 				msg.setData(new float[]{this.x * scale, this.y * scale, this.w * scale, this.h * scale});
 				this.rect_normal_publisher.publish(msg);
 			}
@@ -144,6 +145,7 @@ public class ImageWindowSampleFrame extends JFrame {
 				g.drawImage(i, (int) (woffset), (int) (hoffset),
 						(int) (panel_w - woffset * 2),
 						(int) (panel_h - hoffset * 2), null);
+				this.scale_factor = (float)(1.0 / (panel_w - woffset * 2));
 			} else {
 				g.clearRect(0, 0, panel_w, panel_h);
 				g.drawString("NO IMAGE", panel_w / 2, panel_h / 2);
@@ -285,7 +287,7 @@ public class ImageWindowSampleFrame extends JFrame {
 			System.out.println("clicked");
 			if ( updateSelectedImage(e.getX(), e.getY())){
 				System.out.println(" selected -> " + this.selected);
-				this.selected.clickUpdate(e.getX(), e.getY(), this.pane.getWidth(), this.pane.getHeight());
+				this.selected.clickUpdate(e.getX(), e.getY(), this.pane.getWidth(), this.pane.getHeight(), this.pane.bgImage.scale_factor);
 			}
 			repaint();
 		}
@@ -310,7 +312,7 @@ public class ImageWindowSampleFrame extends JFrame {
 		public void mouseDragged(MouseEvent e) {
 			if ( updateSelectedImage(e.getX(), e.getY())){
 				System.out.println(" drag selected -> " + this.selected);
-				this.selected.clickUpdate(e.getX(), e.getY(), this.pane.getWidth(), this.pane.getHeight());
+				this.selected.clickUpdate(e.getX(), e.getY(), this.pane.getWidth(), this.pane.getHeight(), this.pane.bgImage.scale_factor);
 			}
 			repaint();
 //				switch (this.mode) {
