@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JButton;
@@ -86,7 +87,7 @@ public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 		this.add(this.commandView, BorderLayout.SOUTH);
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setTitle("KubiInterface");
+		setTitle("ImageWindowSample");
 		// this.setPreferredSize(new Dimension(W,H)) ;
 		setSize(W, H);
 
@@ -158,7 +159,7 @@ public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 		}
 	}
 	
-	public class CameraView extends JPanel implements MouseListener {
+	public class CameraView extends JPanel implements MouseListener, MouseMotionListener {
 		private static final long serialVersionUID = 3L;
 		
 		private GridLayout out;
@@ -276,6 +277,21 @@ public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 				paintComponent(g);
 			}
 		}
+		
+//		public boolean update_selected_movie(int x, int y) {
+//			for (int i = MainFrame.movie.size()-1 ; i>=0 ; i--  ) {
+//				Movie mov = MainFrame.movie.get(i) ;
+//				if (x > mov.x && x < mov.x + mov.width && y > mov.y
+//						&& y < mov.y + mov.height) {
+//					this.selected_movie = mov;
+//					this.selected_movie.selected = true;
+//					//System.out.println( "selected" ) ;
+//					return true ;
+//				}
+//				mov.selected = false ;
+//			}
+//			return false ;
+//		}
 
 		@Override
 		public void mouseClicked(MouseEvent arg0) {
@@ -301,6 +317,41 @@ public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 
 		@Override
 		public void mouseReleased(MouseEvent arg0) {
+		}
+
+		@Override
+		public void mouseDragged(MouseEvent arg0) {
+//			if (this.selected_movie != null && this.selected_movie.selected ) {
+//				switch (this.mode) {
+//				case MouseEvent.BUTTON1:
+//					this.selected_movie.x += e.getX() - this.lx ;
+//					this.selected_movie.y += e.getY() - this.ly ;
+//					this.selected_movie.update_values() ;
+//					this.lx = e.getX();
+//					this.ly = e.getY();
+//					break;
+//				case MouseEvent.BUTTON2:
+//					this.selected_movie.inW += e.getX() - this.mx ;
+//					this.selected_movie.inH += e.getY() - this.my ;
+//					this.selected_movie.update_values() ;
+//					this.mx = e.getX();
+//					this.my = e.getY();
+//					break;
+//				case MouseEvent.BUTTON3:
+//					this.selected_movie.width += e.getX() - this.rx ;
+//					this.selected_movie.height += e.getY() - this.ry ;
+//					this.selected_movie.inW = this.selected_movie.width ;
+//					this.selected_movie.inH = this.selected_movie.height ;
+//					this.selected_movie.update_values() ;
+//					this.rx = e.getX();
+//					this.ry = e.getY();
+//					break;
+//				}
+//			}
+		}
+
+		@Override
+		public void mouseMoved(MouseEvent arg0) {
 		}
 
 	}
