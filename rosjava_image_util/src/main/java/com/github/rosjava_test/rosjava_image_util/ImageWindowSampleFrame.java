@@ -57,12 +57,12 @@ public class ImageWindowSampleFrame extends JFrame {
 	}
 
 	public void setLeftImage(BufferedImage i){
-		this.leftCameraView.camera.setImage(i);
+		this.leftCameraView.camera.setBgImage(i);
 		this.repaint();
 	}
 	
 	public void setRightImage(BufferedImage i){
-		this.rightCameraView.camera.setImage(i);
+		this.rightCameraView.camera.setBgImage(i);
 		this.repaint();
 	}
 
@@ -162,11 +162,11 @@ public class ImageWindowSampleFrame extends JFrame {
 			this.setPreferredSize(new Dimension(w, h));
 		}
 
-		public void setImage(BufferedImage i) {
+		public void setBgImage(BufferedImage i) {
 			this.bgImage.setImage(i);
 		}
 
-		public BufferedImage getImage() {
+		public BufferedImage getBgImage() {
 			return this.bgImage.getImage();
 		}
 		
