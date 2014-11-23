@@ -11,6 +11,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -161,14 +162,64 @@ public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 		}
 	}
 	
+	
+	public class ImageData {
+		private BufferedImage image;
+		private int x=0, y=0, w=100, h=100;	
+		
+		public void setImage(BufferedImage i) {
+			this.image = i;
+			this.w = this.image.getWidth();
+			this.h = this.image.getHeight();
+		}
+
+		public BufferedImage getImage() {
+			return this.image;
+		}
+		
+		public void drawBackground(Graphics g, int panel_w, int panel_h) {
+			BufferedImage i = this.image;
+			if (i != null) {
+				double rate = Math.min(1.0 * panel_w / this.w, 1.0 * panel_h
+						/ this.h);
+				double woffset = (panel_w - this.w * rate) / 2;
+				double hoffset = (panel_h - this.h * rate) / 2;
+				g.drawImage(i, (int) (woffset), (int) (hoffset),
+						(int) (panel_w - woffset * 2),
+						(int) (panel_h - hoffset * 2), null);
+			} else {
+				g.clearRect(0, 0, panel_w, panel_h);
+				g.drawString("NO IMAGE", panel_w / 2, panel_h / 2);
+			}
+		}
+		
+//		public void red_filter(int col) {
+//			if (this.image == null) {
+//				return;
+//			}
+//			if (this.red_image != null && col == this.filter) {
+//				return;
+//			}
+//			this.filter = col ;
+//			this.red_image = new BufferedImage(this.image.getWidth(),
+//					this.image.getHeight(), this.image.getType());
+//			for (int x = 0; x < this.image.getWidth(); x++) {
+//				for (int y = 0; y < this.image.getHeight(); y++) {
+//					this.red_image.setRGB(x, y,
+//							col & this.image.getRGB(x, y));
+//				}
+//			}
+//		}
+	}
+	
 	// Image Panel class
 	//
 	public class ImagePanel extends JPanel {
 		private static final long serialVersionUID = 8L;
 
-		private BufferedImage image;
-		private BufferedImage red_image;
-		private int filter ;
+		//private BufferedImage image;
+		private ImageData bgImage;
+		private ArrayList<ImageData> images;
 		private int w, h;
 
 		public ImagePanel(){
@@ -178,77 +229,22 @@ public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 		public ImagePanel(int w, int h) {
 			this.w = w ;
 			this.h = h ;
+			this.images = new ArrayList<ImageData>();
+			this.bgImage = new ImageData();
 			this.setPreferredSize(new Dimension(w, h));
 		}
 
 		public void setImage(BufferedImage i) {
-			this.image = i;
-			if ( this.red_image != null ){
-				red_filter(this.filter) ;
-				repaint() ;
-			}
+			this.bgImage.setImage(i);
 		}
 
 		public BufferedImage getImage() {
-			return this.image;
+			return this.bgImage.getImage();
 		}
 		
-		public void emergency ( final long time, int col ){
-			red_filter(col) ;
-			this.repaint() ;
-			new Thread( new Runnable(){
-				@Override
-				public void run() {
-					try {
-						Thread.sleep(time) ;
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					ImagePanel.this.red_image = null ;
-					ImagePanel.this.repaint() ;
-				}
-			} ).start() ;
-		}
-
-		public void red_filter(int col) {
-			if (this.image == null) {
-				return;
-			}
-			if (this.red_image != null && col == this.filter) {
-				return;
-			}
-			this.filter = col ;
-			this.red_image = new BufferedImage(this.image.getWidth(),
-					this.image.getHeight(), this.image.getType());
-			for (int x = 0; x < this.image.getWidth(); x++) {
-				for (int y = 0; y < this.image.getHeight(); y++) {
-					this.red_image.setRGB(x, y,
-							col & this.image.getRGB(x, y));
-				}
-			}
-		}
-
 		@Override
 		public void paintComponent(Graphics g) {
-			BufferedImage i = this.image ;
-			if ( this.red_image != null ){
-				i = this.red_image ;
-			}
-			if (i != null) {
-				this.w = this.getWidth();
-				this.h = this.getHeight();
-				int w = i.getWidth();
-				int h = i.getHeight();
-				double rate = Math.min(1.0 * this.w / w, 1.0 * this.h / h);
-				double woffset = (this.w - w * rate) / 2;
-				double hoffset = (this.h - h * rate) / 2;
-				g.drawImage(i, (int) (woffset), (int) (hoffset),
-						(int) (this.w - woffset * 2),
-						(int) (this.h - hoffset * 2), null);
-			} else {
-				g.clearRect(0, 0, w, h);
-				g.drawString("NO IMAGE", w / 2, h / 2);
-			}
+			this.bgImage.drawBackground(g, (this.w = this.getWidth()), (this.h = this.getHeight()));
 		}
 
 		@Override
