@@ -235,7 +235,6 @@ public class ImageWindowSampleFrame extends JFrame {
 		public int w, h;
 
 		private JLabel prompt;
-		private Publisher<std_msgs.String> event_publisher;
 		
 		ImageData selected;
 
@@ -249,11 +248,6 @@ public class ImageWindowSampleFrame extends JFrame {
 			this.addMouseMotionListener(this) ;
 			setVisible(true);
 		}
-		
-		public void setEventPublisher(Publisher<std_msgs.String> event) {
-			this.event_publisher = event;
-		}
-		
 		
 		public boolean updateSelectedImage(int x, int y) {
 			ImageData selected = null;
@@ -276,11 +270,6 @@ public class ImageWindowSampleFrame extends JFrame {
 		@Override
 		public void mouseClicked(MouseEvent e) {
 			System.out.println("clicked");
-//			if (this.event_publisher != null) {
-//				std_msgs.String msg = this.event_publisher.newMessage();
-//				msg.setData("clicked");
-//				this.event_publisher.publish(msg);
-//			}
 			if ( updateSelectedImage(e.getX(), e.getY())){
 				System.out.println(" selected -> " + this.selected);
 				this.selected.clickUpdate(e.getX(), e.getY());
