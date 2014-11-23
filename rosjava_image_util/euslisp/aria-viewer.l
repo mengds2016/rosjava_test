@@ -34,6 +34,30 @@
 	(round (aref vec 2)) (round (aref vec 3)))
   (if flush (send *viewer* :viewsurface :flush)))
 
+(defun draw-shoulder-line
+  (&key
+   (init (send *viewer* :adjust-viewport
+	       (send *viewer* :viewsurface :width)
+	       (send *viewer* :viewsurface :height)))
+   (shoulder-pos-list
+    (send *robot* :arms :shoulder-p :child-link :worldpos))
+   (shoulder-pos-screen-list
+    (mapcar
+     #'(lambda (pos)
+	 (let ((spos (send *viewer* :point-to-screen pos)))
+		;;(send *viewer* :viewport :ndc-point-to-screen
+		;;(scale (/ 1.0 (aref pos 2)) pos))))
+	   (integer-vector (round (aref spos 0))
+			   (round (aref spos 1)))))
+     shoulder-pos-list))
+   (shoulder-distance (apply #'v- shoulder-pos-screen-list))
+   (flush t))
+  (print shoulder-pos-list)
+  (print shoulder-pos-screen-list)
+  (send *viewer* :viewsurface :draw-line
+	(car shoulder-pos-screen-list) (cadr shoulder-pos-screen-list))
+  (if flush (send *viewer* :viewsurface :flush)))
+
 (defvar *left-elbow* (float-vector 0 0 0 0))
 (defvar *right-elbow* (float-vector 0 0 0 0))
 (defvar *left-eye* (float-vector 0 0 0 0))
