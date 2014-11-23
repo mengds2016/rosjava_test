@@ -28,7 +28,7 @@ public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 	private BorderLayout outer_layout;
 	private JPanel camera_pane;
 
-	public CameraView leftCameraView, rightCameraView;
+	public ImageView leftCameraView, rightCameraView;
 	public CommandView commandView;
 
 	private float pan = 0;
@@ -44,8 +44,8 @@ public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 		this.getContentPane().setLayout(this.outer_layout);
 
 		this.commandView = new CommandView();
-		this.leftCameraView = new CameraView(this.commandView, (W-4)/2, H-20);
-		this.rightCameraView = new CameraView(this.commandView, (W-4)/2, H-20);
+		this.leftCameraView = new ImageView(this.commandView, (W-4)/2, H-20);
+		this.rightCameraView = new ImageView(this.commandView, (W-4)/2, H-20);
 
 		this.camera_pane.add(this.leftCameraView, BorderLayout.CENTER);
 		this.camera_pane.add(this.rightCameraView, BorderLayout.EAST);
@@ -159,7 +159,7 @@ public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 		}
 	}
 	
-	public class CameraView extends JPanel implements MouseListener, MouseMotionListener {
+	public class ImageView extends JPanel implements MouseListener, MouseMotionListener {
 		private static final long serialVersionUID = 3L;
 		
 		private GridLayout out;
@@ -170,7 +170,7 @@ public class ImageWindowSampleFrame extends JFrame implements ActionListener {
 		private JLabel prompt;
 		private Publisher<std_msgs.String> event_publisher;
 
-		public CameraView(JLabel prompt, int w, int h) {
+		public ImageView(JLabel prompt, int w, int h) {
 			this.prompt = prompt;
 			this.out = new GridLayout(1, 1);
 			this.camera = new ImagePanel(w, h);
