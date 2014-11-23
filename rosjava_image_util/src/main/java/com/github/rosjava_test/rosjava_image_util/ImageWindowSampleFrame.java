@@ -235,6 +235,7 @@ public class ImageWindowSampleFrame extends JFrame {
 			this.setLayout(this.out);
 			this.add(this.pane);
 			this.addMouseListener(this);
+			this.addMouseMotionListener(this) ;
 			setVisible(true);
 		}
 		
@@ -271,6 +272,8 @@ public class ImageWindowSampleFrame extends JFrame {
 //			}
 			if ( updateSelectedImage(e.getX(), e.getY())){
 				System.out.println(" selected -> " + this.selected);
+				this.selected.x = e.getX() - this.selected.w/2;
+				this.selected.y = e.getY() - this.selected.h/2;
 			}
 			repaint();
 		}
@@ -292,7 +295,13 @@ public class ImageWindowSampleFrame extends JFrame {
 		}
 
 		@Override
-		public void mouseDragged(MouseEvent arg0) {
+		public void mouseDragged(MouseEvent e) {
+			if ( updateSelectedImage(e.getX(), e.getY())){
+				System.out.println(" drag selected -> " + this.selected);
+				this.selected.x = e.getX() - this.selected.w/2;
+				this.selected.y = e.getY() - this.selected.h/2;
+			}
+			repaint();
 //			if (this.selected_movie != null && this.selected_movie.selected ) {
 //				switch (this.mode) {
 //				case MouseEvent.BUTTON1:
