@@ -9,8 +9,11 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -43,6 +46,15 @@ public class ImageWindowSampleFrame extends JFrame {
 		this.camera_pane.add(this.leftCameraView, BorderLayout.CENTER);
 		this.camera_pane.add(this.rightCameraView, BorderLayout.EAST);
 
+		try {
+			BufferedImage elbow1 = ImageIO.read(new File("/home/s-noda/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img/elbow.png"));
+			BufferedImage elbow2 = ImageIO.read(new File("/home/s-noda/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img/elbow.png"));
+			this.leftCameraView.pane.addImage("left_elbow", elbow1, W/(2*4), H/2, -1, -1);
+			this.leftCameraView.pane.addImage("right_elbow", elbow2, 3*W/(2*4), H/2, -1, -1);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		this.add(this.camera_pane);
 		this.add(this.commandView, BorderLayout.SOUTH);
 
@@ -57,12 +69,12 @@ public class ImageWindowSampleFrame extends JFrame {
 	}
 
 	public void setLeftImage(BufferedImage i){
-		this.leftCameraView.camera.setBgImage(i);
+		this.leftCameraView.pane.setBgImage(i);
 		this.repaint();
 	}
 	
 	public void setRightImage(BufferedImage i){
-		this.rightCameraView.camera.setBgImage(i);
+		this.rightCameraView.pane.setBgImage(i);
 		this.repaint();
 	}
 
@@ -86,7 +98,8 @@ public class ImageWindowSampleFrame extends JFrame {
 	
 	public class ImageData {
 		private BufferedImage image;
-		private int x=0, y=0, w=100, h=100;	
+		public String name;
+		public int x=0, y=0, w=100, h=100;	
 		
 		public void setImage(BufferedImage i) {
 			this.image = i;
@@ -161,6 +174,17 @@ public class ImageWindowSampleFrame extends JFrame {
 			this.bgImage = new ImageData();
 			this.setPreferredSize(new Dimension(w, h));
 		}
+		
+		public void addImage(String name, BufferedImage i, int x, int y, int w, int h){
+			ImageData img = new ImageData();
+			img.setImage(i);
+			if ( x > 0 ) img.x = x;
+			if ( y > 0 ) img.y = y;
+			if ( w > 0 ) img.w = w;
+			if ( h > 0 ) img.h = h;
+			img.name = name;
+			this.images.add(img);
+		}
 
 		public void setBgImage(BufferedImage i) {
 			this.bgImage.setImage(i);
@@ -191,7 +215,7 @@ public class ImageWindowSampleFrame extends JFrame {
 		
 		private GridLayout out;
 		//final public String topic_raw, topic_compressed;
-		final public ImagePanel camera;
+		final public ImagePanel pane;
 		public int w, h;
 
 		private JLabel prompt;
@@ -200,9 +224,9 @@ public class ImageWindowSampleFrame extends JFrame {
 		public ImageView(JLabel prompt, int w, int h) {
 			this.prompt = prompt;
 			this.out = new GridLayout(1, 1);
-			this.camera = new ImagePanel(w, h);
+			this.pane = new ImagePanel(w, h);
 			this.setLayout(this.out);
-			this.add(this.camera);
+			this.add(this.pane);
 			this.addMouseListener(this);
 			setVisible(true);
 		}
