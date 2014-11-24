@@ -49,8 +49,14 @@ public class ImageWindowSampleFrame extends JFrame {
 		try {
 			BufferedImage elbow1 = ImageIO.read(new File("/home/s-noda/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img/elbow.png"));
 			BufferedImage elbow2 = ImageIO.read(new File("/home/s-noda/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img/elbow.png"));
+			BufferedImage hand1 = ImageIO.read(new File("/home/s-noda/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img/hand.png"));
+			BufferedImage hand2 = ImageIO.read(new File("/home/s-noda/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img/hand.png"));
+			BufferedImage pelvis = ImageIO.read(new File("/home/s-noda/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img/pelvis.png"));
 			this.leftCameraView.pane.addImage("left_elbow", elbow1, W/(2*4), H/2, -1, -1);
 			this.leftCameraView.pane.addImage("right_elbow", elbow2, 3*W/(2*4), H/2, -1, -1);
+			this.leftCameraView.pane.addImage("left_hand", hand1, W/(2*4), 3*H/4, -1, -1);
+			this.leftCameraView.pane.addImage("right_hand", hand2, 3*W/(2*4), 3*H/4, -1, -1);
+			this.leftCameraView.pane.addImage("pelvis", pelvis, 2*W/(2*4), 2*H/4, -1, -1);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

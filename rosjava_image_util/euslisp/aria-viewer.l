@@ -77,6 +77,7 @@
    (move-target (list (send robot :head :end-coords)
 		      (send robot :rarm :end-coords)
 		      (send robot :larm :end-coords)
+		      (send robot :torso :end-coords)
 		      (send robot :get :reye-end-coords)
 		      (send robot :get :leye-end-coords)
 		      (send robot :get :relbow-end-coords)
@@ -85,7 +86,7 @@
 	       #'(lambda (mt)
 		   (send robot :link-list (send mt :parent)))
 	       move-target))
-   (target-msg (list *chin* *left-hand* *right-hand*
+   (target-msg (list *chin* *left-hand* *right-hand* *pelvis*
 		     *left-eye* *right-eye* *left-elbow* *right-elbow*))
    (_screen-target-point
     (mapcar #'screen-to-point (mapcar #'normalize-rectangle-centroid-pos target-msg)))
@@ -382,6 +383,7 @@
 (defvar *right-eye* (float-vector -1 0 0 0))
 (defvar *face* (float-vector -1 0 0 0))
 (defvar *chin* (float-vector -1 0 0 0))
+(defvar *pelvis* (float-vector -1 0 0 0))
 
 (defun copy-rect-callback (vec msg)
   (dotimes (i (min (length (send msg :data)) (length vec)))
@@ -424,6 +426,9 @@
 (ros::subscribe "/eus_animeface/chin/rectangle/normalize"
 		std_msgs::float32multiarray
 		#'copy-rect-callback *chin*)
+(ros::subscribe "/image_window_node/pelvis/rect/normalize"
+		std_msgs::float32multiarray
+		#'copy-rect-callback *pelvis*)
 
 (ros::rate 5)
 (do-until-key
