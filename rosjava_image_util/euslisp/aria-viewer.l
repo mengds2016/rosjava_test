@@ -75,6 +75,8 @@
    &key
    (robot *robot*)
    (move-target (list (send robot :head :end-coords)
+		      (send robot :rarm :end-coords)
+		      (send robot :larm :end-coords)
 		      (send robot :get :reye-end-coords)
 		      (send robot :get :leye-end-coords)
 		      (send robot :get :relbow-end-coords)
@@ -83,7 +85,8 @@
 	       #'(lambda (mt)
 		   (send robot :link-list (send mt :parent)))
 	       move-target))
-   (target-msg (list *chin* *left-eye* *right-eye* *left-elbow* *right-elbow*))
+   (target-msg (list *chin* *left-hand* *right-hand*
+		     *left-eye* *right-eye* *left-elbow* *right-elbow*))
    (_screen-target-point
     (mapcar #'screen-to-point (mapcar #'normalize-rectangle-centroid-pos target-msg)))
    (screen-target-point-min-gain
@@ -373,6 +376,8 @@
 
 (defvar *left-elbow* (float-vector -1 0 0 0))
 (defvar *right-elbow* (float-vector -1 0 0 0))
+(defvar *left-hand* (float-vector -1 0 0 0))
+(defvar *right-hand* (float-vector -1 0 0 0))
 (defvar *left-eye* (float-vector -1 0 0 0))
 (defvar *right-eye* (float-vector -1 0 0 0))
 (defvar *face* (float-vector -1 0 0 0))
@@ -395,6 +400,12 @@
 		std_msgs::int32multiarray
 		#'window-size-callback)
 
+(ros::subscribe "/image_window_node/left_hand/rect/normalize"
+		std_msgs::float32multiarray
+		#'copy-rect-callback *left-hand*)
+(ros::subscribe "/image_window_node/right_hand/rect/normalize"
+		std_msgs::float32multiarray
+		#'copy-rect-callback *right-hand*)
 (ros::subscribe "/image_window_node/left_elbow/rect/normalize"
 		std_msgs::float32multiarray
 		#'copy-rect-callback *left-elbow*)
@@ -433,6 +444,8 @@
  (send *viewer* :viewsurface :color #f(0 0 1))
  (draw-normalize-rectangle *right-elbow* :flush nil)
  (draw-normalize-rectangle *left-elbow* :flush nil)
+ (draw-normalize-rectangle *right-hand* :flush nil)
+ (draw-normalize-rectangle *left-hand* :flush nil)
  ;;
  (send *viewer* :viewsurface :flush)
  (send *viewer* :viewsurface :write-to-image-file *tmp_image_path*)
