@@ -33,7 +33,8 @@
      &key (move-target) (link-list)
      (min (float-vector -5000 -5000  -5000 -200 -200 -100))
      (max (float-vector  5000  5000   250  200  200  100))
-     (root-link-virtual-joint-weight #f(1 1 1 1 1 1))
+     (root-link-virtual-joint-weight
+      (scale 1e-3 (float-vector 1 1 1 1 1 1)))
      (joint-args nil)
      &allow-other-keys)
     (with-append-root-joint
@@ -96,7 +97,9 @@
    (target-coords
     (mapcar #'(lambda (v) (make-coords :pos v)) screen-target-point))
    ;; (translation-axis null-dir)
-   (translation-axis (make-list (length null-dir) :initial-element t))
+   (translation-axis
+    (mapcar #'(lambda (vec) (if (find-if #'minusp vec) nil t))
+	    target-msg))
    (rotation-axis (make-list (length null-dir)))
    (debug-view :no-message)
    (revert-if-fail t)
@@ -368,12 +371,12 @@
 	(car shoulder-pos-screen-list) (cadr shoulder-pos-screen-list))
   (if flush (send *viewer* :viewsurface :flush)))
 
-(defvar *left-elbow* (float-vector 0 0 0 0))
-(defvar *right-elbow* (float-vector 0 0 0 0))
-(defvar *left-eye* (float-vector 0 0 0 0))
-(defvar *right-eye* (float-vector 0 0 0 0))
-(defvar *face* (float-vector 0 0 0 0))
-(defvar *chin* (float-vector 0 0 0 0))
+(defvar *left-elbow* (float-vector -1 0 0 0))
+(defvar *right-elbow* (float-vector -1 0 0 0))
+(defvar *left-eye* (float-vector -1 0 0 0))
+(defvar *right-eye* (float-vector -1 0 0 0))
+(defvar *face* (float-vector -1 0 0 0))
+(defvar *chin* (float-vector -1 0 0 0))
 
 (defun copy-rect-callback (vec msg)
   (dotimes (i (min (length (send msg :data)) (length vec)))
@@ -417,8 +420,8 @@
  (ros::sleep)
  (ros::spin-once)
  (x::window-main-one)
- (update-head-position :flush nil)
- (solve-point-ik :stop 5 :debug-view nil :revert-if-fail nil)
+ ;;  (update-head-position :flush nil)
+ (solve-point-ik :stop 3 :debug-view nil :revert-if-fail nil)
  (send *viewer* :draw-objects :flush nil)
  ;;
  (send *viewer* :viewsurface :color #f(1 0 0))
