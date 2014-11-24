@@ -26,6 +26,143 @@
                 std_msgs::string
                 1)
 
+(defmethod robot-model
+  (:6dof-inverse-kinematics
+    (target-coords
+     &rest args
+     &key (move-target) (link-list)
+     (min (float-vector -5000 -5000  -5000 -200 -200 -100))
+     (max (float-vector  5000  5000   250  200  200  100))
+     (root-link-virtual-joint-weight #f(1 1 1 1 1 1))
+     (joint-args nil)
+     &allow-other-keys)
+    (with-append-root-joint
+     (link-list-with-robot-6dof self link-list
+                                :joint-class 6dof-joint
+                                :joint-args (append (list :min min :max max) joint-args))
+     (send* self :inverse-kinematics target-coords
+            :move-target move-target :link-list link-list-with-robot-6dof
+            args)
+     ))
+  )
+
+(defmethod coordinates
+  (:difference-position
+   (coords &key (translation-axis t))
+   (let ((dif-pos
+          (send self :inverse-transform-vector (send coords :worldpos))))
+     (case
+	 translation-axis
+       ((:x :xx) (setf (elt dif-pos 0) 0))
+       ((:y :yy) (setf (elt dif-pos 1) 0))
+       ((:z :zz) (setf (elt dif-pos 2) 0))
+       ((:xy :yx) (setf (elt dif-pos 0) 0) (setf (elt dif-pos 1) 0))
+       ((:yz :zy) (setf (elt dif-pos 1) 0) (setf (elt dif-pos 2) 0))
+       ((:zx :xz) (setf (elt dif-pos 2) 0) (setf (elt dif-pos 0) 0)))
+     (if (vectorp translation-axis)
+         (let ((ra
+                (transform
+                 (inverse-matrix (send self :worldrot))
+                 translation-axis)))
+           ;; (scale (v. dif-pos ra) ra))
+	   (v- ra (scale (v. dif-pos ra) ra)))
+       dif-pos))))
+
+(defun solve-point-ik
+  (&rest
+   args
+   &key
+   (robot *robot*)
+   (move-target (list (send robot :head :end-coords)
+		      (send robot :get :reye-end-coords)
+		      (send robot :get :leye-end-coords)
+		      (send robot :get :relbow-end-coords)
+		      (send robot :get :lelbow-end-coords)))
+   (link-list (mapcar
+	       #'(lambda (mt)
+		   (send robot :link-list (send mt :parent)))
+	       move-target))
+   (target-msg (list *chin* *left-eye* *right-eye* *left-elbow* *right-elbow*))
+   (_screen-target-point
+    (mapcar #'screen-to-point (mapcar #'normalize-rectangle-centroid-pos target-msg)))
+   (screen-target-point-min-gain
+    (mapcar #'calc-null-gain-for-min-distance
+	    (send-all (send-all move-target :worldcoords) :worldpos)
+	    _screen-target-point))
+   (null-dir (mapcar #'(lambda (v) (calc-null-direction :x v))  _screen-target-point))
+   (screen-target-point
+    (mapcar #'(lambda (v g dir) (v+ (scale g dir) v))
+	    _screen-target-point screen-target-point-min-gain null-dir))
+   (target-coords
+    (mapcar #'(lambda (v) (make-coords :pos v)) screen-target-point))
+   ;; (translation-axis null-dir)
+   (translation-axis (make-list (length null-dir) :initial-element t))
+   (rotation-axis (make-list (length null-dir)))
+   (debug-view :no-message)
+   (revert-if-fail t)
+   &allow-other-keys
+   )
+  ;; (send-all target-coords
+  ;; :draw-on :flush t :color #F(0 1 0) :size 10)
+  ;; (read-line)
+  (apply
+   #'send
+   (append
+    (list robot :6dof-inverse-kinematics  target-coords)
+    args
+    (list
+     :move-target move-target
+     :link-list link-list
+     :translation-axis translation-axis
+     :rotation-axis rotation-axis
+     :debug-view debug-view
+     :revert-if-fail revert-if-fail))))
+
+(defun calc-eye-position
+  nil
+  (let* ((reye (send *robot* :get-val 'eyer_end_link_lk))
+	 (leye (send *robot* :get-val 'eyel_end_link_lk))
+	 (init (send-all (list reye leye) :worldcoords))
+	 (reye-faces (flatten (send-all (send reye :bodies) :faces)))
+	 (leye-faces (flatten (send-all (send leye :bodies) :faces)))
+	 (reye-vertices (flatten (send-all reye-faces :vertices)))
+	 (leye-vertices (flatten (send-all leye-faces :vertices)))
+	 )
+    ;;(send-all (list reye leye) :draw-on :flush t :color #F(0 1 0))
+    ;;(send-all
+    (list
+     (scale (/ 1.0 (length reye-vertices)) (reduce #'v+ reye-vertices))
+     (scale (/ 1.0 (length leye-vertices)) (reduce #'v+ leye-vertices)))
+    ;;:draw-on :flush t :color #F(1 0 0))
+    ))
+
+;; def eye-end-coords
+(let* ((eye-pos (calc-eye-position))
+       (reye-cascoords
+	(make-cascoords
+	 :name :reye-end-coords
+	 :coords (make-coords :pos (car eye-pos))
+	 :parent (send *robot* :head :end-coords :parent)))
+       (leye-cascoords
+	(make-cascoords
+	 :name :reye-end-coords
+	 :coords (make-coords :pos (cadr eye-pos))
+	 :parent (send *robot* :head :end-coords :parent))))
+  (send *robot* :put :reye-end-coords reye-cascoords)
+  (send *robot* :put :leye-end-coords leye-cascoords))
+
+(send *robot* :put :relbow-end-coords
+      (make-cascoords
+       :name :relbow-end-coords
+       :coords (send (send *robot* :rarm :elbow-p :child-link) :copy-worldcoords)
+       :parent (send *robot* :rarm :elbow-p :child-link)))
+
+(send *robot* :put :lelbow-end-coords
+      (make-cascoords
+       :name :lelbow-end-coords
+       :coords (send (send *robot* :larm :elbow-p :child-link) :copy-worldcoords)
+       :parent (send *robot* :larm :elbow-p :child-link)))
+
 (defun calc-null-direction
   (&key (x (float-vector 0 0 0))) ;; yi' = yi * y3'/y3
   (let* ((eye (send *viewer* :get-val 'geometry::eye))
@@ -67,25 +204,6 @@
     ))
 
 ;; (let* ((v (random-vector 100.0))) (dotimes (i 10) (point-to-screen (v+ v (scale i (calc-null-direction :x v))))))
-
-(defun calc-eye-position
-  nil
-  (let* ((reye (send *robot* :get-val 'eyer_end_link_lk))
-	 (leye (send *robot* :get-val 'eyel_end_link_lk))
-	 (init (send-all (list reye leye) :worldcoords))
-	 (reye-faces (flatten (send-all (send reye :bodies) :faces)))
-	 (leye-faces (flatten (send-all (send leye :bodies) :faces)))
-	 (reye-vertices (flatten (send-all reye-faces :vertices)))
-	 (leye-vertices (flatten (send-all leye-faces :vertices)))
-	 )
-    ;;(send-all (list reye leye) :draw-on :flush t :color #F(0 1 0))
-    ;;(send-all
-    (list
-     (scale (/ 1.0 (length reye-vertices)) (reduce #'v+ reye-vertices))
-     (scale (/ 1.0 (length leye-vertices)) (reduce #'v+ leye-vertices)))
-    ;;:draw-on :flush t :color #F(1 0 0))
-    ))
-
 (defun point-to-screen
   (v
    &key
@@ -120,8 +238,15 @@
 	      ;; (print chin-gain)
 	      (scale 1.0 chin-pos2))))
     (let* ((now-pos-list
-	    (append (list (send *robot* :head :end-coords :worldpos))
-		    (calc-eye-position)))
+	    (send-all
+	     (send-all
+	      (list (send *robot* :head :end-coords)
+		    (send *robot* :get :reye-end-coords)
+		    (send *robot* :get :leye-end-coords))
+	      :worldcoords)
+	     :worldpos))
+	   ;;(append (list (send *robot* :head :end-coords :worldpos))
+	   ;;(calc-eye-position)))
 	   (target-pos-list
 	    (mapcar #'calc-target-pos
 		    (list *chin* *right-eye* *left-eye*)
@@ -293,6 +418,7 @@
  (ros::spin-once)
  (x::window-main-one)
  (update-head-position :flush nil)
+ (solve-point-ik :stop 5 :debug-view nil :revert-if-fail nil)
  (send *viewer* :draw-objects :flush nil)
  ;;
  (send *viewer* :viewsurface :color #f(1 0 0))
