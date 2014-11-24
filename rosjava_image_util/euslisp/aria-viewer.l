@@ -26,6 +26,48 @@
                 std_msgs::string
                 1)
 
+(defun calc-null-direction
+  (&key (x (float-vector 0 0 0))) ;; yi' = yi * y3'/y3
+  (let* ((eye (send *viewer* :get-val 'geometry::eye))
+	 (ec (send eye :get-val 'geometry::viewcoords))
+	 (P (send eye :projection))
+	 (Rx+p (v+ (send ec :worldpos)
+		   (transform (send ec :worldrot) x)))
+	 (Rx+p/1 (concatenate float-vector Rx+p '(1)))
+	 (y (transform P Rx+p/1))
+	 (y_ (transform P (float-vector 0 0 1 0)))
+	 (y3_ (aref y_ 3))
+	 (y3 (aref y 3)) u
+	 ret)
+    (dotimes (i 2)
+      (setf (aref y_ i) (* (/ y3_ y3) (aref y i))))
+    (setq u (transform (pseudo-inverse P) y_))
+    ;; (dotimes (i 2)
+    ;;   (let* ((gain (random 10.0)))
+    ;; 	(format t "yi/y3 = ~A vs ~A [gain:~A]~%"
+    ;; 		(/ (aref y i) (aref y 3))
+    ;; 		(/ (+ (aref y i) (* gain (aref y_ i)))
+    ;; 		   (+ (aref y 3) (* gain (aref y_ 3))))
+    ;; 		gain)))
+    (cond
+     ((or (> (abs (- (aref u 2) 1.0)) 1e-3)
+	  (> (abs (- (aref u 3) 0.0)) 1e-3))
+      (format t "[calc-null-direction] invalid 2~3 elements ~A~%" u)))
+    (setq u (subseq u 0 3))
+    ;; (print Rx+p/1) (print y) (print y_)
+    ;; (print u)
+    (setq
+     ret
+     (normalize-vector
+      (transform
+       (transpose (send ec :worldrot)) u)))
+    ;; (format t " ~A vs ~A~%" (send eye :view-direction) ret)
+    ret
+    ;; (send eye :view-direction)
+    ))
+
+;; (let* ((v (random-vector 100.0))) (dotimes (i 10) (point-to-screen (v+ v (scale i (calc-null-direction :x v))))))
+
 (defun calc-eye-position
   nil
   (let* ((reye (send *robot* :get-val 'eyer_end_link_lk))
@@ -66,20 +108,78 @@
   nvp_
   )
 
+(defun update-head-position
+  (&key (flush t))
+  (labels ((calc-target-pos
+	    (vec tpos)
+	    (let* ((screen-chin-pos (normalize-rectangle-centroid-pos vec))
+		   (chin-pos_ (screen-to-point screen-chin-pos))
+		   ;;(chin-cascoords (send (send *robot* :head :end-coords) :worldcoords))
+		   (chin-gain (calc-null-gain-for-min-distance tpos chin-pos_))
+		   (chin-pos2 (screen-to-point screen-chin-pos :gain chin-gain)))
+	      ;; (print chin-gain)
+	      (scale 1.0 chin-pos2))))
+    (let* ((now-pos-list
+	    (append (list (send *robot* :head :end-coords :worldpos))
+		    (calc-eye-position)))
+	   (target-pos-list
+	    (mapcar #'calc-target-pos
+		    (list *chin* *right-eye* *left-eye*)
+		    ;; (list *right-elbow* *right-elbow* *right-elbow*)
+		    now-pos-list))
+	   (move-pos-list (mapcar #'v- target-pos-list now-pos-list))
+	   )
+      ;;(print now-pos-list)
+      ;; (format t "~A -> ~A -> ~A -> ~A [~A]~%"
+      ;; 	      (normalize-rectangle-centroid-pos *right-elbow*)
+      ;; 	      (screen-to-point (normalize-rectangle-centroid-pos *right-elbow*))
+      ;; 	      (car target-pos-list)
+      ;; 	      (point-to-screen (car target-pos-list))
+      ;; 	      (car scaled-move-pos-list))
+      ;;(print target-pos-list)
+      (send *robot* :translate
+	    (scale (/ 1.0 (length target-pos-list))
+		   (reduce #'v+ move-pos-list))
+	    :world)
+      (send-all (send *robot* :links) :worldcoords)
+      ;;(print
+      ;;(append (list (send *robot* :head :end-coords :worldpos))
+      ;;(calc-eye-position)))
+      (if flush (send *viewer* :draw-objects))
+      )))
+
+(defun calc-null-gain-for-min-distance
+  (target-pos vc)
+  (let* ((null-dir (calc-null-direction :x vc)))
+    ;;(send eye :view-direction)))
+    (v. (normalize-vector null-dir)
+	(v- target-pos vc))))
+
+;; (point-to-screen (screen-to-point #F(100 100 0) :gain 2000.0))
 (defun screen-to-point
   (nvp_
    &key
-   (gain 0.0)
+   (gain nil)
+   (null-dir (if gain (calc-null-direction :x (screen-to-point nvp_))))
+   ;; (send eye :view-direction))
    (eye (send *viewer* :get-val 'geometry::eye))
-   (null-dir (send eye :view-direction))
    (vc (send eye :get-val 'geometry::viewcoords))
-   (pm (send eye :projection))
+   (pm_ (send eye :projection))
+   (pm pm_)
+   ;;(let* ((buf (copy-object pm_)))
+   ;;(dotimes (i 4) (setf (aref buf 2 i) 0))
+   ;;(print buf)))
    (ir (send *viewer* :viewport :worldrot))
    (ip (send *viewer* :viewport :worldpos))
    ;;
    (nvp (transform (pseudo-inverse ir) (v- nvp_ ip)))
    (vp (concatenate float-vector nvp '(1)))
-   (vv1 (transform (pseudo-inverse pm) vp))
+   (ipm (pseudo-inverse pm))
+   (vv1 (transform ipm vp))
+   ;;(ivv1 (transform ipm (float-vector 0 0 1 0)))
+   ;;(ivv (float-vector (/ (aref ivv1 0) (aref ivv1 3))
+   ;;(/ (aref ivv1 1) (aref ivv1 3))
+   ;;(/ (aref ivv1 2) (aref ivv1 3))))
    (vv (float-vector (/ (aref vv1 0) (aref vv1 3))
 		     (/ (aref vv1 1) (aref vv1 3))
 		     (/ (aref vv1 2) (aref vv1 3))))
@@ -88,19 +188,37 @@
    ;; (ans (send *viewer* :point-to-screen v))
    )
   ;; (format t "~A ~A ~A ~A~%" vv vv1 vp nvp)
-  (v+ v (scale gain null-dir))
+  (if gain
+      (v+ v (scale gain null-dir))
+    v)
+  ;; v
   )
 
-(defun draw-normalize-rectangle
+(defun normalize-rectangle-centroid-pos
   (nvec &key
 	(scale (send *irtviewer* :width))
 	(h (send *irtviewer* :height))
-	(vec (scale scale nvec))
+	(vec (scale scale nvec)))
+  (float-vector (+ (round (aref vec 0)) (/ (round (aref vec 2)) 2.0))
+		(+ (round (aref vec 1)) (/ (round (aref vec 3)) 2.0))
+		0))
+
+(defun normalize-rectangle
+  (nvec &key
+	(scale (send *irtviewer* :width))
+	(h (send *irtviewer* :height))
+	(vec (scale scale nvec)))
+  (integer-vector (round (aref vec 0))
+		  (max 0 (- (- h (round (aref vec 1))) (round (aref vec 3))))
+		  (max 5 (round (aref vec 2)))
+		  (max 5 (round (aref vec 3)))))
+
+(defun draw-normalize-rectangle
+  (nvec &key
+	(ivec (normalize-rectangle nvec))
 	(flush t))
   (send *viewer* :viewsurface :draw-rectangle
-	(integer-vector (round (aref vec 0))
-			(max 0 (- (- h (round (aref vec 1))) (round (aref vec 3)))))
-	(max 5 (round (aref vec 2))) (max 5 (round (aref vec 3))))
+	(subseq ivec 0 2) (aref ivec 2) (aref ivec 3))
   (if flush (send *viewer* :viewsurface :flush)))
 
 (defun draw-shoulder-line
@@ -174,6 +292,7 @@
  (ros::sleep)
  (ros::spin-once)
  (x::window-main-one)
+ (update-head-position :flush nil)
  (send *viewer* :draw-objects :flush nil)
  ;;
  (send *viewer* :viewsurface :color #f(1 0 0))
