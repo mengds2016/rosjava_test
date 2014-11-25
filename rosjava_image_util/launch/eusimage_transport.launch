@@ -1,0 +1,54 @@
+<launch>
+  <arg name="ROSJAVA_TEST_HOME" default="$(find rosjava_test)" />
+
+  <node pkg="rosjava_test" type="run_node.sh"
+	name="image_window_node" output="screen" args="ImageWindowNode" >
+    <env name="IMG_HOME" value="$(arg ROSJAVA_TEST_HOME)/rosjava_image_util/img" />
+  </node>
+
+  <node pkg="rosjava_test" type="eus_animeface.l" name="eus_animeface"
+	output="screen" >
+    <remap from="/eus_animeface/feedback/outputpath"
+	   to="/sensor_image_node/left/command/string" />
+  </node>
+
+  <node pkg="rosjava_test" type="aria-viewer.l" name="aria_viewer_right"
+	output="screen" >
+    <remap from="/sensor_image_node/command/string"
+	   to="/sensor_image_node/right/command/string" />
+    <remap from="/image_window_node/image/in/raw"
+	   to="/image_window_node/right/image/in/raw" />
+  </node>
+
+  <node pkg="rosjava_test" type="file_path_relay.l"
+	name="file_path_relay" output="screen" >
+    <remap from="/in_path" to="/image_window_node/drop_file/path" />
+    <remap from="/out_path1" to="/sensor_image_node/right/overlay/command/string" />
+    <remap from="/out_path2" to="/eus_animeface/detect_request/string" />
+    <remap from="/out_path3" to="/sensor_image_node/center/command/string" />
+  </node>
+
+  <node pkg="rosjava_test" type="run_node.sh"
+	name="sensor_image_node_left" output="screen" args="DumpImageNode" >
+    <env name="com_image_pub_topic_name"
+	 value="/image_window_node/left/image/in/compressed" />
+    <env name="command_string_topic_name"
+	 value="/sensor_image_node/left/command/string" />
+  </node>
+
+  <node pkg="rosjava_test" type="run_node.sh"
+	name="sensor_image_node_right" output="screen" args="DumpImageNode" >
+    <env name="com_image_pub_topic_name"
+	 value="/image_window_node/right/overlay/image/in/compressed" />
+    <env name="command_string_topic_name"
+	 value="/sensor_image_node/right/overlay/command/string" />
+  </node>
+
+  <node pkg="rosjava_test" type="run_node.sh"
+	name="sensor_image_node_center" output="screen" args="DumpImageNode" >
+    <env name="com_image_pub_topic_name"
+	 value="/image_window_node/center/image/in/compressed" />
+    <env name="command_string_topic_name"
+	 value="/sensor_image_node/center/command/string" />
+  </node>
+</launch>
