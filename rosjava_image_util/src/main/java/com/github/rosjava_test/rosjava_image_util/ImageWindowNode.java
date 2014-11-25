@@ -23,14 +23,16 @@ public class ImageWindowNode extends SensorImageNode{
 				this.nodeName); 
 		
 		ArrayList<String> name_space_array = new ArrayList<String>();
-		name_space_array.add("/image_window_node/left");
-		name_space_array.add("/image_window_node/right");
-		name_space_array.add("/image_window_node/right/overlay");
+		name_space_array.add(nodeName+"/left");
+		name_space_array.add(nodeName+"/right");
+		name_space_array.add(nodeName+"/right/overlay");
 		updateTopics(nodeName,name_space_array);
 		
+		this.window.file_receive_pub = connectedNode.newPublisher(this.nodeName+"/drop_file/path", std_msgs.String._TYPE);
+		
 		for (ImageData d : this.window.getImageDataList()){
-			d.rect_publisher = connectedNode.newPublisher("/image_window_node/" + d.name + "/rect", std_msgs.Int32MultiArray._TYPE);
-			d.rect_normal_publisher = connectedNode.newPublisher("/image_window_node/" + d.name + "/rect/normalize", std_msgs.Float32MultiArray._TYPE);
+			d.rect_publisher = connectedNode.newPublisher(nodeName + "/" + d.name + "/rect", std_msgs.Int32MultiArray._TYPE);
+			d.rect_normal_publisher = connectedNode.newPublisher(nodeName + "/" + d.name + "/rect/normalize", std_msgs.Float32MultiArray._TYPE);
 		}
 		
 		super.onStart(connectedNode);

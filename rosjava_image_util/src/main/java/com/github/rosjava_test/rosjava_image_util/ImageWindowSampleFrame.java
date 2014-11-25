@@ -5,13 +5,21 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetAdapter;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -32,6 +40,8 @@ public class ImageWindowSampleFrame extends JFrame {
 
 	public ImageView leftCameraView, centerCameraView, rightCameraView;
 	public CommandView commandView;
+
+	public Publisher<std_msgs.String> file_receive_pub;
 
 	public ImageWindowSampleFrame() {
 		this.camera_layout = new BorderLayout();
@@ -80,6 +90,19 @@ public class ImageWindowSampleFrame extends JFrame {
 		setBackground(Color.black);
 
 		setVisible(true);
+		
+		DropTarget target = new DropTarget(this.camera_pane, new DropAdapterUtil() {
+			@Override
+			public void drop(File[] files) {
+				for (File f : files) {
+					if ( ImageWindowSampleFrame.this.file_receive_pub != null ){
+						std_msgs.String msg = ImageWindowSampleFrame.this.file_receive_pub.newMessage();
+						msg.setData(f.getAbsolutePath());
+						ImageWindowSampleFrame.this.file_receive_pub.publish(msg);
+					}
+				}
+			}
+		});
 	}
 
 	public void setLeftImage(BufferedImage i){
@@ -382,6 +405,46 @@ public class ImageWindowSampleFrame extends JFrame {
 		}
 
 	}
-
 	
+	public abstract class DropAdapterUtil extends DropTargetAdapter{
+		public abstract void drop( File[] files ) ;
+		@Override
+		public void drop(DropTargetDropEvent e) {
+			File[] files = new File[0];
+			try {
+				Transferable transfer = e.getTransferable();
+				if (transfer
+						.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+					// Windows
+					e.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+					files = (File[]) ((List<File>) (transfer
+							.getTransferData(DataFlavor.javaFileListFlavor)))
+							.toArray();
+				} else if (transfer
+						.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+					// Linux
+					if (e.isLocalTransfer()) {
+					} else {
+						e.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+						String str = (String) transfer
+								.getTransferData(DataFlavor.stringFlavor);
+						String lineSep = System
+								.getProperty("line.separator");
+						String[] fileList = str.split(lineSep);
+						files= new File[fileList.length];
+						for (int i = 0; i < files.length; i++) {
+							URI fileURI = new URI(fileList[i].replaceAll("[\r\n]", ""));
+							files[i] = new File(fileURI);
+						}
+					}
+				}
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+//			for ( File f :files ){
+//				System.out.println( f.getName() ) ;
+//			}
+			drop( files ) ;
+		}
+	}
 }
