@@ -1,5 +1,6 @@
 #!/usr/bin/env roseus
 
+(ros::load-ros-manifest "sensor_msgs")
 (ros::roseus "aria_viewer")
 
 (require "package://aria_model/aria.l")
@@ -24,6 +25,9 @@
 
 (ros::advertise "/sensor_image_node/command/string"
                 std_msgs::string
+                1)
+(ros::advertise "/image_window_node/image/in/raw"
+                sensor_msgs::image
                 1)
 
 (defmethod robot-model
@@ -453,10 +457,19 @@
  (draw-normalize-rectangle *left-hand* :flush nil)
  ;;
  (send *viewer* :viewsurface :flush)
- (send *viewer* :viewsurface :write-to-image-file *tmp_image_path*)
- (ros::publish "/sensor_image_node/command/string"
-	       (instance std_msgs::string :init
-			 :data *tmp_image_path*))
+ (let* ((img (send *viewer* :viewsurface :getglimage)))
+   (ros::publish
+    "/image_window_node/image/in/raw"
+    (instance sensor_msgs::image :init
+	      :width (send img :width)
+	      :height (send img :height)
+	      :encoding "rgb8"
+	      :step (* (send img :width) 3)
+	      :data (send img :entity))))
+ ;;(send *viewer* :viewsurface :write-to-image-file *tmp_image_path*)
+ ;;(ros::publish "/sensor_image_node/command/string"
+ ;;(instance std_msgs::string :init
+ ;;:data *tmp_image_path*))
  )
 
 #|
@@ -464,3 +477,12 @@
 
 (v+ (transform (send *viewer* :viewport :worldrot) v)
     (send *viewer* :viewport :worldpos))
+
+(let* ((img (send *viewer* :viewsurface :getglimage)))
+  (ros::publish
+   "/image_window_node/image/in/raw"
+   (instance sensor_msgs::image :init
+	     :width (send img :width)
+	     :height (send img :height)
+	     :encoding "rgb8"
+	     :data (send img :entity))))

@@ -1,21 +1,5 @@
 <launch>
   <node pkg="rosjava_test" type="run_node.sh"
-	name="sensor_image_node_left" output="screen" args="DumpImageNode" >
-    <env name="com_image_pub_topic_name"
-	 value="/image_window_node/left/image/in/compressed" />
-    <env name="command_string_topic_name"
-	 value="/sensor_image_node/left/command/string" />
-  </node>
-
-  <node pkg="rosjava_test" type="run_node.sh"
-	name="sensor_image_node_right" output="screen" args="DumpImageNode" >
-    <env name="com_image_pub_topic_name"
-	 value="/image_window_node/right/image/in/compressed" />
-    <env name="command_string_topic_name"
-	 value="/sensor_image_node/right/command/string" />
-  </node>
-
-  <node pkg="rosjava_test" type="run_node.sh"
 	name="image_window_node" output="screen" args="ImageWindowNode" >
   </node>
 
@@ -32,6 +16,24 @@
 	output="screen" >
     <remap from="/sensor_image_node/command/string"
 	   to="/sensor_image_node/right/command/string" />
+    <remap from="/image_window_node/image/in/raw"
+	   to="/image_window_node/right/image/in/raw" />
+  </node>
+
+  <node pkg="rosjava_test" type="run_node.sh"
+	name="sensor_image_node_left" output="screen" args="DumpImageNode" >
+    <env name="com_image_pub_topic_name"
+	 value="/image_window_node/left/image/in/compressed" />
+    <env name="command_string_topic_name"
+	 value="/sensor_image_node/left/command/string" />
+  </node>
+
+  <node pkg="rosjava_test" type="run_node.sh"
+	name="sensor_image_node_right" output="screen" args="DumpImageNode" >
+    <env name="com_image_pub_topic_name"
+	 value="/image_window_node/right/image/in/compressed" />
+    <env name="command_string_topic_name"
+	 value="/sensor_image_node/right/command/string" />
   </node>
 
   <!--
