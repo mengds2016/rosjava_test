@@ -22,9 +22,9 @@
  (ros::spin-once)
  (cond
   (*org_msg*
-   (ros::publish "/out_path1" msg)
-   (ros::publish "/out_path2" msg)
-   (ros::publish "/out_path3" msg)))
+   (ros::publish "/out_path1" *org_msg*)
+   (ros::publish "/out_path2" *org_msg*)
+   (ros::publish "/out_path3" *org_msg*)))
  (ros::sleep)
  )
 
