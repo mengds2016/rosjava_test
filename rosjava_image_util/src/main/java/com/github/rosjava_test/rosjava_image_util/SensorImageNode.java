@@ -118,12 +118,15 @@ public class SensorImageNode extends AbstractNodeMain {
 								ChannelBuffer buffer = image.getData();
 								byte[] data = buffer.array();
 								String sData = new String(data);
-								int start = sData.indexOf("JFIF");
-								if (start > 6)
+								int start;
+								if ((start = sData.indexOf("JFIF")) > 6){
 									start -= 6;
+									System.out.println(" jpeg header detected " + start);
+								} else if ((start = sData.indexOf("PNG")) > 1){
+									start -= 1;
+									System.out.println(" png header detected " + start);
+								}
 								if (start > 0) {
-									System.out.println(" jpeg header detected "
-											+ start);
 									InputStream bais = new ByteArrayInputStream(
 											data, start, data.length - start);
 									BufferedImage buf = ImageIO.read(bais);
