@@ -1,6 +1,9 @@
 <launch>
+  <arg name="ROSJAVA_TEST_HOME" default="$(find rosjava_test)" />
+
   <node pkg="rosjava_test" type="run_node.sh"
 	name="image_window_node" output="screen" args="ImageWindowNode" >
+    <env name="IMG_HOME" value="$(arg ROSJAVA_TEST_HOME)/rosjava_image_util/img" />
   </node>
 
   <node pkg="rosjava_test" type="eus_animeface.l" name="eus_animeface"
@@ -16,8 +19,6 @@
     <remap from="/image_window_node/image/in/raw"
 	   to="/image_window_node/right/image/in/raw" />
   </node>
-
-  <arg name="ROSJAVA_TEST_HOME" default="$(find rosjava_test)" />
 
   <node pkg="rosjava_test" type="run_shell.sh"
 	name="aria_image_viewer_left" output="screen"
