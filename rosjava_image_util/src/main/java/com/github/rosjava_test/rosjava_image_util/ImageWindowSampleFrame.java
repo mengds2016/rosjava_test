@@ -23,13 +23,14 @@ import org.ros.node.topic.Publisher;
 public class ImageWindowSampleFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 
-	private static int W = 480*2, H = 640;
+	private static int N = 3;
+	private static int W = 480*N, H = 640;
 
 	private BorderLayout camera_layout;
 	private BorderLayout outer_layout;
 	private JPanel camera_pane;
 
-	public ImageView leftCameraView, rightCameraView;
+	public ImageView leftCameraView, centerCameraView, rightCameraView;
 	public CommandView commandView;
 
 	public ImageWindowSampleFrame() {
@@ -40,10 +41,12 @@ public class ImageWindowSampleFrame extends JFrame {
 		this.getContentPane().setLayout(this.outer_layout);
 
 		this.commandView = new CommandView();
-		this.leftCameraView = new ImageView(this.commandView, (W-4)/2, H-20);
-		this.rightCameraView = new ImageView(this.commandView, (W-4)/2, H-20);
+		this.leftCameraView = new ImageView(this.commandView, (W-4)/N, H-20);
+		this.rightCameraView = new ImageView(this.commandView, (W-4)/N, H-20);
+		this.centerCameraView = new ImageView(this.commandView, (W-4)/N, H-20);
 
-		this.camera_pane.add(this.leftCameraView, BorderLayout.CENTER);
+		this.camera_pane.add(this.leftCameraView, BorderLayout.WEST);
+		this.camera_pane.add(this.centerCameraView, BorderLayout.CENTER);
 		this.camera_pane.add(this.rightCameraView, BorderLayout.EAST);
 
 		try {
@@ -52,11 +55,11 @@ public class ImageWindowSampleFrame extends JFrame {
 			BufferedImage hand1 = ImageIO.read(new File("/home/s-noda/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img/hand.png"));
 			BufferedImage hand2 = ImageIO.read(new File("/home/s-noda/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img/hand.png"));
 			BufferedImage pelvis = ImageIO.read(new File("/home/s-noda/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img/pelvis.png"));
-			this.leftCameraView.pane.addImage("left_elbow", elbow1, W/(2*4), H/2, -1, -1);
-			this.leftCameraView.pane.addImage("right_elbow", elbow2, 3*W/(2*4), H/2, -1, -1);
-			this.leftCameraView.pane.addImage("left_hand", hand1, W/(2*4), 3*H/4, -1, -1);
-			this.leftCameraView.pane.addImage("right_hand", hand2, 3*W/(2*4), 3*H/4, -1, -1);
-			this.leftCameraView.pane.addImage("pelvis", pelvis, 2*W/(2*4), 2*H/4, -1, -1);
+			this.leftCameraView.pane.addImage("left_elbow", elbow1, W/(N*4), H/2, -1, -1);
+			this.leftCameraView.pane.addImage("right_elbow", elbow2, 3*W/(N*4), H/2, -1, -1);
+			this.leftCameraView.pane.addImage("left_hand", hand1, W/(N*4), 3*H/4, -1, -1);
+			this.leftCameraView.pane.addImage("right_hand", hand2, 3*W/(N*4), 3*H/4, -1, -1);
+			this.leftCameraView.pane.addImage("pelvis", pelvis, 2*W/(N*4), 2*H/4, -1, -1);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
