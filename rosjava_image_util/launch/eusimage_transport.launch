@@ -20,6 +20,10 @@
 	   to="/image_window_node/right/image/in/raw" />
   </node>
 
+  <node pkg="rosjava_test" type="aria-joint-state-viewer.l" name="aria_joint_state_viewer"
+	output="screen" >
+  </node>
+
   <node pkg="rosjava_test" type="file_path_relay.l"
 	name="file_path_relay" output="screen" >
     <remap from="/in_path" to="/image_window_node/drop_file/path" />
