@@ -80,7 +80,11 @@ public class SensorImageNode extends AbstractNodeMain {
 					new MessageListener<sensor_msgs.Image>() {
 						@Override
 						public void onNewMessage(sensor_msgs.Image image) {
-							if (!image.getEncoding().contains("rgb8")) {
+							int imageType = BufferedImage.TYPE_INT_RGB;
+							if (image.getEncoding().contains("rgb8")){
+							} else if (image.getEncoding().contains("bgr8")){
+								imageType = BufferedImage.TYPE_INT_BGR;
+							} else {
 								System.out.println("["
 										+ SensorImageNode.this.nodeName
 										+ "] invalid encoding "
@@ -89,8 +93,7 @@ public class SensorImageNode extends AbstractNodeMain {
 							}
 							try {
 								BufferedImage buf = new BufferedImage(image
-										.getWidth(), image.getHeight(),
-										BufferedImage.TYPE_INT_RGB);
+										.getWidth(), image.getHeight(), imageType);
 								ChannelBuffer buffer = image.getData();
 								byte[] data = buffer.array();
 								for (int i = 0; i < image.getWidth(); i++) {

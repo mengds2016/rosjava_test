@@ -463,7 +463,7 @@
     (instance sensor_msgs::image :init
 	      :width (send img :width)
 	      :height (send img :height)
-	      :encoding "rgb8"
+	      :encoding "bgr8" ;;"rgb8"
 	      :step (* (send img :width) 3)
 	      :data (send img :entity))))
  ;;(send *viewer* :viewsurface :write-to-image-file *tmp_image_path*)
