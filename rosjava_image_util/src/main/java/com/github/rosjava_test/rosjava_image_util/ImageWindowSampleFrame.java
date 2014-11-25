@@ -50,11 +50,16 @@ public class ImageWindowSampleFrame extends JFrame {
 		this.camera_pane.add(this.rightCameraView, BorderLayout.EAST);
 
 		try {
-			BufferedImage elbow1 = ImageIO.read(new File("/home/s-noda/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img/elbow.png"));
-			BufferedImage elbow2 = ImageIO.read(new File("/home/s-noda/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img/elbow.png"));
-			BufferedImage hand1 = ImageIO.read(new File("/home/s-noda/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img/hand.png"));
-			BufferedImage hand2 = ImageIO.read(new File("/home/s-noda/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img/hand.png"));
-			BufferedImage pelvis = ImageIO.read(new File("/home/s-noda/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img/pelvis.png"));
+			String home_dir = System.getenv("IMG_HOME"); 
+			if ( home_dir == null ){
+				home_dir = System.getenv("HOME") + "/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img";
+			}
+			//"/home/s-noda/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img"
+			BufferedImage elbow1 = ImageIO.read(new File(home_dir+"/elbow.png"));
+			BufferedImage elbow2 = ImageIO.read(new File(home_dir+"/elbow.png"));
+			BufferedImage hand1 = ImageIO.read(new File(home_dir+"/hand.png"));
+			BufferedImage hand2 = ImageIO.read(new File(home_dir+"/hand.png"));
+			BufferedImage pelvis = ImageIO.read(new File(home_dir+"/pelvis.png"));
 			this.leftCameraView.pane.addImage("left_elbow", elbow1, W/(N*4), H/2, -1, -1);
 			this.leftCameraView.pane.addImage("right_elbow", elbow2, 3*W/(N*4), H/2, -1, -1);
 			this.leftCameraView.pane.addImage("left_hand", hand1, W/(N*4), 3*H/4, -1, -1);
