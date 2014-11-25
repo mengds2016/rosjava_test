@@ -115,6 +115,11 @@ public class ImageWindowSampleFrame extends JFrame {
 		this.repaint();
 	}
 	
+	public void setCenterImage(BufferedImage i){
+		this.centerCameraView.pane.setBgImage(i);
+		this.repaint();
+	}
+	
 	public ArrayList<ImageData> getImageDataList(){
 		return this.leftCameraView.pane.getImageList();
 	}

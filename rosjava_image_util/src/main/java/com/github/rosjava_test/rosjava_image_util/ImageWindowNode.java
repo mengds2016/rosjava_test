@@ -25,6 +25,7 @@ public class ImageWindowNode extends SensorImageNode{
 		ArrayList<String> name_space_array = new ArrayList<String>();
 		name_space_array.add(nodeName+"/left");
 		name_space_array.add(nodeName+"/right");
+		name_space_array.add(nodeName+"/center");
 		name_space_array.add(nodeName+"/right/overlay");
 		updateTopics(nodeName,name_space_array);
 		
@@ -46,6 +47,8 @@ public class ImageWindowNode extends SensorImageNode{
 				// System.out.println(" overlay image = " + buf);
 			} else if ( tag.contains("left")){
 				this.window.setLeftImage(buf);
+			} else if ( tag.contains("center")){
+				this.window.setCenterImage(buf);
 			} else if ( tag.contains("right")){
 				this.window.setRightImage(buf);
 			}
