@@ -9,9 +9,6 @@
 	   to="/sensor_image_node/left/command/string" />
   </node>
 
-  <node pkg="rosjava_test" type="publish_aria_image_path.sh"
-	name="aria_image_viewer_left" args="/eus_animeface/detect_request/string" />
-
   <node pkg="rosjava_test" type="aria-viewer.l" name="aria_viewer_right"
 	output="screen" >
     <remap from="/sensor_image_node/command/string"
@@ -19,6 +16,16 @@
     <remap from="/image_window_node/image/in/raw"
 	   to="/image_window_node/right/image/in/raw" />
   </node>
+
+  <arg name="ROSJAVA_TEST_HOME" default="$(find rosjava_test)" />
+
+  <node pkg="rosjava_test" type="run_shell.sh"
+	name="aria_image_viewer_left" output="screen"
+	args="&quot;rostopic pub -r 1 /eus_animeface/detect_request/string std_msgs/String \&quot;$(arg ROSJAVA_TEST_HOME)/rosjava_image_util/img/aria.jpg\&quot;&quot;" />
+
+  <node pkg="rosjava_test" type="run_shell.sh"
+	name="aria_image_viewer_right" output="screen"
+	args="&quot;rostopic pub -r 1 /sensor_image_node/right/overlay/command/string std_msgs/String \&quot;$(arg ROSJAVA_TEST_HOME)/rosjava_image_util/img/aria.jpg\&quot;&quot;" />
 
   <node pkg="rosjava_test" type="run_node.sh"
 	name="sensor_image_node_left" output="screen" args="DumpImageNode" >
@@ -31,9 +38,9 @@
   <node pkg="rosjava_test" type="run_node.sh"
 	name="sensor_image_node_right" output="screen" args="DumpImageNode" >
     <env name="com_image_pub_topic_name"
-	 value="/image_window_node/right/image/in/compressed" />
+	 value="/image_window_node/right/overlay/image/in/compressed" />
     <env name="command_string_topic_name"
-	 value="/sensor_image_node/right/command/string" />
+	 value="/sensor_image_node/right/overlay/command/string" />
   </node>
 
   <!--
