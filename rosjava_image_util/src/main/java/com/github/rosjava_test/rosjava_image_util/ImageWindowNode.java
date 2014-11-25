@@ -25,6 +25,7 @@ public class ImageWindowNode extends SensorImageNode{
 		ArrayList<String> name_space_array = new ArrayList<String>();
 		name_space_array.add("/image_window_node/left");
 		name_space_array.add("/image_window_node/right");
+		name_space_array.add("/image_window_node/right/overlay");
 		updateTopics(nodeName,name_space_array);
 		
 		for (ImageData d : this.window.getImageDataList()){
@@ -38,7 +39,10 @@ public class ImageWindowNode extends SensorImageNode{
 	@Override
 	protected void rawImageFunction(BufferedImage buf, String tag){
 		if ( this.window != null && buf != null ) {
-			if ( tag.contains("left")){
+			if (tag.contains("overlay")){
+				this.window.rightCameraView.pane.setOverlayImage(buf);
+				// System.out.println(" overlay image = " + buf);
+			} else if ( tag.contains("left")){
 				this.window.setLeftImage(buf);
 			} else if ( tag.contains("right")){
 				this.window.setRightImage(buf);

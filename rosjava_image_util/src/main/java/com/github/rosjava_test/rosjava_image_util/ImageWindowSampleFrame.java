@@ -111,6 +111,8 @@ public class ImageWindowSampleFrame extends JFrame {
 	
 	public class ImageData {
 		private BufferedImage image;
+		public BufferedImage overlayImage;
+		public double alpha = 0.5;
 		public String name;
 		public int x=0, y=0, w=100, h=100;	
 		public boolean flush=false;
@@ -145,7 +147,8 @@ public class ImageWindowSampleFrame extends JFrame {
 		}
 		
 		public void drawBackground(Graphics g, int panel_w, int panel_h) {
-			BufferedImage i = this.image;
+			BufferedImage i;
+			i = this.image;
 			if (i != null) {
 				double rate = Math.min(1.0 * panel_w / this.w, 1.0 * panel_h
 						/ this.h);
@@ -159,6 +162,26 @@ public class ImageWindowSampleFrame extends JFrame {
 				g.clearRect(0, 0, panel_w, panel_h);
 				g.drawString("NO IMAGE", panel_w / 2, panel_h / 2);
 			}
+			//
+			i = this.overlayImage;
+			if (i != null) {
+				BufferedImage buf = new BufferedImage(i.getWidth(), i.getHeight(), BufferedImage.TYPE_INT_ARGB);
+				for ( int w=0 ; w<buf.getWidth(); w++ ){
+					for ( int h=0 ; h<buf.getHeight(); h++ ){
+						int argb = i.getRGB(w, h);
+						argb = (((int)(255 * this.alpha)) << 24) | (argb & 0x00ffffff);
+						buf.setRGB(w, h, argb);
+					}
+				}
+				i = buf;
+				double rate = Math.min(1.0 * panel_w / i.getWidth(), 1.0 * panel_h
+						/ i.getHeight());
+				double woffset = (panel_w - i.getWidth() * rate) / 2;
+				double hoffset = (panel_h - i.getHeight() * rate) / 2;
+				g.drawImage(i, (int) (woffset), (int) (hoffset),
+						(int) (panel_w - woffset * 2),
+						(int) (panel_h - hoffset * 2), null);
+			} 
 		}
 		
 		public void draw(Graphics g) {
@@ -234,6 +257,10 @@ public class ImageWindowSampleFrame extends JFrame {
 
 		public BufferedImage getBgImage() {
 			return this.bgImage.getImage();
+		}
+		
+		public void setOverlayImage(BufferedImage i){
+			this.bgImage.overlayImage = i;
 		}
 		
 		@Override
