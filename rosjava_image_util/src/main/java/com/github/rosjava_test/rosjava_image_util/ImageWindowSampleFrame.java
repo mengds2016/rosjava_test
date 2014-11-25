@@ -130,6 +130,20 @@ public class ImageWindowSampleFrame extends JFrame {
 			return this.image;
 		}
 		
+		public void setOverlayImage(BufferedImage i, double alpha){
+			this.alpha = alpha;
+			// this.overlayImage = i;
+			BufferedImage buf = new BufferedImage(i.getWidth(), i.getHeight(), BufferedImage.TYPE_INT_ARGB);
+			for ( int w=0 ; w<buf.getWidth(); w++ ){
+				for ( int h=0 ; h<buf.getHeight(); h++ ){
+					int argb = i.getRGB(w, h);
+					argb = (((int)(255 * this.alpha)) << 24) | (argb & 0x00ffffff);
+					buf.setRGB(w, h, argb);
+				}
+			}
+			this.overlayImage = buf;
+		}
+		
 		public void clickUpdate(int x, int y, int w, int h, float scale){
 			this.x = x - this.w/2 ;
 			this.y = y - this.h/2;
@@ -165,15 +179,15 @@ public class ImageWindowSampleFrame extends JFrame {
 			//
 			i = this.overlayImage;
 			if (i != null) {
-				BufferedImage buf = new BufferedImage(i.getWidth(), i.getHeight(), BufferedImage.TYPE_INT_ARGB);
-				for ( int w=0 ; w<buf.getWidth(); w++ ){
-					for ( int h=0 ; h<buf.getHeight(); h++ ){
-						int argb = i.getRGB(w, h);
-						argb = (((int)(255 * this.alpha)) << 24) | (argb & 0x00ffffff);
-						buf.setRGB(w, h, argb);
-					}
-				}
-				i = buf;
+//				BufferedImage buf = new BufferedImage(i.getWidth(), i.getHeight(), BufferedImage.TYPE_INT_ARGB);
+//				for ( int w=0 ; w<buf.getWidth(); w++ ){
+//					for ( int h=0 ; h<buf.getHeight(); h++ ){
+//						int argb = i.getRGB(w, h);
+//						argb = (((int)(255 * this.alpha)) << 24) | (argb & 0x00ffffff);
+//						buf.setRGB(w, h, argb);
+//					}
+//				}
+//				i = buf;
 				double rate = Math.min(1.0 * panel_w / i.getWidth(), 1.0 * panel_h
 						/ i.getHeight());
 				double woffset = (panel_w - i.getWidth() * rate) / 2;
@@ -260,7 +274,8 @@ public class ImageWindowSampleFrame extends JFrame {
 		}
 		
 		public void setOverlayImage(BufferedImage i){
-			this.bgImage.overlayImage = i;
+			//this.bgImage.overlayImage = i;
+			this.bgImage.setOverlayImage(i, 0.5);
 		}
 		
 		@Override
