@@ -27,6 +27,7 @@ public class ImageWindowNode extends SensorImageNode{
 		name_space_array.add(nodeName+"/right");
 		name_space_array.add(nodeName+"/center");
 		name_space_array.add(nodeName+"/right/overlay");
+		name_space_array.add(nodeName+"/left/overlay");
 		updateTopics(nodeName,name_space_array);
 		
 		this.window.file_receive_pub = connectedNode.newPublisher(this.nodeName+"/drop_file/path", std_msgs.String._TYPE);
@@ -42,9 +43,10 @@ public class ImageWindowNode extends SensorImageNode{
 	@Override
 	protected void rawImageFunction(BufferedImage buf, String tag){
 		if ( this.window != null && buf != null ) {
-			if (tag.contains("overlay")){
+			if (tag.contains("overlay") && tag.contains("right")){
 				this.window.rightCameraView.pane.setOverlayImage(buf);
-				// System.out.println(" overlay image = " + buf);
+			} else if (tag.contains("overlay") && tag.contains("left")){
+				this.window.leftCameraView.pane.setOverlayImage(buf);
 			} else if ( tag.contains("left")){
 				this.window.setLeftImage(buf);
 			} else if ( tag.contains("center")){
