@@ -152,6 +152,7 @@ public class ImageWindowSampleFrame extends JFrame {
 		public Publisher<std_msgs.Int32MultiArray> rect_publisher;
 		public Publisher<std_msgs.Float32MultiArray> rect_normal_publisher;
 		public float scale_factor=1.0f;
+		public float woffset=0.0f, hoffset=0.0f;
 
 		public void setImage(BufferedImage i) {
 			this.image = i;
@@ -177,18 +178,18 @@ public class ImageWindowSampleFrame extends JFrame {
 			this.overlayImage = buf;
 		}
 		
-		public void clickUpdate(int x, int y, int w, int h, float scale){
+		public void clickUpdate(int x, int y, int w, int h, float scale, float woffset, float hoffset){
 			this.x = x - this.w/2 ;
 			this.y = y - this.h/2;
 			if ( this.rect_publisher != null ){
 				std_msgs.Int32MultiArray msg = this.rect_publisher.newMessage();
-				msg.setData(new int[]{this.x, this.y, this.w, this.h});
+				msg.setData(new int[]{(int)(this.x-woffset), (int)(this.y-hoffset), this.w, this.h});
 				this.rect_publisher.publish(msg);
 			}
 			if ( this.rect_normal_publisher != null ){
 				std_msgs.Float32MultiArray msg = this.rect_normal_publisher.newMessage();
 				//float scale = 1.0f / w ;
-				msg.setData(new float[]{this.x * scale, this.y * scale, this.w * scale, this.h * scale});
+				msg.setData(new float[]{(this.x-woffset) * scale, (this.y-hoffset) * scale, this.w * scale, this.h * scale});
 				this.rect_normal_publisher.publish(msg);
 			}
 		}
@@ -199,12 +200,12 @@ public class ImageWindowSampleFrame extends JFrame {
 			if (i != null) {
 				double rate = Math.min(1.0 * panel_w / this.w, 1.0 * panel_h
 						/ this.h);
-				double woffset = (panel_w - this.w * rate) / 2;
-				double hoffset = (panel_h - this.h * rate) / 2;
-				g.drawImage(i, (int) (woffset), (int) (hoffset),
-						(int) (panel_w - woffset * 2),
-						(int) (panel_h - hoffset * 2), null);
-				this.scale_factor = (float)(1.0 / (panel_w - woffset * 2));
+				this.woffset = (float)((panel_w - this.w * rate) / 2);
+				this.hoffset = (float)((panel_h - this.h * rate) / 2);
+				g.drawImage(i, (int) (this.woffset), (int) (this.hoffset),
+						(int) (panel_w - this.woffset * 2),
+						(int) (panel_h - this.hoffset * 2), null);
+				this.scale_factor = (float)(1.0 / (panel_w - this.woffset * 2));
 			} else {
 				g.clearRect(0, 0, panel_w, panel_h);
 				g.drawString("NO IMAGE", panel_w / 2, panel_h / 2);
@@ -371,7 +372,11 @@ public class ImageWindowSampleFrame extends JFrame {
 			System.out.println("clicked");
 			if ( updateSelectedImage(e.getX(), e.getY())){
 				System.out.println(" selected -> " + this.selected);
-				this.selected.clickUpdate(e.getX(), e.getY(), this.pane.getWidth(), this.pane.getHeight(), this.pane.bgImage.scale_factor);
+				this.selected.clickUpdate(e.getX(), e.getY(),
+						this.pane.getWidth(), this.pane.getHeight(),
+						this.pane.bgImage.scale_factor,
+						this.pane.bgImage.woffset,
+						this.pane.bgImage.hoffset);
 			}
 			repaint();
 		}
@@ -396,7 +401,11 @@ public class ImageWindowSampleFrame extends JFrame {
 		public void mouseDragged(MouseEvent e) {
 			if ( updateSelectedImage(e.getX(), e.getY())){
 				System.out.println(" drag selected -> " + this.selected);
-				this.selected.clickUpdate(e.getX(), e.getY(), this.pane.getWidth(), this.pane.getHeight(), this.pane.bgImage.scale_factor);
+				this.selected.clickUpdate(e.getX(), e.getY(),
+						this.pane.getWidth(), this.pane.getHeight(),
+						this.pane.bgImage.scale_factor,
+						this.pane.bgImage.woffset,
+						this.pane.bgImage.hoffset);
 			}
 			repaint();
 //				switch (this.mode) {
