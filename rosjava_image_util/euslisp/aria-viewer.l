@@ -359,7 +359,8 @@
 	(flush t))
   (send *viewer* :viewsurface :draw-rectangle
 	(subseq ivec 0 2) (aref ivec 2) (aref ivec 3))
-  (if flush (send *viewer* :viewsurface :flush)))
+  (if flush (send *viewer* :viewsurface :flush))
+  ivec)
 
 (defun draw-shoulder-line
   (&key
@@ -448,17 +449,18 @@
  (solve-point-ik :stop 3 :debug-view nil :revert-if-fail nil)
  (send *viewer* :draw-objects :flush nil)
  ;;
- (send *viewer* :viewsurface :color #f(1 0 0))
- (draw-normalize-rectangle *face* :flush nil)
- (send *viewer* :viewsurface :color #f(0 1 0))
- (draw-normalize-rectangle *right-eye* :flush nil)
- (draw-normalize-rectangle *left-eye* :flush nil)
- (draw-normalize-rectangle *chin* :flush nil)
- (send *viewer* :viewsurface :color #f(0 0 1))
- (draw-normalize-rectangle *right-elbow* :flush nil)
- (draw-normalize-rectangle *left-elbow* :flush nil)
- (draw-normalize-rectangle *right-hand* :flush nil)
- (draw-normalize-rectangle *left-hand* :flush nil)
+ ;; (send *viewer* :viewsurface :color #f(1 0 0))
+ ;; (draw-normalize-rectangle *face* :flush nil)
+ ;; (send *viewer* :viewsurface :color #f(0 1 0))
+ ;; (draw-normalize-rectangle *right-eye* :flush nil)
+ ;; (draw-normalize-rectangle *left-eye* :flush nil)
+ ;; (draw-normalize-rectangle *chin* :flush nil)
+ ;; (send *viewer* :viewsurface :color #f(0 0 1))
+ ;; (draw-normalize-rectangle *right-elbow* :flush nil)
+ ;; (draw-normalize-rectangle *left-elbow* :flush nil)
+ ;; (draw-normalize-rectangle *right-hand* :flush nil)
+ ;; (draw-normalize-rectangle *left-hand* :flush nil)
+ ;; (send (send (send *robot* :rarm :end-coords) :worldpos) :draw-on :flush t :color #F(1 0 0) :size 100 :width 100)
  ;;
  (send *viewer* :viewsurface :flush)
  (let* ((img (send *viewer* :viewsurface :getglimage)))
