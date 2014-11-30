@@ -4,9 +4,10 @@ import javax.sound.sampled.*;
 
 public class MicTest extends Thread {
 
-	public static final int SAMPLE_RATE = 44100;
-	public static final int TIME_STEP = 100;
-	public static final int BUFFER_SIZE = (int)(SAMPLE_RATE * (TIME_STEP/1000.0));
+	public static final int SAMPLE_RATE = 8000;
+	public static final int TIME_STEP = 500;
+	public static final int FRAME = 2;
+	public static final int BUFFER_SIZE = (int)(SAMPLE_RATE * (TIME_STEP/1000.0) * FRAME);
 	private TargetDataLine targetDataLine;
 	private SourceDataLine sourceDataLine;
 
@@ -77,9 +78,13 @@ public class MicTest extends Thread {
 	}
 	
 	public AudioFormat genAudioFormat(){
+//		return  new AudioFormat(
+//				AudioFormat.Encoding.PCM_SIGNED, MicTest.SAMPLE_RATE, 8, 1, 1, MicTest.SAMPLE_RATE,
+//				false);
 		return  new AudioFormat(
-				AudioFormat.Encoding.PCM_SIGNED, MicTest.SAMPLE_RATE, 8, 1, 1, MicTest.SAMPLE_RATE,
+				AudioFormat.Encoding.PCM_SIGNED, MicTest.SAMPLE_RATE, 8 *MicTest.FRAME, 1, MicTest.FRAME, MicTest.SAMPLE_RATE,
 				false);
+
 	}
 
 	public TargetDataLine setupTarget() throws LineUnavailableException {
