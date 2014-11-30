@@ -16,3 +16,8 @@
 
 include 'rosjava_image_util'
 include 'rosjava_audio_util'
+
+/* Uncomment these and add your own packages to be gradled
+include 'my_android_project'
+include 'my_android_library_project'
+*/
