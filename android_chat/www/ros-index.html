@@ -21,13 +21,15 @@
     </div>
     <div id="bottom_column" style="height:20%;">
       <input type="button" name="forward" value="前"
-             onclick="rc.publish_drive_command(-1,1);"> </input>
+             onclick="rc.publish_drive_command(-4,4);"> </input>
       <input type="button" name="forward" value="左"
-             onclick="rc.publish_drive_command(1,1);"> </input>
+             onclick="rc.publish_drive_command(4,4);"> </input>
       <input type="button" name="forward" value="右"
-             onclick="rc.publish_drive_command(-1,-1);"> </input>
+             onclick="rc.publish_drive_command(-4,-4);"> </input>
       <input type="button" name="forward" value="後"
-             onclick="rc.publish_drive_command(1,-1);"> </input>
+             onclick="rc.publish_drive_command(4,-4);"> </input>
+      <input type="button" name="forward" value="0"
+             onclick="rc.publish_drive_command(0,0);"> </input>
     </div>
     <script type="text/javascript"
 	    src="ros-controller.js"></script>

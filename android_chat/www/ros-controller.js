@@ -5,7 +5,8 @@ var ros_controller = function(opt) {
 
     this.drive_topic = new ROSLIB.Topic({
         ros: this.ros,
-        name: "/chat/request/drive_vector",
+        name: "/invented_pendulum/torque_offset_vector/once",
+	// "/chat/request/drive_vector",
         messageType: 'std_msgs/Float32MultiArray'
     });
 
