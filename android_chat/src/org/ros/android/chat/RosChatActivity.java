@@ -33,8 +33,8 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 	private int camera_width=-1, camera_height=-1 ;
 	
 	private ImagePublishNode image_publisher ;
+	private AudioPubSubNode audio_node;
 	private Thread chat_observer ;
-	// private USB2Roomba roomba ;
 	private boolean ros_initialized ;
 	
 	final public static String node_name = "chat" ;
@@ -61,6 +61,8 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		this.image_view.setTopicName( node_name + "/request/" + "image/raw/compressed") ;
 		this.image_view.setMessageType(sensor_msgs.CompressedImage._TYPE);
 		this.image_view.setTalker(this.chatnode) ;
+		
+		this.audio_node = new AudioPubSubNode("ros_chat");
 		
 		this.bottom_notf = (TextView) findViewById(R.id.bottom_notification_text) ;
 		
@@ -212,6 +214,7 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		}
 		this.chatnode.onDestroy();
 		this.chat_observer = null ;
+		this.audio_node.onDestroy();
 	}
 
 	@Override
@@ -229,7 +232,8 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		nodeMainExecutor.execute(this.image_view, nodeConfiguration);
 		nodeMainExecutor.execute(this.image_publisher, nodeConfiguration);
 		nodeMainExecutor.execute(this.chatnode, nodeConfiguration);
-		
+		nodeMainExecutor.execute(this.audio_node, nodeConfiguration);
+
 		Camera.Parameters param = this.camera.getParameters() ;
 		this.image_publisher.startImagePublisher(this.camera, param.getPreviewSize().width, param.getPreviewSize().height) ;
 
