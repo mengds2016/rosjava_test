@@ -65,7 +65,7 @@
 		audio_common_msgs::audiodata
 		10)
 
-(set-param-sound-touch *samplerate* *channel* 1.0 3.0 0.0)
+(set-param-sound-touch *samplerate* *channel* 1.0 5.0 0.0)
 (ros::rate 100)
 ;;(ros::spin)
 (do-until-key

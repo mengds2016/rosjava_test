@@ -6,7 +6,7 @@
 
 (ros::load-ros-manifest "audio_common_msgs")
 
-(defvar *samplerate* 16000)
+(defvar *samplerate* 44100)
 (defvar *channel* 1)
 
 (defvar *outpath* "out.wav")
@@ -14,7 +14,7 @@
 (defvar *amp-data* (instantiate float-vector (/ *samplerate* 10)))
 
 (defun byte-array2float-vector
-  (barray fv &key (scale 1.0))
+  (barray fv &key (scale 0.9))
   (dotimes (i (length barray))
     (setf (aref fv i)
 	  (- (* scale (aref barray i)) (* (/ scale 2.0) #xFF))
@@ -28,7 +28,7 @@
     (if (not (eq n (length *amp-data*)))
 	(setq *amp-data* (instantiate float-vector n)))
     (byte-array2float-vector (send msg :data) *amp-data*)
-    (write-wav-file *amp-data* (/ n *channel*))
+    (write-wav-file *amp-data* (* n *channel*))
     ))
 
 (ros::subscribe "/audio_in"
