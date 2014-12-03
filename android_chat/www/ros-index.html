@@ -11,27 +11,37 @@
 	    ></script>
   </head>
   <body style="background:black;">
-    <div id="main_column" style="width:80%; height:80%; text-align:center;">
+    <!-- -->
+    <div id="main_column" style="width:100%; text-align:center; ">
       <img src="http://localhost:8080/stream?topic=/chat/status/camera/image/raw"
-	   style="max-width:80%; max-height:70%; position:absolute; top:30px; left:10%;"
+	   style="width:100%; max-height:100%; position:absolute; top:0px; left:0%; z-index:-100;"
 	   />
       <img src="http://localhost:8080/stream?topic=/chat/request/image/raw"
-	   style="max-width:30%; max-height:30%; position:absolute; bottom:300px; right: 5%;"
+	   style="max-width:30%; max-height:30%;
+		  position:absolute; bottom:0px; right: 0px; z-index:-100;"
 	   />
     </div>
-    <div id="bottom_column" style="height:20%;">
-      <input type="button" name="forward" value="前"
-             onclick="rc.publish_drive_command(-4,4);"> </input>
-      <input type="button" name="forward" value="左"
-             onclick="rc.publish_drive_command(4,4);"> </input>
-      <input type="button" name="forward" value="右"
-             onclick="rc.publish_drive_command(-4,-4);"> </input>
-      <input type="button" name="forward" value="後"
-             onclick="rc.publish_drive_command(4,-4);"> </input>
-      <input type="button" name="forward" value="0"
-             onclick="rc.publish_drive_command(0,0);"> </input>
-    </div>
+    <!-- -->
     <script type="text/javascript"
 	    src="ros-controller.js"></script>
+    <div id="bottom_column" style="">
+      <input type="image" src="./test.jpg" name="forward" value="forward"
+             onclick="rc.publish_drive_command(-4,4);"> </input>
+      <input type="image" src="./test.jpg" name="left" value="left"
+             onclick="rc.publish_drive_command(4,4);"> </input>
+      <input type="image" src="./test.jpg" name="right" value="right"
+             onclick="rc.publish_drive_command(-4,-4);"> </input>
+      <input type="image" src="./test.jpg" name="backward" value="backward"
+             onclick="rc.publish_drive_command(4,-4);"> </input>
+      <input type="image" src="./test.jpg" name="zero" value="zerp"
+             onclick="rc.publish_drive_command(0,0);"> </input>
+    </div>
+    <div id="bottom_column" style="">
+      <input type="image" src="./test.jpg" name="insert1" value="insert1"
+             onclick="insert_container(['fuga', 'hoge']);"> </input>
+      <input type="image" src="./test.jpg" name="insert2" value="insert2"
+             onclick="insert_container([]);"> </input>
+    </div>
+    <div id="test_container" />
   </body>
 </html>
