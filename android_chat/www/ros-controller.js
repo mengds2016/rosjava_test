@@ -24,12 +24,17 @@ var ros_controller = function(opt) {
 
 var rc = new ros_controller() ;
 
-function insert_container(command_list){
+function insert_container(tag, command_list){
     var elem = document.getElementById("test_container");
     var i=0;
     var buf="";
-    for ( ; i<command_list.length; i++ ){
-	buf += "<input type=\"image\" src=\"./test.jpg\" name=\"" + command_list[i] + "\" value=\"forward\" onclick=\"rc.publish_string_command(" + command_list[i] + ");\"></input>" ;
+    if ( tag == elem.title ){
+	elem.title = "";
+    } else {
+	elem.title = tag;
+	for ( ; i<command_list.length; i++ ){
+	    buf += "<input type=\"image\" src=\"./test.jpg\" name=\"" + command_list[i] + "\" value=\"forward\" onclick=\"rc.publish_string_command(" + command_list[i] + ");\"></input>" ;
+	}
     }
     elem.innerHTML=buf;
 }
