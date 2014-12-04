@@ -9,12 +9,23 @@
     <script type="text/javascript"
 	    src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"
 	    ></script>
+    <style type="text/css">
+      input:hover {
+      opacity:0.50;
+      filter:alpha(opacity=50);
+      -ms-filter: "alpha( opacity=50 )";
+      -moz-opacity:0.50;
+      }
+    </style>
   </head>
   <body style="background:black;">
+    <script type="text/javascript" src="ros-controller.js"></script>
     <!-- -->
-    <div id="main_column" style="width:100%; text-align:center; ">
+    <div id="main_column" style="width:100%; text-align:center;
+				 display:table-cell; vertical-align:middle;">
       <img src="http://localhost:8080/stream?topic=/chat/status/camera/image/raw"
-	   style="width:100%; max-height:100%; position:absolute; top:0px; left:0%; z-index:-100;"
+	   style="width:100%; max-height:100%;
+		  position:absolute; top:0px; left:0%; z-index:-100;"
 	   />
       <img src="http://localhost:8080/stream?topic=/chat/request/image/raw"
 	   style="max-width:30%; max-height:30%;
@@ -22,26 +33,57 @@
 	   />
     </div>
     <!-- -->
-    <script type="text/javascript"
-	    src="ros-controller.js"></script>
-    <div id="bottom_column" style="">
-      <input type="image" src="./test.jpg" name="forward" value="forward"
+    <div id="control_forward_overlay"
+	 style="position:absolute; width:100%; text-align: center; top:0px;">
+      <input type="image" src="img/mi_forward.png" name="forward" value="forward"
              onclick="rc.publish_drive_command(-4,4);"> </input>
-      <input type="image" src="./test.jpg" name="left" value="left"
-             onclick="rc.publish_drive_command(4,4);"> </input>
-      <input type="image" src="./test.jpg" name="right" value="right"
-             onclick="rc.publish_drive_command(-4,-4);"> </input>
-      <input type="image" src="./test.jpg" name="backward" value="backward"
-             onclick="rc.publish_drive_command(4,-4);"> </input>
-      <input type="image" src="./test.jpg" name="zero" value="zerp"
-             onclick="rc.publish_drive_command(0,0);"> </input>
     </div>
-    <div id="bottom_column" style="">
-      <input type="image" src="./test.jpg" name="insert1" value="insert1"
-             onclick="insert_container('piyo', ['fuga', 'hoge']);"> </input>
-      <input type="image" src="./test.jpg" name="insert2" value="insert2"
-             onclick="insert_container('moe', ['sun']);"> </input>
+    <!--
+    <div id="control_backward_overlay"
+	 style="position:absolute; width:100%; text-align: center; bottom:0px;">
+      <input type="image" src="img/mi_backward.png" name="backward" value="backward"
+             onclick="rc.publish_drive_command(4,-4);"
+	     style="bottom: 0px;" > </input>
     </div>
-    <div id="test_container" />
+    -->
+    <div id="control_left_overlay_outer" style="display: table; position:absolute; height: 100%; left:0px;">
+      <div id="control_left_overlay"
+	   style="display:table-cell; vertical-align: middle;">
+	<input type="image" src="img/mi_left.png"
+	       name="left" value="left"
+               onclick="rc.publish_drive_command(4,4);"> </input>
+      </div>
+    </div>
+    <div id="control_right_overlay_outer"
+	 style="display: table; position:absolute; height: 100%; right:0px;">
+      <div id="control_right_overlay"
+	   style="display:table-cell; vertical-align: middle;">
+	<input type="image" src="img/mi_right.png"
+	       name="right" value="right"
+               onclick="rc.publish_drive_command(-4,-4);"> </input>
+      </div>
+    </div>
+    <!-- -->
+    <div id="bottom_column"
+	 style="position: absolute; width: 100%; bottom: 0px;">
+      <div id="bottom_insert_container"></div>
+      <div>
+	<input type="image" src="img/mi_emotions.png" name="emotions" value="emotions"
+               onclick="insert_container('piyo','bottom_insert_container',['fuga']);"> </input>
+	<input type="image" src="img/mi_situation.png" name="situation" value="situation"
+               onclick="insert_container('piyo','bottom_insert_container',['fuga']);"> </input>
+	<input type="image" src="img/mi_fool.png" name="fool" value="fool"
+               onclick="insert_container('piyo','bottom_insert_container',['fuga']);"> </input>
+	<input type="image" src="img/mi_else.png" name="else" value="else"
+               onclick="insert_container('piyo','bottom_insert_container',['fuga']);"> </input>
+      </div>
+    </div>
+    <!-- -->
+    <div id="top_column"
+	 style="position: absolute; top: 0px;">
+      <input type="image" src="img/mi_myaction.png" name="myaction" value="myaction"
+             onclick="insert_container('piyo','top_insert_container',['fuga']);"> </input>
+      <div id="top_insert_container" />
+    </div>
   </body>
 </html>

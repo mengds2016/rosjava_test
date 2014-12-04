@@ -24,8 +24,8 @@ var ros_controller = function(opt) {
 
 var rc = new ros_controller() ;
 
-function insert_container(tag, command_list){
-    var elem = document.getElementById("test_container");
+function insert_container(tag, container, command_list){
+    var elem = document.getElementById(container);
     var i=0;
     var buf="";
     if ( tag == elem.title ){
