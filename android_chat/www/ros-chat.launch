@@ -2,10 +2,10 @@
  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
  <node pkg="image_transport" type="republish" name="android_camera_image_transport"
        args="compressed in:=/chat/status/camera/image raw out:=/chat/status/camera/image/raw" />
- <node pkg="usb_cam" type="usb_cam_node" name="usb_cam">
-   <remap from="/usb_cam/image_raw"
+ <node pkg="usb_cam" type="usb_cam_node" name="client_usb_cam">
+   <remap from="/client_usb_cam/image_raw"
 	  to="/chat/request/image/raw" />
-   <remap from="/usb_cam/image_raw/compressed"
+   <remap from="/client_usb_cam/image_raw/compressed"
 	  to="/chat/request/image/raw/compressed" />
  </node>
  <node pkg="mjpeg_server" type="mjpeg_server" name="mjpeg_server" />
