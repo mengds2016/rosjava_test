@@ -90,7 +90,7 @@ public class HalfScreenCapImageNode extends SensorImageNode implements Runnable 
 				} else {
 					System.out.println("[ScreenCapImageNode] null image");
 				}
-				if ( (now = System.currentTimeMillis() - now) > 0 ){
+				if ( (now = sleep_time - (System.currentTimeMillis() - now)) > 0 ){
 					Thread.sleep(now);
 				} else {
 					System.out.println("[ScreenCapImageNode] overslept");
