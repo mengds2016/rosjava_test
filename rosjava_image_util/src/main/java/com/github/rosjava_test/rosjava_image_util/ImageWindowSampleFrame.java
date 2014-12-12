@@ -43,7 +43,11 @@ public class ImageWindowSampleFrame extends JFrame {
 
 	public Publisher<std_msgs.String> file_receive_pub;
 
-	public ImageWindowSampleFrame() {
+	public ImageWindowSampleFrame(){
+		this(true,true,true,true);
+	}
+	
+	public ImageWindowSampleFrame(boolean leftcam, boolean centcam, boolean rightcam, boolean compane) {
 		this.camera_layout = new BorderLayout();
 		this.outer_layout = new BorderLayout();
 		this.camera_pane = new JPanel();
@@ -55,9 +59,9 @@ public class ImageWindowSampleFrame extends JFrame {
 		this.rightCameraView = new ImageView(this.commandView, (W-4)/N, H-20);
 		this.centerCameraView = new ImageView(this.commandView, (W-4)/N, H-20);
 
-		this.camera_pane.add(this.leftCameraView, BorderLayout.WEST);
-		this.camera_pane.add(this.centerCameraView, BorderLayout.CENTER);
-		this.camera_pane.add(this.rightCameraView, BorderLayout.EAST);
+		if ( leftcam ) this.camera_pane.add(this.leftCameraView, BorderLayout.WEST);
+		if ( centcam ) this.camera_pane.add(this.centerCameraView, BorderLayout.CENTER);
+		if (rightcam ) this.camera_pane.add(this.rightCameraView, BorderLayout.EAST);
 
 		try {
 			String home_dir = System.getenv("IMG_HOME"); 
@@ -80,7 +84,7 @@ public class ImageWindowSampleFrame extends JFrame {
 		}
 		
 		this.add(this.camera_pane);
-		this.add(this.commandView, BorderLayout.SOUTH);
+		if ( compane ) this.add(this.commandView, BorderLayout.SOUTH);
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setTitle("ImageWindowSample");
