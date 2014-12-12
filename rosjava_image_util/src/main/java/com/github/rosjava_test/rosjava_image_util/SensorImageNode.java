@@ -175,6 +175,17 @@ public class SensorImageNode extends AbstractNodeMain {
 		topic.com_image_publisher.publish(image_topic) ;
 	}
 	
+	public void publishRawImage(BufferedImage image, String tag){
+		SensorImageTopics topic = this.image_topics_hash.get(tag);
+		if ( tag == null ) {
+			System.out.println("[" + this.nodeName + "] unknown topic name " + tag) ;
+			return;
+		}
+		sensor_msgs.Image image_topic = topic.raw_image_publisher.newMessage();
+		///image_topic.setData(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, image, 0, data.length));
+		//topic.raw_image_publisher.publish(image_topic) ;
+	}
+	
 	public static BufferedImage monoImage(byte[] data, int w, int h) {
 		BufferedImage buf = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
 		int offset = data.length - w * h;
@@ -195,6 +206,8 @@ public class SensorImageNode extends AbstractNodeMain {
 		
 		public Publisher<std_msgs.String> status_publisher ;
 		public Publisher<sensor_msgs.CompressedImage> com_image_publisher ;
+		public Publisher<sensor_msgs.Image> raw_image_publisher ;
+
 		public Subscriber<std_msgs.String> command_subscriber;
 		public Subscriber<sensor_msgs.Image> raw_image_subscriber;
 		public Subscriber<sensor_msgs.CompressedImage> com_image_subscriber;
@@ -204,6 +217,7 @@ public class SensorImageNode extends AbstractNodeMain {
 		public String com_image_sub_topic_name;
 		public String status_string_topic_name;
 		public String com_image_pub_topic_name;
+		public String raw_image_pub_topic_name;
 		public String command_string_topic_name;
 		
 		public SensorImageTopics (){
@@ -221,6 +235,7 @@ public class SensorImageNode extends AbstractNodeMain {
 			this.com_image_sub_topic_name = this.nodeName + "/image/in/compressed";
 			this.status_string_topic_name = this.nodeName + "/status/string";
 			this.com_image_pub_topic_name = this.nodeName + "/image/out/compressed";
+			this.raw_image_pub_topic_name = this.nodeName + "/image/out/raw";
 			this.command_string_topic_name = this.nodeName + "/command/string";
 		}
 
@@ -233,6 +248,8 @@ public class SensorImageNode extends AbstractNodeMain {
 					this.nodeName + "/status_string_topic_name", this.status_string_topic_name);
 			this.com_image_pub_topic_name = connectedNode.getParameterTree().getString(
 					this.nodeName + "/com_image_pub_topic_name", this.com_image_pub_topic_name);
+			this.raw_image_pub_topic_name = connectedNode.getParameterTree().getString(
+					this.nodeName + "/raw_image_pub_topic_name", this.raw_image_pub_topic_name);
 			this.command_string_topic_name = connectedNode.getParameterTree().getString(
 					this.nodeName + "/command_string_topic_name", this.command_string_topic_name);
 		}
@@ -247,6 +264,8 @@ public class SensorImageNode extends AbstractNodeMain {
 			if ( buf != null ) this.status_string_topic_name = buf;
 			buf = System.getenv("com_image_pub_topic_name");
 			if ( buf != null ) this.com_image_pub_topic_name = buf;
+			buf = System.getenv("raw_image_pub_topic_name");
+			if ( buf != null ) this.raw_image_pub_topic_name = buf;
 			buf = System.getenv("command_string_topic_name");
 			if ( buf != null ) this.command_string_topic_name = buf;
 		}
@@ -257,6 +276,7 @@ public class SensorImageNode extends AbstractNodeMain {
 			updateTopicNameFromEnv();
 			this.status_publisher = connectedNode.newPublisher(this.status_string_topic_name, std_msgs.String._TYPE);
 			this.com_image_publisher = connectedNode.newPublisher(this.com_image_pub_topic_name, sensor_msgs.CompressedImage._TYPE);
+			this.raw_image_publisher = connectedNode.newPublisher(this.raw_image_pub_topic_name, sensor_msgs.Image._TYPE);
 			this.command_subscriber =  connectedNode.newSubscriber(this.command_string_topic_name, std_msgs.String._TYPE);
 			this.raw_image_subscriber = connectedNode.newSubscriber(this.raw_image_sub_topic_name, sensor_msgs.Image._TYPE);
 			this.com_image_subscriber = connectedNode.newSubscriber(this.com_image_sub_topic_name, sensor_msgs.CompressedImage._TYPE);

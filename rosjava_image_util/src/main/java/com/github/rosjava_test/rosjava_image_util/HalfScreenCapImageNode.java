@@ -8,6 +8,7 @@ import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -65,10 +66,14 @@ public class HalfScreenCapImageNode extends SensorImageNode implements Runnable 
 	public void run() {
 		long sleep_time = 50;
 		long now;
+		this.robot.setAutoDelay((int)sleep_time);
 		while ( this.thread != null && this.robot != null){
 			try {
 				now = System.currentTimeMillis();
-				BufferedImage image = this.robot.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
+				Rectangle rect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
+				rect.x = rect.width/2;
+				rect.width = rect.width/2;
+				BufferedImage image = this.robot.createScreenCapture(rect);
 				if ( image != null ){
 //					if (this.buf == null
 //							|| this.buf.getWidth() != image.getWidth() / 2
@@ -81,12 +86,17 @@ public class HalfScreenCapImageNode extends SensorImageNode implements Runnable 
 						int x = (int) pointer.getLocation().getX();
 						int y = (int) pointer.getLocation().getY();
 						image.getGraphics().drawImage(this.pointer,
-								x - this.pointer.getWidth() / 2,
-								y - this.pointer.getHeight()/2, null);
+								x - this.pointer.getWidth() / 2 - rect.x,
+								y - this.pointer.getHeight()/2 - rect.y, null);
 					}
-					ImageIO.write(image.getSubimage(image.getWidth()/2, 0, image.getWidth()/2, image.getHeight()), "png", new File("/tmp/screen_cap" + ".png"));
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					// ImageIO.write(image.getSubimage(image.getWidth()/2, 0, image.getWidth()/2, image.getHeight()), "png", baos);
+					ImageIO.write(image, "png", baos);
+					byte[] bytes = baos.toByteArray();
+					// ImageIO.write(image.getSubimage(image.getWidth()/2, 0, image.getWidth()/2, image.getHeight()), "png", new File("/tmp/screen_cap" + ".png"));
 					//ImageIO.write(this.buf, "png", new File("/tmp/screen_cap" + ".png"));
-					publishCompressedImage("/tmp/screen_cap" + ".png");
+					// publishCompressedImage("/tmp/screen_cap" + ".png");
+					publishCompressedImage(bytes);
 				} else {
 					System.out.println("[ScreenCapImageNode] null image");
 				}
