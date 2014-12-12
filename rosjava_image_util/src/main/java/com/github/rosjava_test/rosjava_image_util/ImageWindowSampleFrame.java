@@ -32,7 +32,7 @@ public class ImageWindowSampleFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 
 	private static int N = 3;
-	private static int W = 480*N, H = 640;
+	private static int W = 480, H = 640;
 
 	private BorderLayout camera_layout;
 	private BorderLayout outer_layout;
@@ -55,32 +55,58 @@ public class ImageWindowSampleFrame extends JFrame {
 		this.getContentPane().setLayout(this.outer_layout);
 
 		this.commandView = new CommandView();
-		this.leftCameraView = new ImageView(this.commandView, (W-4)/N, H-20);
-		this.rightCameraView = new ImageView(this.commandView, (W-4)/N, H-20);
-		this.centerCameraView = new ImageView(this.commandView, (W-4)/N, H-20);
+		this.leftCameraView = new ImageView(this.commandView, (W-4), H-20);
+		this.rightCameraView = new ImageView(this.commandView, (W-4), H-20);
+		this.centerCameraView = new ImageView(this.commandView, (W-4), H-20);
 
-		if ( leftcam ) this.camera_pane.add(this.leftCameraView, BorderLayout.WEST);
-		if ( centcam ) this.camera_pane.add(this.centerCameraView, BorderLayout.CENTER);
-		if (rightcam ) this.camera_pane.add(this.rightCameraView, BorderLayout.EAST);
+		if ( leftcam ){
+			this.camera_pane.add(this.leftCameraView, BorderLayout.WEST);
+		} else {
+			N--;
+		}
+		if ( centcam ){
+			this.camera_pane.add(this.centerCameraView, BorderLayout.CENTER);
+		} else{
+			N--;
+		}
+		if (rightcam ){
+			this.camera_pane.add(this.rightCameraView, BorderLayout.EAST);
+		} else {
+			N--;
+		}
+		W = W*N;
 
-		try {
-			String home_dir = System.getenv("IMG_HOME"); 
-			if ( home_dir == null ){
-				home_dir = System.getenv("HOME") + "/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img";
+		if (N == 3) {
+			try {
+				String home_dir = System.getenv("IMG_HOME");
+				if (home_dir == null) {
+					home_dir = System.getenv("HOME")
+							+ "/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img";
+				}
+				// "/home/s-noda/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img"
+				BufferedImage elbow1 = ImageIO.read(new File(home_dir
+						+ "/elbow.png"));
+				BufferedImage elbow2 = ImageIO.read(new File(home_dir
+						+ "/elbow.png"));
+				BufferedImage hand1 = ImageIO.read(new File(home_dir
+						+ "/hand.png"));
+				BufferedImage hand2 = ImageIO.read(new File(home_dir
+						+ "/hand.png"));
+				BufferedImage pelvis = ImageIO.read(new File(home_dir
+						+ "/pelvis.png"));
+				this.leftCameraView.pane.addImage("left_elbow", elbow1, W
+						/ (N * 4), H / 2, -1, -1);
+				this.leftCameraView.pane.addImage("right_elbow", elbow2, 3 * W
+						/ (N * 4), H / 2, -1, -1);
+				this.leftCameraView.pane.addImage("left_hand", hand1, W
+						/ (N * 4), 3 * H / 4, -1, -1);
+				this.leftCameraView.pane.addImage("right_hand", hand2, 3 * W
+						/ (N * 4), 3 * H / 4, -1, -1);
+				this.leftCameraView.pane.addImage("pelvis", pelvis, 2 * W
+						/ (N * 4), 2 * H / 4, -1, -1);
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			//"/home/s-noda/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img"
-			BufferedImage elbow1 = ImageIO.read(new File(home_dir+"/elbow.png"));
-			BufferedImage elbow2 = ImageIO.read(new File(home_dir+"/elbow.png"));
-			BufferedImage hand1 = ImageIO.read(new File(home_dir+"/hand.png"));
-			BufferedImage hand2 = ImageIO.read(new File(home_dir+"/hand.png"));
-			BufferedImage pelvis = ImageIO.read(new File(home_dir+"/pelvis.png"));
-			this.leftCameraView.pane.addImage("left_elbow", elbow1, W/(N*4), H/2, -1, -1);
-			this.leftCameraView.pane.addImage("right_elbow", elbow2, 3*W/(N*4), H/2, -1, -1);
-			this.leftCameraView.pane.addImage("left_hand", hand1, W/(N*4), 3*H/4, -1, -1);
-			this.leftCameraView.pane.addImage("right_hand", hand2, 3*W/(N*4), 3*H/4, -1, -1);
-			this.leftCameraView.pane.addImage("pelvis", pelvis, 2*W/(N*4), 2*H/4, -1, -1);
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 		
 		this.add(this.camera_pane);
