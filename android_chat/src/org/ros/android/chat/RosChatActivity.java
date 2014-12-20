@@ -37,16 +37,17 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 	private Thread chat_observer ;
 	private boolean ros_initialized ;
 	
-	final public static String node_name = "chat" ;
+	public static String node_name = "ros_chat" ;
 	
 	public RosChatActivity() {
-		super(node_name, node_name);
+		super(node_name, node_name, node_name);
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		node_name = getNodename();
 		setContentView(R.layout.main);
 		
 		this.ros_initialized = false ;
@@ -62,7 +63,7 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		this.image_view.setMessageType(sensor_msgs.CompressedImage._TYPE);
 		this.image_view.setTalker(this.chatnode) ;
 		
-		this.audio_node = new AudioPubSubNode("ros_chat");
+		this.audio_node = new AudioPubSubNode(node_name);
 		
 		this.bottom_notf = (TextView) findViewById(R.id.bottom_notification_text) ;
 		

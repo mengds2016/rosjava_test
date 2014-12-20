@@ -22,8 +22,16 @@ public abstract class RosDialogActivity extends RosActivity {
 	private final static String preftag = "RosDialogActivity";
 	private final static String preftag_master = "ROS_MASTER_URI";
 	private final static String preftag_hostname = "ROS_HOSTNAME";
-
+	private final static String preftag_nodename = "ROS_NODENAME";
+	
 	private String hostname ;
+	protected String nodename_org="";
+
+	protected RosDialogActivity(String notificationTicker,
+			String notificationTitle, String nodename_org) {
+		this(notificationTicker, notificationTitle);
+		this.nodename_org = nodename_org;
+	}
 	
 	protected RosDialogActivity(String notificationTicker,
 			String notificationTitle) {
@@ -45,6 +53,10 @@ public abstract class RosDialogActivity extends RosActivity {
 		}
 	}
 	
+	public String getNodename(){
+		return this.nodename_org;
+	}
+	
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -63,8 +75,11 @@ public abstract class RosDialogActivity extends RosActivity {
 				.getString(RosDialogActivity.preftag_master, "");
 		if (master_uri.length() == 0)
 			master_uri = "http://localhost:11311";
+		
+		String node_name = pref
+				.getString(RosDialogActivity.preftag_nodename, this.nodename_org);
 		final MasterChooserDialog ld = new MasterChooserDialog(this,
-				master_uri, getHostname());
+				master_uri, getHostname(), node_name);
 		ld.setOnDismissListener(new OnDismissListener() {
 			@Override
 			public void onDismiss(DialogInterface dialog) {
@@ -79,6 +94,9 @@ public abstract class RosDialogActivity extends RosActivity {
 							editor.putString(
 									RosDialogActivity.preftag_hostname,
 									ld.getHostname());
+							editor.putString(
+									RosDialogActivity.preftag_nodename,
+									ld.getNodename());
 							editor.commit();
 							//
 							if (master == null || master.length() == 0
