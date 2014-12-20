@@ -3,6 +3,7 @@
  <node pkg="image_transport" type="republish" name="android_camera_image_transport"
        args="compressed in:=/chat/status/camera/image raw out:=/chat/status/camera/image/raw" />
  <node pkg="usb_cam" type="usb_cam_node" name="client_usb_cam">
+   <param name="~video_device" value="/dev/video0" />
    <remap from="/client_usb_cam/image_raw"
 	  to="/chat/request/image/raw" />
    <remap from="/client_usb_cam/image_raw/compressed"
