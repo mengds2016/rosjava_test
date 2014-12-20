@@ -4,14 +4,12 @@ package org.ros.android.chat;
 import java.util.List;
 
 import android.hardware.Camera;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.ros.android.RosDialogActivity;
@@ -34,6 +32,7 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 	
 	private ImagePublishNode image_publisher ;
 	private AudioPubSubNode audio_node;
+	private AndroidPosePubNode pose_node;
 	private Thread chat_observer ;
 	private boolean ros_initialized ;
 	
@@ -104,8 +103,7 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 			}
 		} ) ;
 		
-		//this.roomba = new USB2Roomba(this);
-		
+		this.pose_node = new AndroidPosePubNode(node_name, (SensorManager)getSystemService(SENSOR_SERVICE));
 	}
 	
 	private void setupCamera(){
@@ -197,6 +195,13 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 	@Override
 	public void onResume() {
 		super.onResume();
+		this.pose_node.onResume();
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		this.pose_node.onPause();
 	}
 	
 	@Override
@@ -234,6 +239,7 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		nodeMainExecutor.execute(this.image_publisher, nodeConfiguration);
 		nodeMainExecutor.execute(this.chatnode, nodeConfiguration);
 		nodeMainExecutor.execute(this.audio_node, nodeConfiguration);
+		nodeMainExecutor.execute(this.pose_node, nodeConfiguration);
 
 		Camera.Parameters param = this.camera.getParameters() ;
 		this.image_publisher.startImagePublisher(this.camera, param.getPreviewSize().width, param.getPreviewSize().height) ;
@@ -274,7 +280,11 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 	public void run() {
 		while ( this.chat_observer != null ){
 			try {
-				Thread.sleep(1000) ;
+				Thread.sleep(300) ;
+				if ( this.pose_node != null){
+					// this.pose_node.pubTwist();
+					this.pose_node.pubPose();
+				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
