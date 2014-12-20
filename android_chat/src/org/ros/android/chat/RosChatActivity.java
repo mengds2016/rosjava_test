@@ -224,15 +224,6 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 	@Override
 	public void onDestroy(){
 		super.onDestroy() ;
-		try {
-			this.finalize();
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-	}
-	
-	@Override
-	public void finalize() throws Throwable{
 		if ( this.camera != null ){
 			this.image_publisher.stopImagePublisher() ;
 			this.camera.stopPreview();
@@ -242,6 +233,11 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		this.chatnode.onDestroy();
 		this.chat_observer = null ;
 		this.audio_node.onDestroy();
+	}
+	
+	@Override
+	public void finalize() throws Throwable{
+		onDestroy();
 		super.finalize();
 	}
 

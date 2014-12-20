@@ -143,11 +143,6 @@ public class AudioPubSubNode implements NodeMain {
 	}
 
 	public void onDestroy(){
-		finalize();
-	}
-	
-	@Override
-	public void finalize() throws Throwable {
 		if (this.audioRec != null) {
 			this.audioRec.stop();
 			this.audioRec.release();
@@ -161,6 +156,11 @@ public class AudioPubSubNode implements NodeMain {
 			this.audioTra.release();
 			this.audioTra = null;
 		}
+	}
+	
+	@Override
+	public void finalize() throws Throwable {
+		onDestroy();
 		super.finalize();
 	}
 
