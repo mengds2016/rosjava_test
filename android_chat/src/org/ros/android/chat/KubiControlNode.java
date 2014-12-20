@@ -43,12 +43,16 @@ public class KubiControlNode extends AbstractNodeMain implements Runnable, IKubi
 	public KubiControlNode(Context con, String node_name){
 		this.context = con ;
 		this.node_name = node_name;
+		this.command_connect = node_name + "/connect_request";
+		this.command_pantlt = node_name + "/request/pan_tilt_vector";
+		this.command_pantlt_relative = node_name + "/request/pan_tilt_vector/relative";
+		this.status_pantlt = node_name + "/status/pan_tilt_vector";
 		this.kubi_manager = new KubiManager(this,false) ;
 		kubi_connect();
 	}
 
 	public void pantltPublish(){
-		if ( this.kubi_manager != null && this.kubi_manager.getKubi() != null ){
+		if ( this.kubi_manager != null && this.kubi_manager.getKubi() != null && this.float_msg2 != null){
 			Kubi kubi = this.kubi_manager.getKubi();
 			float pan = kubi.getPan() ;
 			float tlt = kubi.getTilt() ;
@@ -77,11 +81,11 @@ public class KubiControlNode extends AbstractNodeMain implements Runnable, IKubi
 				tlt = kubi.getTilt() + tlt ;
 			}
 			if ( pan >= 90 ) pan = 90 - 1f ;
-			if ( tlt >= 90 ) tlt = 90 - 1f ;
 			if ( pan <= -90 ) pan = -90 + 1f ;
-			if ( tlt <= -90 ) tlt = -90 + 1f ;
+			if ( tlt >= 180 ) tlt = 180 - 1f ;
+			if ( tlt <= -180 ) tlt = -180 + 1f ;
 			Log.d("kubiNode", "move " + pan + "," + tlt) ;
-			kubi.moveTo(pan, tlt ) ;
+			kubi.moveTo(pan, tlt, 10.0f ) ;
 			return true;
 		} else {
 			return kubi_connect();
