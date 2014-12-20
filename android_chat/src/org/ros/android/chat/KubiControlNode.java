@@ -149,14 +149,18 @@ public class KubiControlNode extends AbstractNodeMain implements Runnable, IKubi
 		super.finalize();
 	}
 	
-	@Override
-	public void onShutdown(Node node) {
-		super.onShutdownComplete(node) ;
+	public void onDestroy(){
 		try {
 			finalize();
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@Override
+	public void onShutdown(Node node) {
+		super.onShutdownComplete(node) ;
+		onDestroy();
 	}
 
 	@Override

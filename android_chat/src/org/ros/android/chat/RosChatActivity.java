@@ -41,10 +41,12 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 	private ImagePublishNode image_publisher ;
 	private AudioPubSubNode audio_node;
 	private AndroidPosePubNode pose_node;
+	private KubiControlNode kubi_node;
+	
 	private Thread chat_observer ;
 	private boolean ros_initialized ;
 	
-	public static String node_name = "ros_chat" ;
+	public static String node_name = "kubi_chat" ;
 	
 	public RosChatActivity() {
 		super(node_name, node_name, node_name);
@@ -114,36 +116,11 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		this.pose_node = new AndroidPosePubNode(node_name, (SensorManager)getSystemService(SENSOR_SERVICE));
 
 		// replace tagged button images
-		String[] tagNames = new String[]{"fuza1","fuza2","my1","my2","my3","my4"};
 		LinearLayout tagged_button = (LinearLayout) findViewById(R.id.taged_image_buttons) ;
 		tagged_button.removeAllViews();
-		for (String imageName : tagNames) {
-			R.drawable rDrawable = new R.drawable();
-			Field field;
-			int resId;
-			try {
-				field = rDrawable.getClass().getField(imageName);
-				resId = field.getInt(rDrawable);
-				Bitmap image = BitmapFactory.decodeResource(getResources(),
-						resId);
-				//
-				ImageButton imageButton = new ImageButton(this);
-				imageButton.setScaleType(ScaleType.FIT_XY);
-				imageButton.setAdjustViewBounds(true);
-				imageButton.setImageBitmap(image);
-				imageButton.setTag(imageName);
-				imageButton.setOnClickListener(new OnClickListener(){
-					@Override
-					public void onClick(View v) {
-						RosChatActivity.this.chatnode.publishStringStatus("tag:" + v.getTag());
-					}
-				});
-				tagged_button.addView(imageButton);
-			} catch (Exception e) {
-				System.out.println("[place tagged image] " + imageName + " fail!! ");
-				e.printStackTrace();
-			}
-		}
+		tagged_button.setWeightSum(0);
+		
+		this.kubi_node = new KubiControlNode(this, node_name);
 	}
 	
 	private void setupCamera(){
@@ -285,6 +262,7 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		nodeMainExecutor.execute(this.chatnode, nodeConfiguration);
 		nodeMainExecutor.execute(this.audio_node, nodeConfiguration);
 		nodeMainExecutor.execute(this.pose_node, nodeConfiguration);
+		nodeMainExecutor.execute(this.kubi_node, nodeConfiguration);
 
 		Camera.Parameters param = this.camera.getParameters() ;
 		this.image_publisher.startImagePublisher(this.camera, param.getPreviewSize().width, param.getPreviewSize().height) ;
@@ -326,9 +304,12 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		while ( this.chat_observer != null ){
 			try {
 				Thread.sleep(300) ;
-				if ( this.pose_node != null){
+				//if ( this.pose_node != null){
 					// this.pose_node.pubTwist();
-					this.pose_node.pubPose();
+				//	this.pose_node.pubPose();
+				//}
+				if ( this.kubi_node != null ){
+					this.kubi_node.pantltPublish();
 				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
