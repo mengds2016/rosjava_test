@@ -142,19 +142,15 @@ public class KubiControlNode extends AbstractNodeMain implements Runnable, IKubi
 	
 	@Override
 	public void finalize() throws Throwable{
-		if ( this.kubi_manager != null && this.kubi_manager.getKubi() != null ){
-			this.kubi_manager.getKubi().disconnect() ;
-		}
-		this.state_publish_thread = null ;
+		onDestroy();
 		super.finalize();
 	}
 	
 	public void onDestroy(){
-		try {
-			finalize();
-		} catch (Throwable e) {
-			e.printStackTrace();
+		if ( this.kubi_manager != null && this.kubi_manager.getKubi() != null ){
+			this.kubi_manager.getKubi().disconnect() ;
 		}
+		this.state_publish_thread = null ;
 	}
 	
 	@Override

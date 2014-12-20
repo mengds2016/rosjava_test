@@ -233,6 +233,7 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		this.chatnode.onDestroy();
 		this.chat_observer = null ;
 		this.audio_node.onDestroy();
+		this.kubi_node.onDestroy();
 	}
 	
 	@Override
