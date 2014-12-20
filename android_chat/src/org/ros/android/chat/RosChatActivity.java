@@ -1,8 +1,11 @@
 package org.ros.android.chat;
 
 
+import java.lang.reflect.Field;
 import java.util.List;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -10,6 +13,11 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ImageButton;
+import android.widget.ImageView.ScaleType;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.ros.android.RosDialogActivity;
@@ -104,6 +112,38 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		} ) ;
 		
 		this.pose_node = new AndroidPosePubNode(node_name, (SensorManager)getSystemService(SENSOR_SERVICE));
+
+		// replace tagged button images
+		String[] tagNames = new String[]{"fuza1","fuza2","my1","my2","my3","my4"};
+		LinearLayout tagged_button = (LinearLayout) findViewById(R.id.taged_image_buttons) ;
+		tagged_button.removeAllViews();
+		for (String imageName : tagNames) {
+			R.drawable rDrawable = new R.drawable();
+			Field field;
+			int resId;
+			try {
+				field = rDrawable.getClass().getField(imageName);
+				resId = field.getInt(rDrawable);
+				Bitmap image = BitmapFactory.decodeResource(getResources(),
+						resId);
+				//
+				ImageButton imageButton = new ImageButton(this);
+				imageButton.setScaleType(ScaleType.FIT_XY);
+				imageButton.setAdjustViewBounds(true);
+				imageButton.setImageBitmap(image);
+				imageButton.setTag(imageName);
+				imageButton.setOnClickListener(new OnClickListener(){
+					@Override
+					public void onClick(View v) {
+						RosChatActivity.this.chatnode.publishStringStatus("tag:" + v.getTag());
+					}
+				});
+				tagged_button.addView(imageButton);
+			} catch (Exception e) {
+				System.out.println("[place tagged image] " + imageName + " fail!! ");
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	private void setupCamera(){
@@ -119,7 +159,7 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		this.camera = Camera.open(cameraId) ;
 		if (this.camera_height < 0 || this.camera_width < 0) {
 			int width, height ;
-			width = height = 700 ;
+			width = height = 600 ;
 			double min = 1e+30 ;
 			double target_size = width*height ;
 
