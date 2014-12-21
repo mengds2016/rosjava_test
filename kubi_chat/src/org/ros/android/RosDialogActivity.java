@@ -97,6 +97,7 @@ public abstract class RosDialogActivity extends RosActivity {
 							editor.putString(
 									RosDialogActivity.preftag_nodename,
 									ld.getNodename());
+							RosDialogActivity.this.nodename_org = ld.getNodename();
 							editor.commit();
 							//
 							if (master == null || master.length() == 0

@@ -46,8 +46,11 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 	private Thread chat_observer ;
 	private boolean ros_initialized ;
 	
+	private static boolean client_p = false;
 	public static String node_name = "kubi_chat" ;
-	private static boolean client_p = true;
+	static{
+		if ( client_p ) node_name = "ros_chat";
+	}
 	
 	public RosChatActivity() {
 		super(node_name, node_name, node_name);
