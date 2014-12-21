@@ -1,3 +1,4 @@
+#!/usr/bin/env roseus
 
 (ros::load-ros-manifest "geometry_msgs")
 (ros::load-ros-manifest "sensor_msgs")
@@ -57,6 +58,8 @@
 
 (defvar *base-beer-pose*
   (float-vector 0.0 -1.45573 0.027471 -61.1792 -0.972318 -0.653704 9.32218 -3.00486 -154.84 -15.8 2.4 -98.4 43.2 -36.0 43.2 6.68738 5.8092 1.85949 -0.543847 0.0 0.0 0.0))
+
+(defvar *kubi-command-timer* 0)
 
 ;; (defvar *kanpai-flag* 0)
 (defvar *mode-id*)
@@ -127,6 +130,23 @@
 	     ;;(send-all (send *robot* :rarm :joint-list) :joint-angle 0)
 	     (send-all (send *robot* :larm :joint-list) :joint-angle 0)
 	     (model2real :sleep-time 1000)
+	     ;; kubi
+	     (cond
+	      ((> (- (car (unix:gettimeofday)) *kubi-command-timer*)  1.5)
+	       (ros::publish
+		"/kubi_chat/request/pan_tilt_vector"
+		(instance std_msgs::float32multiarray :init
+			  :data
+			  (float-vector
+			   (rad2deg (aref (matrix-log (send *fove-obj* :worldrot)) 2))
+			   (-
+			    90
+			    (rad2deg (aref (matrix-log (send *fove-obj* :worldrot)) 1)))
+			   )))
+	       (setq *kubi-command-timer* (car (unix:gettimeofday)))
+	       )
+	      (t 'nop))
+	     ;;
 	     ;; (unix:sleep 1)
 	     ))
     (cons :event-end '(lambda (&rest args) nil)))
@@ -235,13 +255,13 @@
     (cond
      (*beer-zero-coords-calib-flag*
       (setq *beer-zero-coords-calib-flag* nil)
-      ;;(setq *beer-zero-coords*
-	    ;; (make-coords
-	    ;;  :rpy
-	    ;;  (map cons #'*
-	    ;; 	  '(-1 -1 1)
-	    ;; 	  (car (rpy-angle (send (make-coords :rot (transpose m)) :worldrot))))))
-      (setq *beer-zero-coords* (make-coords))
+      (setq *beer-zero-coords*
+	    (make-coords
+	     :rpy
+	     (map cons #'*
+	     	  '(-1 1 1)
+	     	  (car (rpy-angle (send (make-coords :rot (transpose m)) :worldrot))))))
+      ;;(setq *beer-zero-coords* (make-coords))
       ;;(make-coords :rot (transpose m)))
       ))
     (send *beer-obj* :newcoords
@@ -254,7 +274,7 @@
 		  (make-coords
 		   :rpy
 		   (map cons #'*
-			'(-1 -1 -1)
+			'(-1 1 1)
 			(car (rpy-angle (send (make-coords :rot (transpose m)) :worldrot))))))
 	    :worldrot)))
     ;; (send *viewer* :draw-objects)
@@ -317,6 +337,10 @@
 ;; (ros::subscribe "/android_pose/poseStamped"
 ;;		geometry_msgs::PoseStamped
 ;;		#'android-pose-callback)
+
+(ros::advertise "/kubi_chat/request/pan_tilt_vector"
+		std_msgs::float32multiarray
+		)
 
 
 (defun reset-manip-pose
