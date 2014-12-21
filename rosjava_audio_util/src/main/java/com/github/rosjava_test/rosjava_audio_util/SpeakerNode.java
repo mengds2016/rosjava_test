@@ -15,10 +15,15 @@ public class SpeakerNode extends AbstractNodeMain {
 
 	private SourceDataLine sourceDataLine;
 	private MicTest mic;
+	public static String node_name = "rosjava_test/speaker";
 	
 	@Override
 	public GraphName getDefaultNodeName() {
-		return GraphName.of("rosjava_test/speaker");
+		String name = System.getenv("ROSJAVA_VOICE_SPEAKER_REQUEST_NODE_NAME");
+		if ( name != null ){
+			node_name = name;
+		}
+		return GraphName.of(node_name);
 	}
 	
 	@Override
@@ -39,9 +44,13 @@ public class SpeakerNode extends AbstractNodeMain {
 			System.exit(-1);
 		}
 		
+		node_name = connectedNode.getParameterTree().getString(
+				"ROSJAVA_VOICE_SPEAKER_REQUEST_NODE_NAME",
+				"rosjava_test/speaker"); 
+		
 		String request_topic = connectedNode.getParameterTree().getString(
 				"ROSJAVA_VOICE_SPEAKER_REQUEST_TOPIC",
-				"rosjava_test/speaker/request");
+				node_name + "/request");
 		
 		Subscriber<audio_common_msgs.AudioData> subscriber = connectedNode
 				.newSubscriber(request_topic,

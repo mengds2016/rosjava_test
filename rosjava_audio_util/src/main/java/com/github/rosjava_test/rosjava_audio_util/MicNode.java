@@ -34,9 +34,15 @@ public class MicNode extends AbstractNodeMain {
 	private TargetDataLine targetDataLine;
 	private MicTest mic;
 
+	public static String node_name = "rosjava_test/mic";
+	
 	@Override
 	public GraphName getDefaultNodeName() {
-		return GraphName.of("rosjava_test/mic");
+		String name = System.getenv("ROSJAVA_VOICE_MIC_DATA_NODE_NAME");
+		if ( name != null ){
+			node_name = name;
+		}
+		return GraphName.of(node_name);
 	}
 
 	@Override
@@ -57,10 +63,14 @@ public class MicNode extends AbstractNodeMain {
 			System.exit(-1);
 		}
 		
+		node_name = connectedNode.getParameterTree().getString(
+				"ROSJAVA_VOICE_MIC_DATA_NODE_NAME",
+				"rosjava_test/mic"); 
+		
 		String mic_topic = connectedNode.getParameterTree().getString(
 				"ROSJAVA_VOICE_MIC_DATA_TOPIC",
-				"rosjava_test/mic/data"); 
-
+				node_name + "/data"); 
+		
 		final Publisher<audio_common_msgs.AudioData> publisher = connectedNode
 				.newPublisher(mic_topic, audio_common_msgs.AudioData._TYPE);
 		
