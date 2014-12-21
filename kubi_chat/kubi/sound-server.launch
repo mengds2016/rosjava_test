@@ -2,9 +2,9 @@
   <param name="ROSJAVA_VOICE_SPEAKER_REQUEST_TOPIC" value="/chat_server/audio/out" />
   <param name="ROSJAVA_VOICE_MIC_DATA_TOPIC" value="/chat_server/audio/in" />
   <node pkg="rosjava_test" type="run_audio_util_node.sh"
-	name="audio_speaker" output="screen" args="SpeakerNode">
+	name="audio_speaker_server" output="screen" args="SpeakerNode">
   </node>
   <node pkg="rosjava_test" type="run_audio_util_node.sh"
-	name="audio_mic" output="screen" args="MicNode">
+	name="audio_mic_server" output="screen" args="MicNode">
   </node>
 </launch>
