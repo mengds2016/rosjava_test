@@ -10,12 +10,12 @@
 (aria-init)
 (ros::unsubscribe "/kduino/converted_imu")
 
-(send *robot* :head :neck-p :min-angle -15)
-(send *robot* :head :neck-p :max-angle +15)
-(send *robot* :head :neck-r :min-angle -15)
-(send *robot* :head :neck-r :max-angle +15)
-(send *robot* :head :neck-y :min-angle -15)
-(send *robot* :head :neck-y :max-angle +15)
+(send *robot* :head :neck-p :min-angle -30)
+(send *robot* :head :neck-p :max-angle +30)
+(send *robot* :head :neck-r :min-angle -30)
+(send *robot* :head :neck-r :max-angle +30)
+(send *robot* :head :neck-y :min-angle -45)
+(send *robot* :head :neck-y :max-angle +45)
 
 (send *robot* :reset-pose)
 (send *robot* :newcoords (make-coords))
