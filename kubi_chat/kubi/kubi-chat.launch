@@ -1,0 +1,6 @@
+<launch>
+ <node pkg="image_transport" type="republish" name="android_kubi_image_transport"
+       args="compressed in:=/kubi_chat/status/camera/image compressed out:=/ros_chat/request/image/raw" />
+ <node pkg="image_transport" type="republish" name="android_ros_image_transport"
+       args="compressed in:=/ros_chat/status/camera/image compressed out:=/kubi_chat/request/image/raw" />
+</launch>
