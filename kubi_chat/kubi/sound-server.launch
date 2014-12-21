@@ -4,10 +4,10 @@
 
   <node pkg="rosjava_test" type="run_audio_util_node.sh"
 	name="chat_server_audio_speaker" output="screen" args="SpeakerNode">
-    <env name="ROSJAVA_VOICE_SPEAKER_REQUEST_NODE_NAME" value="/chat_server/audio/speaker" />
+    <env name="ROSJAVA_VOICE_SPEAKER_REQUEST_NODE_NAME" value="/chat_server/audio/speaker/server" />
   </node>
   <node pkg="rosjava_test" type="run_audio_util_node.sh"
 	name="chat_server_audio_mic" output="screen" args="MicNode">
-    <env name="ROSJAVA_VOICE_MIC_DATA_NODE_NAME" value="/chat_server/audio/mic" />
+    <env name="ROSJAVA_VOICE_MIC_DATA_NODE_NAME" value="/chat_server/audio/mic/server" />
   </node>
 </launch>

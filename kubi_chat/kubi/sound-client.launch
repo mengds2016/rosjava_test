@@ -1,13 +1,13 @@
 <launch>
-  <param name="ROSJAVA_VOICE_SPEAKER_REQUEST_TOPIC" value="/kubi_chat/audio/in" />
+  <param name="ROSJAVA_VOICE_SPEAKER_REQUEST_TOPIC" value="/kubi_chat/audio/out" />
   <param name="ROSJAVA_VOICE_MIC_DATA_TOPIC" value="/chat_server/audio/out" />
 
   <node pkg="rosjava_test" type="run_audio_util_node.sh"
 	name="kubi_chat_audio" output="screen" args="SpeakerNode">
-    <env name="ROSJAVA_VOICE_SPEAKER_REQUEST_NODE_NAME" value="/kubi_chat/audio" />
+    <env name="ROSJAVA_VOICE_SPEAKER_REQUEST_NODE_NAME" value="/kubi_chat/audio/client" />
   </node>
   <node pkg="rosjava_test" type="run_audio_util_node.sh"
 	name="chat_server_audio" output="screen" args="MicNode">
-    <env name="ROSJAVA_VOICE_MIC_DATA_NODE_NAME" value="/chat_server/audio" />
+    <env name="ROSJAVA_VOICE_MIC_DATA_NODE_NAME" value="/chat_server/audio/client" />
   </node>
 </launch>
