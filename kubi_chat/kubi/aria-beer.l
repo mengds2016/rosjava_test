@@ -77,13 +77,13 @@
 	  '(lambda (&rest args)
 	     (send *robot* :angle-vector (float-vector 0.0 -1.45573 0.027471 -61.1792 -0.972318 -0.653704 9.32218 -3.00486 -154.84 -15.8 10.251 -30.0 -7.89955 8.59526 80.0 6.68738 5.8092 1.85949 -0.543847 0.0 0.0 0.0))
 	     (model2real :sleep-time 4000)
-	     ;; (unix:sleep 4)
+	     (unix:sleep 4)
 	     ))
     (cons :event-end
 	  '(lambda (&rest args)
 	     (reset-manip-pose)
 	     (model2real :sleep-time 4000)
-	     ;; (unix:sleep 4)
+	     (unix:sleep 4)
 	     t) ;; hook
 	  )
     )
@@ -129,7 +129,6 @@
 	     (send *robot* :torso :waist-y :joint-angle 0)
 	     ;;(send-all (send *robot* :rarm :joint-list) :joint-angle 0)
 	     (send-all (send *robot* :larm :joint-list) :joint-angle 0)
-	     (model2real :sleep-time 1000)
 	     ;; kubi
 	     (cond
 	      ((> (- (car (unix:gettimeofday)) *kubi-command-timer*)  1.5)
@@ -147,7 +146,8 @@
 	       )
 	      (t 'nop))
 	     ;;
-	     ;; (unix:sleep 1)
+	     (model2real :sleep-time 1000)
+	     (unix:sleep 1)
 	     ))
     (cons :event-end '(lambda (&rest args) nil)))
    ))
