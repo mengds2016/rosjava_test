@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -24,8 +25,15 @@ import org.ros.android.RosDialogActivity;
 import org.ros.android.chat.RosChatNode.RosFloatVectorCallback;
 import org.ros.android.chat.RosChatNode.RosStringCallback;
 import org.ros.android.chat.R;
+import org.ros.message.MessageListener;
+import org.ros.namespace.GraphName;
+import org.ros.node.AbstractNodeMain;
+import org.ros.node.ConnectedNode;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
+import org.ros.node.topic.Subscriber;
+
+import std_msgs.Float32MultiArray;
 
 public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.Callback, Runnable{
 
@@ -46,7 +54,7 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 	private Thread chat_observer ;
 	private boolean ros_initialized ;
 	
-	private static boolean client_p = false;
+	private static boolean client_p = true;
 	public static String node_name = "kubi_chat" ;
 	static{
 		if ( client_p ) node_name = "ros_chat";
@@ -159,6 +167,53 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		if ( ! client_p ){
 			this.kubi_node = new KubiControlNode(this, node_name);
 		}
+	}
+	
+	@Override
+	protected void init(NodeMainExecutor nodeMainExecutor) {
+		NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(
+				getHostname(), getMasterUri());
+		this.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				RosChatActivity.this.bottom_notf.setText(
+						RosChatActivity.this.bottom_notf.getText()
+						+ "/ROS: " + getHostname() + " --[connect]--> " + getMasterUri());
+			}
+		});
+		nodeMainExecutor.execute(this.image_view, nodeConfiguration);
+		nodeMainExecutor.execute(this.image_publisher, nodeConfiguration);
+		nodeMainExecutor.execute(this.chatnode, nodeConfiguration);
+		nodeMainExecutor.execute(this.audio_node, nodeConfiguration);
+		nodeMainExecutor.execute(this.pose_node, nodeConfiguration);
+		if ( this.kubi_node != null ) nodeMainExecutor.execute(this.kubi_node, nodeConfiguration);
+		
+		// vibration
+		nodeMainExecutor.execute( new AbstractNodeMain(){
+	        private Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+	        
+			@Override
+			public GraphName getDefaultNodeName() {
+				return GraphName.of( RosChatActivity.node_name + "/vibrate_node");
+			}
+			@Override
+			public void onStart(final ConnectedNode connectedNode) {
+				Subscriber<std_msgs.Int64> subscriber1 = connectedNode
+						.newSubscriber(RosChatActivity.node_name + "/request/vibrate", std_msgs.Int64._TYPE) ;
+				subscriber1
+						.addMessageListener(new MessageListener<std_msgs.Int64>() {
+							@Override
+							public void onNewMessage(std_msgs.Int64 tm) {
+								vibrator.vibrate(tm.getData());
+							}
+						}, 1) ;
+			}
+		}, nodeConfiguration);
+		
+		Camera.Parameters param = this.camera.getParameters() ;
+		this.image_publisher.startImagePublisher(this.camera, param.getPreviewSize().width, param.getPreviewSize().height) ;
+
+		this.ros_initialized = true ;
 	}
 	
 	private void setupCamera(){
@@ -278,31 +333,6 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 	public void finalize() throws Throwable{
 		onDestroy();
 		super.finalize();
-	}
-
-	@Override
-	protected void init(NodeMainExecutor nodeMainExecutor) {
-		NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(
-				getHostname(), getMasterUri());
-		this.runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				RosChatActivity.this.bottom_notf.setText(
-						RosChatActivity.this.bottom_notf.getText()
-						+ "/ROS: " + getHostname() + " --[connect]--> " + getMasterUri());
-			}
-		});
-		nodeMainExecutor.execute(this.image_view, nodeConfiguration);
-		nodeMainExecutor.execute(this.image_publisher, nodeConfiguration);
-		nodeMainExecutor.execute(this.chatnode, nodeConfiguration);
-		nodeMainExecutor.execute(this.audio_node, nodeConfiguration);
-		nodeMainExecutor.execute(this.pose_node, nodeConfiguration);
-		if ( this.kubi_node != null ) nodeMainExecutor.execute(this.kubi_node, nodeConfiguration);
-
-		Camera.Parameters param = this.camera.getParameters() ;
-		this.image_publisher.startImagePublisher(this.camera, param.getPreviewSize().width, param.getPreviewSize().height) ;
-
-		this.ros_initialized = true ;
 	}
 
 	@Override

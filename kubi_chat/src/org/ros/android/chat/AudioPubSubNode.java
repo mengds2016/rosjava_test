@@ -125,6 +125,7 @@ public class AudioPubSubNode implements NodeMain {
 							.newMessage();
 					while (AudioPubSubNode.this.recordThre != null
 							&& AudioPubSubNode.this.audioRec != null) {
+						System.out.println("[AudioPubSub] publish ");
 						int returnSize = AudioPubSubNode.this.audioRec.read(
 								buf, 0, buf.length);
 						ChannelBuffer heapBuffer = ChannelBuffers.buffer(
