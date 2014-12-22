@@ -88,7 +88,7 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		
 		this.bottom_notf = (TextView) findViewById(R.id.bottom_notification_text) ;
 		
-		this.connect() ;
+		//this.connect() ;
 		
 		this.chat_observer = new Thread(this) ;
 		this.chat_observer.start() ;
@@ -210,9 +210,11 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 			}
 		}, nodeConfiguration);
 		
-		Camera.Parameters param = this.camera.getParameters() ;
-		this.image_publisher.startImagePublisher(this.camera, param.getPreviewSize().width, param.getPreviewSize().height) ;
-
+		if ( this.camera != null ) {
+			Camera.Parameters param = this.camera.getParameters() ;
+			this.image_publisher.startImagePublisher(this.camera, param.getPreviewSize().width, param.getPreviewSize().height) ;
+		}
+			
 		this.ros_initialized = true ;
 	}
 	
@@ -226,7 +228,13 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 			}
 		}
 		//
-		this.camera = Camera.open(cameraId) ;
+		try {
+			this.camera = Camera.open(cameraId) ;
+		} catch ( Exception e ){
+			e.printStackTrace();
+			this.camera = null;
+			return ;
+		}
 		if (this.camera_height < 0 || this.camera_width < 0) {
 			int width, height ;
 			width = height = 600 ;
@@ -294,13 +302,13 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		//this.camera.startPreview();
 	}
 	
-	private long last_connect_trial ;
-	public void connect(){
-		Log.e("chatActivity"," try to connect") ;
-		if ( ! this.isDestroyed() && ! this.isFinishing() && (this.last_connect_trial + 3000 < System.currentTimeMillis())){
-			this.last_connect_trial = System.currentTimeMillis() ;
-		}
-	}
+//	private long last_connect_trial ;
+//	public void connect(){
+//		Log.e("chatActivity"," try to connect") ;
+//		if ( ! this.isDestroyed() && ! this.isFinishing() && (this.last_connect_trial + 3000 < System.currentTimeMillis())){
+//			this.last_connect_trial = System.currentTimeMillis() ;
+//		}
+//	}
 	
 	@Override
 	public void onResume() {
@@ -340,7 +348,7 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 			int height) {
 		setupCamera() ;
 		try {
-           this.camera.setPreviewDisplay(holder);
+           if ( this.camera != null ) this.camera.setPreviewDisplay(holder);
         } catch (Exception e) {
             e.printStackTrace();
         }
