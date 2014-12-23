@@ -352,7 +352,7 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
         } catch (Exception e) {
             e.printStackTrace();
         }
-		if ( this.ros_initialized ){
+		if ( this.ros_initialized && this.camera != null ){
 			Camera.Parameters param = this.camera.getParameters() ;
 			this.image_publisher.startImagePublisher(this.camera, param.getPreviewSize().width, param.getPreviewSize().height) ;
 		}
