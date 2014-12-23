@@ -1,7 +1,6 @@
 <launch>
-  <!--
- <node pkg="rosjava_test" type="aria-beer.l" name="aria_beer" />
- -->
+  <node pkg="rosjava_test" type="aria-beer.l" name="aria_beer" />
+  <node pkg="rosjava_test" type="vibration-observer.l" name="vibration_observer" />
   <node pkg="rosjava_test" type="tagged-image-publisher.l" name="tagged_image_publisher" />
   <node pkg="ros2http" type="kduino_imu_converter.l" name="cup_ui_kduino_converter" >
     <remap from="/kduino/converted_imu" to="/cup_ui/kduino/converted_imu" />

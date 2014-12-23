@@ -236,7 +236,9 @@
 			      (map float-vector #'(lambda (id) (aref v id)) '(1 0 2)))
 			     )))
 		    :worldrot)))
-	     (matrix-exponent (map float-vector #'* '(1 1 -1) (matrix-log r))))))
+	     ;; (matrix-exponent (map float-vector #'* '(1 1 -1) (matrix-log r)))
+	     (matrix-exponent (map float-vector #'* '(-1 -1 -1) (matrix-log r)))
+	     )))
     (send *tablet-obj* :newcoords
 	  (send (send *fove-obj* :copy-worldcoords) :translate #F(300 0 0) :local))
     ;; (send *viewer* :draw-objects)
