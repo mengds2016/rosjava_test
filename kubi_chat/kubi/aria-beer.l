@@ -51,6 +51,8 @@
 (defvar *tablet-zero-coords-calib-flag* t)
 (defvar *tablet-obj* (make-cube 30 120 300))
 
+(defvar *head-only-time* 0)
+
 (send *beer-obj* :set-color #F(1 1 0))
 (send *fove-obj* :set-color #F(1 0 0))
 (send *fove-obj* :set-color #F(0 0 1))
@@ -75,16 +77,21 @@
 	       )))
     (cons :event-callback
 	  '(lambda (&rest args)
+	     (ros::publish "/aria/commandline"
+			   (instance std_msgs::string :init
+				     :data "cheers"))
 	     (send *robot* :angle-vector (float-vector 0.0 -1.45573 0.027471 -61.1792 -0.972318 -0.653704 9.32218 -3.00486 -154.84 -15.8 10.251 -30.0 -7.89955 8.59526 80.0 6.68738 5.8092 1.85949 -0.543847 0.0 0.0 0.0))
-	     (model2real :sleep-time 4000)
-	     (unix:sleep 4)
+	     ;; (model2real :sleep-time 4000)
+	     (unix:sleep 1)
 	     ))
     (cons :event-end
 	  '(lambda (&rest args)
-	     (reset-manip-pose)
-	     (model2real :sleep-time 4000)
-	     (unix:sleep 4)
-	     t) ;; hook
+	     ;; (reset-manip-pose)
+	     ;; (model2real :sleep-time 4000)
+	     ;; (unix:sleep 4)
+	     ;; t
+	     nil
+	     ) ;; hook
 	  )
     )
    (list
@@ -146,11 +153,33 @@
 	       )
 	      (t 'nop))
 	     ;;
-	     (model2real :sleep-time 1000)
-	     (unix:sleep 1)
+	     (beer-model2real :sleep-time 1000 :wait? t)
+	     ;; (unix:sleep 1)
 	     ))
     (cons :event-end '(lambda (&rest args) nil)))
    ))
+
+(defun beer-model2real
+  (&key (sleep-time 1000) (wait? t)
+	(only-head?;; nil)
+	 (cond
+	  ((> *head-only-time* (car (unix:gettimeofday))) t)
+	  (t (setq *head-only-time* 0) nil)))
+	(jlist (send *robot* :joint-list)))
+  ;; (model2real :sleep-time sleep-time)
+  (send *ri* :_angle-vector
+	(map float-vector
+	     #'(lambda (j v)
+		 (cond
+		  ((and only-head?
+			(not (find j (send *robot* :head :joint-list))))
+		   1e+6)
+		  (t v)))
+	     jlist
+	     (send *robot* :angle-vector))
+	sleep-time)
+  (if wait?
+      (unix:usleep (round (* sleep-time 1000)))))
 
 (defun android-imu-callback
   (msg)
@@ -324,6 +353,12 @@
   (setq *beer-zero-coords-calib-flag* t)
   (setq *fove-zero-coords-calib-flag* t))
 
+(defun aria-command-callback
+  (msg)
+  (setq *head-only-time*
+	(+ (car (unix:gettimeofday)) 5))
+  )
+
 (ros::subscribe "/ros_chat/poseStamped"
 		geometry_msgs::PoseStamped
 		#'android-imu-callback2)
@@ -336,6 +371,12 @@
 (ros::subscribe "/aria_beer/request/calib"
 		std_msgs::empty
 		#'calib-callback)
+(ros::subscribe "/aria_beer/request/calib"
+		std_msgs::empty
+		#'calib-callback)
+(ros::subscribe "/aria/commandline"
+		std_msgs::string
+		#'aria-command-callback)
 ;; (ros::subscribe "/android_pose/poseStamped"
 ;;		geometry_msgs::PoseStamped
 ;;		#'android-pose-callback)
@@ -343,7 +384,9 @@
 (ros::advertise "/kubi_chat/request/pan_tilt_vector"
 		std_msgs::float32multiarray
 		)
-
+(ros::advertise "/aria/commandline"
+		std_msgs::String
+		)
 
 (defun reset-manip-pose
   nil
