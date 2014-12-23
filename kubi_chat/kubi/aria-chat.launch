@@ -1,5 +1,7 @@
 <launch>
-  <node pkg="rosjava_test" type="aria-beer.l" name="aria_beer" />
+  <node pkg="rosjava_test" type="aria-beer.l" name="aria_beer" >
+    <remap from="/kubi_chat/request/pan_tilt_vector" to="/dev/null" />
+  </node>
   <node pkg="rosjava_test" type="vibration-observer.l" name="vibration_observer" />
   <node pkg="rosjava_test" type="tagged-image-publisher.l" name="tagged_image_publisher" />
   <node pkg="ros2http" type="kduino_imu_converter.l" name="cup_ui_kduino_converter" >
@@ -11,4 +13,10 @@
   <node pkg="image_transport" type="republish" name="android_ros_image_transport"
 	args="compressed in:=/ros_chat/status/camera/image compressed out:=/kubi_chat/request/image/raw" />
   <include file="$(find rosjava_test)/kubi_chat/kubi/sound-client2.launch" />
+  <!-- -->
+  <node pkg="rosjava_test" type="aria-viewer.l" name="aria_viewer_for_aria" />
+  <node pkg="image_transport" type="republish" name="aria_kubi_image_transport"
+	args="raw in:=/image_window_node/image/in/raw compressed out:=/kubi_chat/request/image/raw" />
+  <node pkg="image_view" type="image_view" name="image_view_kubi"
+	args="image:=/kubi_chat/status/camera/image _image_transport:=compressed" />
 </launch>

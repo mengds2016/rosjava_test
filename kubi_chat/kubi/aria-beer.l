@@ -82,7 +82,7 @@
 				     :data "cheers"))
 	     (send *robot* :angle-vector (float-vector 0.0 -1.45573 0.027471 -61.1792 -0.972318 -0.653704 9.32218 -3.00486 -154.84 -15.8 10.251 -30.0 -7.89955 8.59526 80.0 6.68738 5.8092 1.85949 -0.543847 0.0 0.0 0.0))
 	     ;; (model2real :sleep-time 4000)
-	     (unix:sleep 1)
+	     ;; (unix:sleep 1)
 	     ))
     (cons :event-end
 	  '(lambda (&rest args)
@@ -157,7 +157,7 @@
 	       )
 	      (t 'nop))
 	     ;;
-	     (beer-model2real :sleep-time 1000 :wait? t)
+	     ;; (beer-model2real :sleep-time 1000 :wait? t)
 	     (unix:sleep 1)
 	     ))
     (cons :event-end '(lambda (&rest args) nil)))
