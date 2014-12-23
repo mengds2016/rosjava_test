@@ -87,10 +87,14 @@
     (cons :event-end
 	  '(lambda (&rest args)
 	     ;; (reset-manip-pose)
+	     (ros::publish "/aria/commandline"
+			   (instance std_msgs::string :init
+				     :data "reset"))
+	     (unix:sleep 1)
 	     ;; (model2real :sleep-time 4000)
 	     ;; (unix:sleep 4)
-	     ;; t
-	     nil
+	     t
+	     ;; nil
 	     ) ;; hook
 	  )
     )
@@ -154,7 +158,7 @@
 	      (t 'nop))
 	     ;;
 	     (beer-model2real :sleep-time 1000 :wait? t)
-	     ;; (unix:sleep 1)
+	     (unix:sleep 1)
 	     ))
     (cons :event-end '(lambda (&rest args) nil)))
    ))
@@ -167,6 +171,7 @@
 	  (t (setq *head-only-time* 0) nil)))
 	(jlist (send *robot* :joint-list)))
   ;; (model2real :sleep-time sleep-time)
+  ;; (return-from beer-model2real nil)
   (send *ri* :_angle-vector
 	(map float-vector
 	     #'(lambda (j v)
@@ -356,7 +361,7 @@
 (defun aria-command-callback
   (msg)
   (setq *head-only-time*
-	(+ (car (unix:gettimeofday)) 5))
+	(+ (car (unix:gettimeofday)) 4))
   )
 
 (ros::subscribe "/ros_chat/poseStamped"
@@ -413,7 +418,7 @@
 	(t
 	 (funcall (cdr (assoc :event-callback f)))))
        (setq *mode-id* id)
-       (return-from nil nil)
+       ;; (return-from nil nil)
        ))))
  ;;
  (send *beer-obj* :newcoords
