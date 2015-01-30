@@ -1,6 +1,7 @@
 package org.ros.android.chat;
 
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.List;
 
@@ -218,6 +219,30 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		this.ros_initialized = true ;
 	}
 	
+//	private void openCamera(SurfaceHolder holder) throws IOException {
+//		if (myCamera == null) {
+//			// myCamera = Camera.open();
+//			// if (myCamera == null) {
+//			// myCamera = Camera.open(0);
+//			// }
+//			try {
+//				myCamera = Camera.open(this.cameraId);
+//			} catch (NoSuchMethodError e) {
+//				e.printStackTrace();
+//				myCamera = Camera.open();
+//			}
+//			if (myCamera == null) {
+//				throw new IOException();
+//			}
+//		}
+//		myCamera.setPreviewDisplay(holder);
+//		// if (gl == null) {
+//		myCamera.setOneShotPreviewCallback(this);
+//		myCamera.startPreview();
+//		// }
+//		// myCamera.setOneShotPreviewCallback(this) ;
+//	}
+	
 	private void setupCamera(){
 		int cameraId = 0;
 		Camera.CameraInfo info = new Camera.CameraInfo() ;
@@ -229,7 +254,9 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		}
 		//
 		try {
-			this.camera = Camera.open(cameraId) ;
+			if ( this.camera == null ){
+				this.camera = Camera.open(cameraId) ;
+			}
 		} catch ( Exception e ){
 			e.printStackTrace();
 			this.camera = null;
@@ -346,9 +373,13 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 	@Override
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
 			int height) {
+		System.out.println("-- RosChatActiivty surfaceChanged called");
 		setupCamera() ;
 		try {
-           if ( this.camera != null ) this.camera.setPreviewDisplay(holder);
+           if ( this.camera != null ){
+        	   this.camera.setPreviewDisplay(holder);
+        	   this.camera.startPreview();
+           }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -360,10 +391,12 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
+		System.out.println("-- RosChatActiivty surfaceCreated called");
 	}
 
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
+		System.out.println("-- RosChatActiivty surfaceDestroyed called");
 		if ( this.camera != null ){
 			this.image_publisher.stopImagePublisher() ;
 			this.camera.stopPreview();

@@ -25,10 +25,10 @@ public class ImagePublishNode extends AbstractNodeMain implements PreviewCallbac
 	private sensor_msgs.CompressedImage image_topic ;
 	private Publisher<sensor_msgs.CompressedImage> image_publisher ;
 	private String topic_name = RosChatActivity.node_name + "/status/camera/image/compressed";
-	private Camera camera ;
+	private Camera camera = null;
 	private int width, height ;
 	private int hz = 3;
-	private Thread thread ;
+	private Thread thread = null;
 	private boolean started = false ;
 	private int rotate_cnt ;
 	
@@ -52,12 +52,17 @@ public class ImagePublishNode extends AbstractNodeMain implements PreviewCallbac
 	}
 
 	public void startImagePublisher(Camera cam, int width, int height ){
-		this.camera = cam ;
-		this.width = width ;
-		this.height = height ;
-		this.thread = new Thread(this) ;
-		this.camera.startPreview() ;
-		this.thread.start() ;
+		if ( this.camera == null && this.thread == null ){
+			System.out.println("startImagePublisher");
+			this.camera = cam;
+			this.width = width;
+			this.height = height;
+			this.thread = new Thread(this);
+			// this.camera.startPreview() ;
+			this.thread.start();
+		} else {
+			System.out.println("call startImagePublisher several times...?");
+		}
 	}
 	
 	public void stopImagePublisher(){
