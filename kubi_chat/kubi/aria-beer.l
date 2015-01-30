@@ -16,6 +16,8 @@
 (send *robot* :head :neck-r :max-angle +30)
 (send *robot* :head :neck-y :min-angle -45)
 (send *robot* :head :neck-y :max-angle +45)
+(send *robot* :rarm :shoulder-r :min-angle -30)
+(send *robot* :rarm :shoulder-r :max-angle 0)
 
 (send *robot* :reset-pose)
 (send *robot* :newcoords (make-coords))
@@ -81,16 +83,18 @@
 			   (instance std_msgs::string :init
 				     :data "cheers"))
 	     (send *robot* :angle-vector (float-vector 0.0 -1.45573 0.027471 -61.1792 -0.972318 -0.653704 9.32218 -3.00486 -154.84 -15.8 10.251 -30.0 -7.89955 8.59526 80.0 6.68738 5.8092 1.85949 -0.543847 0.0 0.0 0.0))
+	     (send *viewer* :draw-objects)
 	     ;; (model2real :sleep-time 4000)
-	     ;; (unix:sleep 1)
+	     (unix:sleep 3)
 	     ))
     (cons :event-end
 	  '(lambda (&rest args)
-	     ;; (reset-manip-pose)
+	     (reset-manip-pose)
+	     (send *viewer* :draw-objects)
 	     (ros::publish "/aria/commandline"
 			   (instance std_msgs::string :init
 				     :data "reset"))
-	     (unix:sleep 1)
+	     (unix:sleep 3)
 	     ;; (model2real :sleep-time 4000)
 	     ;; (unix:sleep 4)
 	     t
@@ -157,8 +161,8 @@
 	       )
 	      (t 'nop))
 	     ;;
-	     ;; (beer-model2real :sleep-time 1000 :wait? t)
-	     (unix:sleep 1)
+	     (beer-model2real :sleep-time 1000 :wait? t)
+	     ;; (unix:sleep 1)
 	     ))
     (cons :event-end '(lambda (&rest args) nil)))
    ))
@@ -361,7 +365,7 @@
 (defun aria-command-callback
   (msg)
   (setq *head-only-time*
-	(+ (car (unix:gettimeofday)) 4))
+	(+ (car (unix:gettimeofday)) 8))
   )
 
 (ros::subscribe "/ros_chat/poseStamped"
