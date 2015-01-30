@@ -264,7 +264,7 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		}
 		if (this.camera_height < 0 || this.camera_width < 0) {
 			int width, height ;
-			width = height = 600 ;
+			width = height = 300 ;
 			double min = 1e+30 ;
 			double target_size = width*height ;
 

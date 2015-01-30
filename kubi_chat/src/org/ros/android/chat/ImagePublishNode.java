@@ -103,17 +103,21 @@ public class ImagePublishNode extends AbstractNodeMain implements PreviewCallbac
 		byte[] yuv = data ;
 		YuvImage yuvimage = new YuvImage(yuv, ImageFormat.NV21, this.width, this.height, null);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        yuvimage.compressToJpeg(new Rect(0, 0, this.width, this.height), 80, baos);
+        yuvimage.compressToJpeg(new Rect(0, 0, this.width, this.height), 50, baos);
         
-        Bitmap bmap = BitmapFactory.decodeByteArray(baos.toByteArray(), 0, baos.toByteArray().length) ;
-        Matrix matrix = new Matrix();
-       // matrix.postScale(1, 1);
-        matrix.postRotate(this.rotate_cnt*-90);
-		bmap = Bitmap.createBitmap(bmap, 0, 0, this.width, this.height, matrix,
-				true);
-		baos.reset();
-        bmap.compress(Bitmap.CompressFormat.JPEG, 50, baos);
+//        Bitmap bmap = BitmapFactory.decodeByteArray(baos.toByteArray(), 0, baos.toByteArray().length) ;
+//        Matrix matrix = new Matrix();
+//       // matrix.postScale(1, 1);
+//        matrix.postRotate(this.rotate_cnt*-90);
+//		bmap = Bitmap.createBitmap(bmap, 0, 0, this.width, this.height, matrix,
+//				true);
+//		baos.reset();
+//        bmap.compress(Bitmap.CompressFormat.JPEG, 50, baos);
         this.onPictureTaken(baos.toByteArray(), camera) ;
+
+       //  bmap.recycle();
+        // baos.close();
+        yuvimage = null;
 	}
 
 	@Override
