@@ -1,5 +1,6 @@
 package com.github.rosjava_test.rosjava_image_util;
 
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -201,6 +202,11 @@ public class SensorImageNode extends AbstractNodeMain {
 		return buf;
 	}
 	
+	public static BufferedImage resizeImage(BufferedImage image, int width, int height) {
+		BufferedImage thumb = new BufferedImage(width, height, image.getType());
+		thumb.getGraphics().drawImage(image.getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING), 0, 0, width, height, null);
+		return thumb;
+	}
 	
 	public class SensorImageTopics{
 		
