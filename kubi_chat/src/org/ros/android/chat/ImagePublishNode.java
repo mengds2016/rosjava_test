@@ -25,7 +25,7 @@ public class ImagePublishNode extends AbstractNodeMain implements PreviewCallbac
 	private String topic_name = RosChatActivity.node_name + "/status/camera/image/compressed";
 	private Camera camera = null;
 	private int width, height ;
-	private double hz = 2.5;
+	private double hz = 5;
 	private Thread thread = null;
 	private boolean started = false ;
 	private int rotate_cnt ;
