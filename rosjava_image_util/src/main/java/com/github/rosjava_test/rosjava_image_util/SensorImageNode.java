@@ -209,17 +209,21 @@ public class SensorImageNode extends AbstractNodeMain {
 	
 	public static BufferedImage resizeImage(BufferedImage image, int width, int height, int rotate) {
 		BufferedImage thumb=null;
+		AffineTransform at = new AffineTransform();
+
 		if ( rotate % 2 == 0 ){
 			thumb = new BufferedImage(width, height, image.getType());
+	        at.translate(width / 2.0, height / 2.0);
 		} else{
 			thumb = new BufferedImage(height, width, image.getType());
+	        at.translate(height / 2.0, width / 2.0);
 		}			
-		AffineTransform at = new AffineTransform();
-        at.translate(width / 2, height / 2);
+		// at.translate(image.getWidth()/2.0, image.getHeight()/2.0);
 		at.rotate(Math.PI / 2 * rotate);
 		at.scale(width * 1.0 / image.getWidth(),
 				height * 1.0 / image.getHeight());
-		at.translate(-image.getWidth()/2, -image.getHeight()/2);
+		at.translate(-image.getWidth()/2.0, -image.getHeight()/2.0);
+		// at.translate(-width/2.0, -height/2.0);
 		Graphics2D g2d = (Graphics2D) thumb.getGraphics();
 		g2d.drawImage(image, at, null);
 		return thumb;
