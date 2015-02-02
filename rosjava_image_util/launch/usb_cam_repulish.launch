@@ -26,7 +26,7 @@
 
   <node pkg="image_transport" type="republish"
 	name="image_transport_for_republish_small_in"
-	args="compressed in:=/$(arg IMG_REPUB_NODE_NAME)/image/in compressed out:=/$(arg IMG_REPUB_NODE_NAME)_small/image/in" />
+	args="compressed in:=/kubi_chat/status/camera/image compressed out:=/$(arg IMG_REPUB_NODE_NAME)_small/image/in" />
 
   <node pkg="rosjava_test" type="run_node.sh"
 	name="$(arg IMG_REPUB_NODE_NAME)_small" output="screen"
