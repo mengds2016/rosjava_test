@@ -3,6 +3,7 @@
   <arg name="IMG_REPUB_NODE_NAME" default="image_republish_node" />
   <arg name="REPUB_OUTPUT_TOPIC" default="/ros_chat/request/image/raw" />
 
+<!--
   <node pkg="usb_cam" type="usb_cam_node" name="usb_cam_node_for_republish">
     <remap from="/usb_cam_node_for_republish/image_raw/compressed"
 	   to="/$(arg IMG_REPUB_NODE_NAME)/image/in/compressed" />
@@ -21,6 +22,7 @@
   <node pkg="image_view" type="image_view" name="image_view_for_republish"
 	args="image:=$(arg REPUB_OUTPUT_TOPIC) _image_transport:=compressed">
   </node>
+-->
 
   <!-- For small image test -->
 
@@ -32,7 +34,8 @@
 	name="$(arg IMG_REPUB_NODE_NAME)_small" output="screen"
 	args="ImageRepublishNode" >
     <env name="ROSJAVA_IMAGE_REPUBLISH_MAX_RATE" value="3.0" />
-    <env name="ROSJAVA_IMAGE_REPUBLISH_SCALE" value="0.1" />
+    <env name="ROSJAVA_IMAGE_REPUBLISH_SCALE" value="0.2" />
+    <env name="ROSJAVA_IMAGE_REPUBLISH_ROTATE" value="3" />
     <env name="ROSJAVA_IMAGE_REPUBLISH_NODE_NAME"
 	 value="$(arg IMG_REPUB_NODE_NAME)_small" />
   </node>

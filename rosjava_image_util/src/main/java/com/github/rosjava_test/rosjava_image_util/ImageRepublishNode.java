@@ -11,9 +11,9 @@ import org.ros.node.ConnectedNode;
 
 public class ImageRepublishNode extends SensorImageNode{
 
-	private ConnectedNode connectedNode;
 	private double max_pub_rate = 3; // hz
 	private double scale = 1.0 ;
+	private int rotate = 0;
 	private long last_publish_time = System.currentTimeMillis();
 	
 	public ImageRepublishNode (){
@@ -33,29 +33,11 @@ public class ImageRepublishNode extends SensorImageNode{
 		
 		this.max_pub_rate = getDoubleParameterEnvOrRos("ROSJAVA_IMAGE_REPUBLISH_MAX_RATE", this.max_pub_rate);
 		this.scale = getDoubleParameterEnvOrRos("ROSJAVA_IMAGE_REPUBLISH_SCALE", this.scale);
+		this.rotate = getIntegerParameterEnvOrRos("ROSJAVA_IMAGE_REPUBLISH_ROTATE", this.rotate);
 		
 		super.onStart(connectedNode);
 	}
 	
-	public String getStringParameterEnvOrRos(String tag, String defo){
-		String ret;
-		ret = System.getenv(tag);
-		if ( ret == null ){
-			ret = this.connectedNode.getParameterTree().getString(tag,defo);
-		}
-		return ret;
-	}
-	
-	public double getDoubleParameterEnvOrRos(String tag, double defo){
-		double ret;
-		try{
-			ret = Double.parseDouble(System.getenv(tag));
-		} catch ( Exception e ){
-			ret = this.connectedNode.getParameterTree().getDouble(tag,defo);
-		}
-		return ret;
-	}
-
 	public void republishImage(BufferedImage img){
 		// this.max_pub_rate = this.connectedNode.getParameterTree().getDouble("ROSJAVA_IMAGE_REPUBLISH_MAX_RATE", this.max_pub_rate);
 		// this.scale = this.connectedNode.getParameterTree().getDouble("ROSJAVA_IMAGE_REPUBLISH_SCALE", this.scale);
@@ -64,7 +46,7 @@ public class ImageRepublishNode extends SensorImageNode{
 		if ( System.currentTimeMillis() - this.last_publish_time > 1000.0/this.max_pub_rate ){
 			System.out.println("["+this.nodeName+"]" + " x" + this.scale + " in " + (System.currentTimeMillis() - this.last_publish_time) + "ms" );
 			if ( this.scale != 1.0 ){
-				img = SensorImageNode.resizeImage(img, (int)(img.getWidth()*this.scale), (int)(img.getHeight()*this.scale));
+				img = SensorImageNode.resizeImage(img, (int)(img.getWidth()*this.scale), (int)(img.getHeight()*this.scale), this.rotate);
 			}
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try {

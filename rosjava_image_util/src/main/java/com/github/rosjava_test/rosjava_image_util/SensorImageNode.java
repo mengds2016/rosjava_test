@@ -1,6 +1,8 @@
 package com.github.rosjava_test.rosjava_image_util;
 
+import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -29,6 +31,8 @@ public class SensorImageNode extends AbstractNodeMain {
 	
 	protected ArrayList<String> name_space_array ;
 	protected HashMap<String, SensorImageTopics> image_topics_hash;
+	
+	protected ConnectedNode connectedNode;
 	
 	public SensorImageNode (){
 		this("sensor_image_node");
@@ -64,7 +68,8 @@ public class SensorImageNode extends AbstractNodeMain {
 
 	@Override
 	public void onStart(final ConnectedNode connectedNode) {
-
+		this.connectedNode = connectedNode;
+		
 		for (final String name : this.name_space_array) {
 			SensorImageTopics topic = this.image_topics_hash.get(name);
 			topic.onStart(connectedNode);
@@ -202,10 +207,51 @@ public class SensorImageNode extends AbstractNodeMain {
 		return buf;
 	}
 	
-	public static BufferedImage resizeImage(BufferedImage image, int width, int height) {
-		BufferedImage thumb = new BufferedImage(width, height, image.getType());
-		thumb.getGraphics().drawImage(image.getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING), 0, 0, width, height, null);
+	public static BufferedImage resizeImage(BufferedImage image, int width, int height, int rotate) {
+		BufferedImage thumb=null;
+		if ( rotate % 2 == 0 ){
+			thumb = new BufferedImage(width, height, image.getType());
+		} else{
+			thumb = new BufferedImage(height, width, image.getType());
+		}			
+		AffineTransform at = new AffineTransform();
+        at.translate(width / 2, height / 2);
+		at.rotate(Math.PI / 2 * rotate);
+		at.scale(width * 1.0 / image.getWidth(),
+				height * 1.0 / image.getHeight());
+		at.translate(-image.getWidth()/2, -image.getHeight()/2);
+		Graphics2D g2d = (Graphics2D) thumb.getGraphics();
+		g2d.drawImage(image, at, null);
 		return thumb;
+	}
+	
+	public String getStringParameterEnvOrRos(String tag, String defo){
+		String ret;
+		ret = System.getenv(tag);
+		if ( ret == null ){
+			ret = this.connectedNode.getParameterTree().getString(tag,defo);
+		}
+		return ret;
+	}
+	
+	public double getDoubleParameterEnvOrRos(String tag, double defo){
+		double ret;
+		try{
+			ret = Double.parseDouble(System.getenv(tag));
+		} catch ( Exception e ){
+			ret = this.connectedNode.getParameterTree().getDouble(tag,defo);
+		}
+		return ret;
+	}
+	
+	public int getIntegerParameterEnvOrRos(String tag, int defo){
+		int ret;
+		try{
+			ret = Integer.parseInt(System.getenv(tag));
+		} catch ( Exception e ){
+			ret = this.connectedNode.getParameterTree().getInteger(tag,defo);
+		}
+		return ret;
 	}
 	
 	public class SensorImageTopics{
