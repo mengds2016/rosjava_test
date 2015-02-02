@@ -1,9 +1,7 @@
 package com.github.rosjava_test.rosjava_image_util;
 
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -26,23 +24,41 @@ public class ImageRepublishNode extends SensorImageNode{
 	public void onStart(final ConnectedNode connectedNode) {
 		this.connectedNode = connectedNode;
 		
-		String nodeName = this.connectedNode.getParameterTree().getString(
-				"ROSJAVA_IMAGE_REPUBLISH_NODE_NAME",
-				this.nodeName); 
+		String nodeName = getStringParameterEnvOrRos(
+				"ROSJAVA_IMAGE_REPUBLISH_NODE_NAME", this.nodeName);
 		ArrayList<String> name_space_array = null;
 		//		new ArrayList<String>();
 		// name_space_array.add(nodeName+"/left");
 		updateTopics(nodeName,name_space_array);
 		
-		this.max_pub_rate = this.connectedNode.getParameterTree().getDouble("ROSJAVA_IMAGE_REPUBLISH_MAX_RATE", this.max_pub_rate);
-		this.scale = this.connectedNode.getParameterTree().getDouble("ROSJAVA_IMAGE_REPUBLISH_SCALE", this.scale);
+		this.max_pub_rate = getDoubleParameterEnvOrRos("ROSJAVA_IMAGE_REPUBLISH_MAX_RATE", this.max_pub_rate);
+		this.scale = getDoubleParameterEnvOrRos("ROSJAVA_IMAGE_REPUBLISH_SCALE", this.scale);
 		
 		super.onStart(connectedNode);
 	}
+	
+	public String getStringParameterEnvOrRos(String tag, String defo){
+		String ret;
+		ret = System.getenv(tag);
+		if ( ret == null ){
+			ret = this.connectedNode.getParameterTree().getString(tag,defo);
+		}
+		return ret;
+	}
+	
+	public double getDoubleParameterEnvOrRos(String tag, double defo){
+		double ret;
+		try{
+			ret = Double.parseDouble(System.getenv(tag));
+		} catch ( Exception e ){
+			ret = this.connectedNode.getParameterTree().getDouble(tag,defo);
+		}
+		return ret;
+	}
 
 	public void republishImage(BufferedImage img){
-		this.max_pub_rate = this.connectedNode.getParameterTree().getDouble("ROSJAVA_IMAGE_REPUBLISH_MAX_RATE", this.max_pub_rate);
-		this.scale = this.connectedNode.getParameterTree().getDouble("ROSJAVA_IMAGE_REPUBLISH_SCALE", this.scale);
+		// this.max_pub_rate = this.connectedNode.getParameterTree().getDouble("ROSJAVA_IMAGE_REPUBLISH_MAX_RATE", this.max_pub_rate);
+		// this.scale = this.connectedNode.getParameterTree().getDouble("ROSJAVA_IMAGE_REPUBLISH_SCALE", this.scale);
 		//
 		//
 		if ( System.currentTimeMillis() - this.last_publish_time > 1000.0/this.max_pub_rate ){
