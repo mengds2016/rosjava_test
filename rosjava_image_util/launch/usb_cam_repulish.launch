@@ -22,4 +22,23 @@
 	args="image:=$(arg REPUB_OUTPUT_TOPIC) _image_transport:=compressed">
   </node>
 
+  <!-- For small image test -->
+
+  <node pkg="image_transport" type="republish"
+	name="image_transport_for_republish_small_in"
+	args="compressed in:=/$(arg IMG_REPUB_NODE_NAME)/image/in compressed out:=/$(arg IMG_REPUB_NODE_NAME)_small/image/in" />
+
+  <node pkg="rosjava_test" type="run_node.sh"
+	name="$(arg IMG_REPUB_NODE_NAME)_small" output="screen"
+	args="ImageRepublishNode" >
+    <env name="ROSJAVA_IMAGE_REPUBLISH_MAX_RATE" value="3.0" />
+    <env name="ROSJAVA_IMAGE_REPUBLISH_SCALE" value="0.1" />
+    <env name="ROSJAVA_IMAGE_REPUBLISH_NODE_NAME"
+	 value="$(arg IMG_REPUB_NODE_NAME)_small" />
+  </node>
+
+  <node pkg="image_transport" type="republish"
+	name="image_transport_for_republish_small_out"
+	args="compressed in:=/$(arg IMG_REPUB_NODE_NAME)_small/image/out compressed out:=$(arg REPUB_OUTPUT_TOPIC)/small" />
+
 </launch>
