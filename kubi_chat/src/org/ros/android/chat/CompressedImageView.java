@@ -57,7 +57,7 @@ public class CompressedImageView extends ImageView implements NodeMain {
 	}
 	
 	public void setNodeName(String name){
-		
+		this.nodename = name;
 	}
 	
 	@Override

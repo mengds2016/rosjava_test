@@ -189,6 +189,7 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 			}
 		});
 		nodeMainExecutor.execute(this.image_view, nodeConfiguration);
+		nodeMainExecutor.execute(this.image_view_small, nodeConfiguration);
 		nodeMainExecutor.execute(this.image_publisher, nodeConfiguration);
 		nodeMainExecutor.execute(this.chatnode, nodeConfiguration);
 		nodeMainExecutor.execute(this.audio_node, nodeConfiguration);
