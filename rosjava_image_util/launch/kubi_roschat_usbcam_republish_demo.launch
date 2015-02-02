@@ -58,4 +58,11 @@
 	args="compressed in:=/$(arg IMG_REPUB_NODE_NAME)_small/image/out compressed out:=$(arg REPUB_OUTPUT_TOPIC)/small" />
   -->
 
+  <!-- aria viewer -->
+  <node pkg="rosjava_test" type="aria-sensor-viewer.l" name="aria_sensor_viewer_node" />
+
+  <node pkg="image_transport" type="republish"
+	name="image_transport_for_aria_sensor_viewer"
+	args="raw in:=/image_window_node/image/in/raw compressed out:=/kubi_chat/request/image/raw" />
+
 </launch>
