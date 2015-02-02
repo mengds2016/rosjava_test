@@ -308,23 +308,23 @@ public class SensorImageNode extends AbstractNodeMain {
 
 		protected void updateTopicNameFromEnv() {
 			String buf;
-			buf = System.getenv("raw_image_sub_topic_name");
+			buf = System.getenv(this.nodeName + "/raw_image_sub_topic_name");
 			if ( buf != null ) this.raw_image_sub_topic_name = buf;
-			buf = System.getenv("com_image_sub_topic_name");
+			buf = System.getenv(this.nodeName + "/com_image_sub_topic_name");
 			if ( buf != null ) this.com_image_sub_topic_name = buf;
-			buf = System.getenv("status_string_topic_name");
+			buf = System.getenv(this.nodeName + "/status_string_topic_name");
 			if ( buf != null ) this.status_string_topic_name = buf;
-			buf = System.getenv("com_image_pub_topic_name");
+			buf = System.getenv(this.nodeName + "/com_image_pub_topic_name");
 			if ( buf != null ) this.com_image_pub_topic_name = buf;
-			buf = System.getenv("raw_image_pub_topic_name");
+			buf = System.getenv(this.nodeName + "/raw_image_pub_topic_name");
 			if ( buf != null ) this.raw_image_pub_topic_name = buf;
-			buf = System.getenv("command_string_topic_name");
+			buf = System.getenv(this.nodeName + "/command_string_topic_name");
 			if ( buf != null ) this.command_string_topic_name = buf;
 		}
 
 		
 		public void onStart(final ConnectedNode connectedNode) {
-			// updateTopicNameFromRosParam(connectedNode);
+			updateTopicNameFromRosParam(connectedNode);
 			updateTopicNameFromEnv();
 			this.status_publisher = connectedNode.newPublisher(this.status_string_topic_name, std_msgs.String._TYPE);
 			this.com_image_publisher = connectedNode.newPublisher(this.com_image_pub_topic_name, sensor_msgs.CompressedImage._TYPE);
