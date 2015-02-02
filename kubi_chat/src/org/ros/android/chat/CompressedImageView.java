@@ -25,6 +25,7 @@ public class CompressedImageView extends ImageView implements NodeMain {
 	private float aspect;
 	private RosChatNode talker ;
 	private RosChatNode chat ;
+	private String nodename = RosChatActivity.node_name + "/compressed_image_view";
 
 
 	public CompressedImageView(Context context) {
@@ -55,9 +56,13 @@ public class CompressedImageView extends ImageView implements NodeMain {
 		this.chat = chat ;
 	}
 	
+	public void setNodeName(String name){
+		
+	}
+	
 	@Override
 	public GraphName getDefaultNodeName() {
-		return GraphName.of( RosChatActivity.node_name + "/compressed_image_view");
+		return GraphName.of( this.nodename );
 	}
 
 	@Override

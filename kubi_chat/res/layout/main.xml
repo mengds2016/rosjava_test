@@ -28,7 +28,7 @@
     	        android:layout_height="0dp"
         	    android:layout_weight="0.7"
 	            android:gravity="center" />
-             <LinearLayout
+ 			<LinearLayout
 	            android:layout_width="fill_parent"
     	        android:layout_height="0dp"
     	        android:layout_weight="0.3"
@@ -37,8 +37,14 @@
             	<View
                     android:layout_width="0dp"
                     android:layout_height="fill_parent"
-                    android:layout_weight="0.7"
+                    android:layout_weight="0.4"
                     android:gravity="center" />
+            	<org.ros.android.chat.CompressedImageView
+                	android:id="@+id/compressed_image_view_small"
+                	android:layout_height="wrap_content"
+                	android:layout_width="0dp"
+                	android:layout_weight="0.3"
+                	android:layout_gravity="center" />
 				<SurfaceView
                     android:id="@+id/camera_surface"
                     android:layout_width="0dp"

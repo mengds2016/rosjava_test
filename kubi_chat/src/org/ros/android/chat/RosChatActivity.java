@@ -41,6 +41,7 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 	final private String TAG = "ChatActivity";
 	
 	private CompressedImageView image_view ;
+	private CompressedImageView image_view_small ;
 	private TextView bottom_notf ;
 	private RosChatNode chatnode;
 	private Camera camera ;
@@ -84,6 +85,11 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		this.image_view.setTopicName( node_name + "/request/" + "image/raw/compressed") ;
 		this.image_view.setMessageType(sensor_msgs.CompressedImage._TYPE);
 		this.image_view.setTalker(this.chatnode) ;
+		
+		this.image_view_small = (CompressedImageView) findViewById(R.id.compressed_image_view_small) ;
+		this.image_view_small.setTopicName( node_name + "/request/" + "image/raw/small/compressed") ;
+		this.image_view_small.setMessageType(sensor_msgs.CompressedImage._TYPE);
+		this.image_view_small.setNodeName(node_name + "/compressed_image_view_small");
 		
 		this.audio_node = new AudioPubSubNode(node_name);
 		
