@@ -55,6 +55,7 @@ public abstract class RosDialogActivity extends RosActivity {
 	
 	public String getNodename(){
 		return this.nodename_org;
+		//this.nodename_org;
 	}
 	
 	@Override
@@ -68,15 +69,15 @@ public abstract class RosDialogActivity extends RosActivity {
 	@Override
 	public void startMasterChooser() {
 
-		pref = getSharedPreferences(RosDialogActivity.preftag,
+		this.pref = getSharedPreferences(RosDialogActivity.preftag,
 				Context.MODE_PRIVATE);
-
-		String master_uri = pref
+		
+		String master_uri = this.pref
 				.getString(RosDialogActivity.preftag_master, "");
 		if (master_uri.length() == 0)
 			master_uri = "http://localhost:11311";
 		
-		String node_name = pref
+		String node_name = this.pref
 				.getString(RosDialogActivity.preftag_nodename, this.nodename_org);
 		final MasterChooserDialog ld = new MasterChooserDialog(this,
 				master_uri, getHostname(), node_name);
