@@ -17,6 +17,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
@@ -43,6 +44,8 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 	private CompressedImageView image_view ;
 	private CompressedImageView image_view_small ;
 	private TextView bottom_notf ;
+	private EditText edit_text;
+	
 	private RosChatNode chatnode;
 	private Camera camera ;
 	private SurfaceView surf ;
@@ -52,9 +55,10 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 	private AudioPubSubNode audio_node;
 	private AndroidPosePubNode pose_node;
 	private KubiControlNode kubi_node;
+	private TextPubNode text_node;
 	
 	private Thread chat_observer ;
-	private boolean ros_initialized ;
+	private boolean image_publishing ;
 	
 	private static boolean client_p = true;
 	public static String node_name = "kubi_chat" ;
@@ -69,17 +73,56 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		node_name = getNodename();
 		setContentView(R.layout.main);
 		
-		this.ros_initialized = false ;
-		this.chatnode = new RosChatNode(this.getApplicationContext());
+		this.image_publishing = false ;
 		
 		this.surf = (SurfaceView) findViewById(R.id.camera_surface) ;
 		SurfaceHolder holder = this.surf.getHolder();
         holder.addCallback(this);
         holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+		
+		// replace tagged button images
+		LinearLayout tagged_button = (LinearLayout) findViewById(R.id.taged_image_buttons) ;
+		tagged_button.removeAllViews();
+		if ( client_p ){
+			// replace tagged button images
+			String[] tagNames = new String[]{"fuza1","fuza2","my1","my2","my3","my4"};
+			for (String imageName : tagNames) {
+				R.drawable rDrawable = new R.drawable();
+				Field field;
+				int resId;
+				try {
+					field = rDrawable.getClass().getField(imageName);
+					resId = field.getInt(rDrawable);
+					Bitmap image = BitmapFactory.decodeResource(getResources(),
+							resId);
+					//
+					ImageButton imageButton = new ImageButton(this);
+					imageButton.setScaleType(ScaleType.FIT_XY);
+					imageButton.setAdjustViewBounds(true);
+					imageButton.setImageBitmap(image);
+					imageButton.setTag(imageName);
+					imageButton.setOnClickListener(new OnClickListener(){
+						@Override
+						public void onClick(View v) {
+							RosChatActivity.this.chatnode.publishStringStatus("tag:" + v.getTag());
+						}
+					});
+					tagged_button.addView(imageButton);
+				} catch (Exception e) {
+					System.out.println("[place tagged image] " + imageName + " fail!! ");
+					e.printStackTrace();
+				}
+			}
+		} else {
+			tagged_button.setWeightSum(0);
+		}
+	}
+	
+	public void initializeNodes(){
+		node_name = getNodename();
+		this.chatnode = new RosChatNode(this.getApplicationContext());
 
 		this.image_view = (CompressedImageView) findViewById(R.id.compressed_image_view) ;
 		this.image_view.setTopicName( node_name + "/request/" + "image/raw/compressed") ;
@@ -94,6 +137,8 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		this.audio_node = new AudioPubSubNode(node_name);
 		
 		this.bottom_notf = (TextView) findViewById(R.id.bottom_notification_text) ;
+		
+		this.edit_text = (EditText) findViewById(R.id.editabletextbox);
 		
 		//this.connect() ;
 		
@@ -133,51 +178,21 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		} ) ;
 		
 		this.pose_node = new AndroidPosePubNode(node_name, (SensorManager)getSystemService(SENSOR_SERVICE));
+		this.pose_node.onResume();
 
-		// replace tagged button images
-		LinearLayout tagged_button = (LinearLayout) findViewById(R.id.taged_image_buttons) ;
-		tagged_button.removeAllViews();
-		if ( client_p ){
-			// replace tagged button images
-			String[] tagNames = new String[]{"fuza1","fuza2","my1","my2","my3","my4"};
-			for (String imageName : tagNames) {
-				R.drawable rDrawable = new R.drawable();
-				Field field;
-				int resId;
-				try {
-					field = rDrawable.getClass().getField(imageName);
-					resId = field.getInt(rDrawable);
-					Bitmap image = BitmapFactory.decodeResource(getResources(),
-							resId);
-					//
-					ImageButton imageButton = new ImageButton(this);
-					imageButton.setScaleType(ScaleType.FIT_XY);
-					imageButton.setAdjustViewBounds(true);
-					imageButton.setImageBitmap(image);
-					imageButton.setTag(imageName);
-					imageButton.setOnClickListener(new OnClickListener(){
-						@Override
-						public void onClick(View v) {
-							RosChatActivity.this.chatnode.publishStringStatus("tag:" + v.getTag());
-						}
-					});
-					tagged_button.addView(imageButton);
-				} catch (Exception e) {
-					System.out.println("[place tagged image] " + imageName + " fail!! ");
-					e.printStackTrace();
-				}
-			}
-		} else {
-			tagged_button.setWeightSum(0);
-		}
+		this.text_node = new TextPubNode(this.nodename_org, this.edit_text);
 		
 		if ( ! client_p ){
 			this.kubi_node = new KubiControlNode(this, node_name);
 		}
 	}
 	
+	
 	@Override
 	protected void init(NodeMainExecutor nodeMainExecutor) {
+		
+		initializeNodes();
+		
 		NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(
 				getHostname(), getMasterUri());
 		this.runOnUiThread(new Runnable() {
@@ -194,6 +209,7 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 		nodeMainExecutor.execute(this.chatnode, nodeConfiguration);
 		nodeMainExecutor.execute(this.audio_node, nodeConfiguration);
 		nodeMainExecutor.execute(this.pose_node, nodeConfiguration);
+		nodeMainExecutor.execute(this.text_node, nodeConfiguration);
 		if ( this.kubi_node != null ) nodeMainExecutor.execute(this.kubi_node, nodeConfiguration);
 		
 		// vibration
@@ -218,12 +234,12 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 			}
 		}, nodeConfiguration);
 		
-		if ( this.camera != null ) {
+		if ( this.camera != null && ! this.image_publishing) {
+			this.image_publishing = true ;
 			Camera.Parameters param = this.camera.getParameters() ;
 			this.image_publisher.startImagePublisher(this.camera, param.getPreviewSize().width, param.getPreviewSize().height) ;
 		}
 			
-		this.ros_initialized = true ;
 	}
 	
 //	private void openCamera(SurfaceHolder holder) throws IOException {
@@ -323,7 +339,7 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 	         case Surface.ROTATION_180: degrees = 2; break;
 	         case Surface.ROTATION_270: degrees = 3; break;
 	     }
-	     this.image_publisher.setRotateCnt(degrees);
+	     // this.image_publisher.setRotateCnt(degrees);
 	     degrees = degrees*90 ;
 	     int result;
 	     if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
@@ -347,13 +363,17 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.pose_node.onResume();
+		if ( this.pose_node != null ){
+			this.pose_node.onResume();
+		}
 	}
 	
 	@Override
 	public void onPause() {
 		super.onPause();
-		this.pose_node.onPause();
+		if ( this.pose_node != null ){
+			this.pose_node.onPause();
+		}
 	}
 	
 	@Override
@@ -390,7 +410,8 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
         } catch (Exception e) {
             e.printStackTrace();
         }
-		if ( this.ros_initialized && this.camera != null ){
+		if ( ! this.image_publishing && this.camera != null && this.image_publisher != null ){
+			this.image_publishing = true;
 			Camera.Parameters param = this.camera.getParameters() ;
 			this.image_publisher.startImagePublisher(this.camera, param.getPreviewSize().width, param.getPreviewSize().height) ;
 		}
@@ -404,7 +425,8 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		System.out.println("-- RosChatActiivty surfaceDestroyed called");
-		if ( this.camera != null ){
+		if ( this.camera != null && this.image_publishing){
+			this.image_publishing = false;
 			this.image_publisher.stopImagePublisher() ;
 			this.camera.stopPreview();
 			this.camera.release() ;
