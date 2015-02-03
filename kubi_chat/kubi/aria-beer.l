@@ -12,8 +12,8 @@
 
 (send *robot* :head :neck-p :min-angle -30)
 (send *robot* :head :neck-p :max-angle +30)
-(send *robot* :head :neck-r :min-angle -30)
-(send *robot* :head :neck-r :max-angle +30)
+(send *robot* :head :neck-r :min-angle -20)
+(send *robot* :head :neck-r :max-angle +20)
 (send *robot* :head :neck-y :min-angle -45)
 (send *robot* :head :neck-y :max-angle +45)
 (send *robot* :rarm :shoulder-r :min-angle -30)
@@ -76,7 +76,7 @@
    (list
     (cons :event-triger ;; logger
 	  '(lambda (&rest args)
-	     (format t "[event-function] mode=~A~%" *control-mode*)
+	     (format t "[event-function-logger] mode=~A~%" *control-mode*)
 	     nil)))
    (list
     (cons :event-triger
@@ -379,10 +379,17 @@
   (setq *beer-zero-coords-calib-flag* t)
   (setq *fove-zero-coords-calib-flag* t))
 
+(defun aria-command-org-callback
+  (msg)
+  (setq *head-only-time*
+	(+ (car (unix:gettimeofday)) 6))
+  (ros::publish "/aria/commandline" msg)
+  )
+
 (defun aria-command-callback
   (msg)
   (setq *head-only-time*
-	(+ (car (unix:gettimeofday)) 8))
+	(+ (car (unix:gettimeofday)) 6))
   )
 
 (defun relative-lookat-callback
@@ -427,6 +434,9 @@
 (ros::subscribe "/aria/commandline"
 		std_msgs::string
 		#'aria-command-callback)
+(ros::subscribe "/aria/commandline/org"
+		std_msgs::string
+		#'aria-command-org-callback)
 (ros::subscribe "/look_face_node/lookpos_vector/relative"
 		std_msgs::float32multiarray
 		#'relative-lookat-callback)
@@ -476,41 +486,4 @@
  ;;
  (send *viewer* :draw-objects)
  (x::window-main-one)
- ;;
- ;; (model2real :sleep-time 1000)
  )
-
-
-;; (defun pose-callback
-;;   (msg)
-;;   (let* ((qv (float-vector
-;; 	      (send (send (send msg :pose) :orientation) :w)
-;; 	      (send (send (send msg :pose) :orientation) :x)
-;; 	      (send (send (send msg :pose) :orientation) :y)
-;; 	      (send (send (send msg :pose) :orientation) :z)))
-;; 	 (m (quaternion2matrix qv)))
-;;     (cond
-;;      (*beer-zero-coords-calib-flag*
-;;       (setq *beer-zero-coords-calib-flag* nil)
-;;       (setq *beer-zero-coords* (make-coords :rot (transpose m)))
-;;       ))
-;;     (send *beer-obj* :newcoords
-;; 	  (send *beer-zero-coords*
-;; 		:transformation
-;; 		(make-coords :rot (transpose m))))
-;;     (send *robot* :inverse-kinematics
-;; 	  (send *beer-obj* :copy-worldcoords)
-;; 	  :move-target *beer-end-coords*
-;; 	  :link-list (send *robot* :link-list (send *robot* :rarm :end-coords :parent)
-;; 			   (send *robot* :rarm :root-link))
-;; 	  :rotation-axis t
-;; 	  :translation-axis nil
-;; 	  :stop 10
-;; 	  :revert-if-fail nil
-;; 	  :debug-view nil)
-;;     (send *beer-obj* :newcoords
-;; 	  (send *beer-end-coords* :copy-worldcoords))
-;;     ))
-;; (ros::subscribe "/android_pose/poseStamped"
-;; 		geometry_msgs::PoseStamped
-;; 		#'pose-callback)
