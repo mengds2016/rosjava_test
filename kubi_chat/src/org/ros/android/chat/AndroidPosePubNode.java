@@ -23,6 +23,8 @@ public class AndroidPosePubNode extends AbstractNodeMain implements SensorEventL
 	private SensorManager mSensorManager;
     private Sensor mAccelerometer, mOrientation;
     private float[] p, v, q, r, rpy ;
+    
+    private boolean listener_registered = false;
 	
 	public AndroidPosePubNode(String nodeName, SensorManager manager){
 		super() ;
@@ -53,14 +55,20 @@ public class AndroidPosePubNode extends AbstractNodeMain implements SensorEventL
 	}
 	
 	protected void onResume() {
-		this.mSensorManager.registerListener(this, this.mOrientation,
-				SensorManager.SENSOR_DELAY_NORMAL);
-		this.mSensorManager.registerListener(this, this.mAccelerometer,
-				SensorManager.SENSOR_DELAY_FASTEST) ;
+		if ( ! this.listener_registered ){
+			this.listener_registered = true;
+			this.mSensorManager.registerListener(this, this.mOrientation,
+					SensorManager.SENSOR_DELAY_NORMAL);
+			this.mSensorManager.registerListener(this, this.mAccelerometer,
+					SensorManager.SENSOR_DELAY_FASTEST);
+		}
 	}
 
 	protected void onPause() {
-		this.mSensorManager.unregisterListener(this);
+		if ( this.listener_registered ){
+			this.listener_registered = false;
+			this.mSensorManager.unregisterListener(this);
+		}
 	}
 	
 	public void pubTwist(float[] xyz, float[] rpy){
