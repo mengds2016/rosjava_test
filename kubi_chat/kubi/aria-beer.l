@@ -55,9 +55,13 @@
 
 (defvar *head-only-time* 0)
 
+(defvar *control-mode* :user)
+(defvar *last-user-command-receive-time*
+  (car (unix:gettimeofday)))
+
 (send *beer-obj* :set-color #F(1 1 0))
-(send *fove-obj* :set-color #F(1 0 0))
 (send *fove-obj* :set-color #F(0 0 1))
+(send *tablet-obj* :set-color #F(0 1 0))
 (objects (list *robot* *beer-obj* *fove-obj* *tablet-obj*))
 
 (defvar *base-beer-pose*
@@ -70,11 +74,16 @@
 (setq *event-functions*
   (list
    (list
+    (cons :event-triger ;; logger
+	  '(lambda (&rest args)
+	     (format t "[event-function] mode=~A~%" *control-mode*)
+	     nil)))
+   (list
     (cons :event-triger
 	  '(lambda (&rest args)
 	     (let* ((thre 0.4)
 		    (beer-tilt (cadr (car (rpy-angle (send *beer-obj* :worldrot))))))
-	       (format t "[kanpai triger] ~A > ~A~%" beer-tilt thre)
+	       ;; (format t "[kanpai triger] ~A > ~A~%" beer-tilt thre)
 	       (> beer-tilt thre)
 	       )))
     (cons :event-callback
@@ -190,9 +199,11 @@
   (if wait?
       (unix:usleep (round (* sleep-time 1000)))))
 
-(defun android-imu-callback
+(defun android-imu-callback ;; for beer
   (msg)
   (format t "[cup-ui-imu-callback]~%")
+  (setq *control-mode* :user) ;; usr flag
+  (setq *last-user-command-receive-time* (car (unix:gettimeofday)))
   (let* ((qv (float-vector
 	      (send (send (send msg :pose) :orientation) :w)
 	      (send (send (send msg :pose) :orientation) :x)
@@ -235,9 +246,11 @@
     ;;  (t (setq *kanpai-flag* 0)))
     ))
 
-(defun android-imu-callback2
+(defun android-imu-callback2 ;; for fove
   (msg)
   (format t "[cup-ui-imu-callback]~%")
+  (setq *control-mode* :user) ;; usr flag
+  (setq *last-user-command-receive-time* (car (unix:gettimeofday)))
   (let* ((qv (float-vector
 	      (send (send (send msg :pose) :orientation) :w)
 	      (send (send (send msg :pose) :orientation) :x)
@@ -285,6 +298,8 @@
 (defun cup-ui-imu-callback
   (msg)
   (format t "[cup-ui-imu-callback]~%")
+  (setq *control-mode* :user) ;; usr flag
+  (setq *last-user-command-receive-time* (car (unix:gettimeofday)))
   (let* ((qv (float-vector
 	      (send (send msg :orientation) :w)
 	      (send (send msg :orientation) :x)
@@ -323,6 +338,8 @@
 (defun fove-imu-callback
   (msg)
   (format t "[fove-imu-callback]~%")
+  (setq *control-mode* :user) ;; usr flag
+  (setq *last-user-command-receive-time* (car (unix:gettimeofday)))
   (let* ((qv (float-vector
 	      (send (send msg :orientation) :w)
 	      (send (send msg :orientation) :x)
@@ -368,6 +385,27 @@
 	(+ (car (unix:gettimeofday)) 8))
   )
 
+(defun relative-lookat-callback
+  (msg)
+  (cond
+   ((or (eq *control-mode* :auto)
+	(> (- (car (unix:gettimeofday))
+	      *last-user-command-receive-time*)
+	   10))
+    (setq *control-mode* :auto)
+    (let* ((dx (aref (send msg :data) 0))
+	   (dy (aref (send msg :data) 1)))
+      (send *robot* :head :neck-y
+	    :joint-angle (* -10.0 dx) :relative t)
+      (send *robot* :head :neck-p
+	    :joint-angle (* -10.0 dy) :relative t)
+      (send *fove-obj* :newcoords
+	    (send *fove-end-coords* :copy-worldcoords))
+      (send *tablet-obj* :newcoords
+	    (send (send *fove-obj* :copy-worldcoords)
+		  :translate #F(300 0 0) :local))
+      ))))
+
 (ros::subscribe "/ros_chat/poseStamped"
 		geometry_msgs::PoseStamped
 		#'android-imu-callback2)
@@ -389,6 +427,9 @@
 (ros::subscribe "/aria/commandline"
 		std_msgs::string
 		#'aria-command-callback)
+(ros::subscribe "/look_face_node/lookpos_vector/relative"
+		std_msgs::float32multiarray
+		#'relative-lookat-callback)
 ;; (ros::subscribe "/android_pose/poseStamped"
 ;;		geometry_msgs::PoseStamped
 ;;		#'android-pose-callback)
