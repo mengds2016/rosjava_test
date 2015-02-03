@@ -371,6 +371,9 @@
 (ros::subscribe "/ros_chat/poseStamped"
 		geometry_msgs::PoseStamped
 		#'android-imu-callback2)
+(ros::subscribe "/cup_ui/poseStamped"
+		geometry_msgs::PoseStamped
+		#'android-imu-callback)
 (ros::subscribe "/fove/kduino/converted_imu"
 		sensor_msgs::imu
 		#'fove-imu-callback)
