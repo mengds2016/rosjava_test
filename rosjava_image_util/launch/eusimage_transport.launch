@@ -1,6 +1,10 @@
 <launch>
   <arg name="ROSJAVA_TEST_HOME" default="$(find rosjava_test)" />
 
+  <node pkg="rosjava_test" type="image_info_publisher.sh"
+	name="image_info_publisher"
+	output="screen" />
+
   <node pkg="rosjava_test" type="eus_animeface.l" name="eus_animeface"
 	output="screen" >
     <remap from="/eus_animeface/feedback/outputpath"
@@ -9,6 +13,8 @@
 
   <node pkg="rosjava_test" type="aria-viewer.l" name="aria_viewer_right"
 	output="screen" >
+    <remap from="/aria_viewer/window_size"
+	   to="/image_info/size_array" />
     <remap from="/image_window_node/image/in/raw"
 	   to="/image_window_node/left/image/in/raw" />
   </node>
