@@ -58,7 +58,10 @@
 
   <node pkg="rosjava_test" type="run_node.sh"
 	name="image_window_node" output="screen" args="ImageWindowNode" >
-    <env name="IMG_HOME" value="$(arg ROSJAVA_TEST_HOME)/rosjava_image_util/img" />
+    <env name="IMG_HOME" value="/dev/null" />
+	 <!--
+	 value="$(arg ROSJAVA_TEST_HOME)/rosjava_image_util/img" />
+	 -->
     <env name="image_window_node/right/raw_image_sub_topic_name"
 	 value="/image_window_node/left/image/in/raw" />
   </node>
