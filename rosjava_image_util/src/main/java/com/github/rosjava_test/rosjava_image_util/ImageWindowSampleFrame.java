@@ -83,11 +83,11 @@ public class ImageWindowSampleFrame extends JFrame {
 					home_dir = System.getenv("HOME")
 							+ "/prog/euslib/demo/s-noda/tmp-ros-package/rosjava_test/rosjava_image_util/img";
 				}
-				String[] tag = new String[]{"left_hand", "left_elbow", "pelvis", "right_elbow", "right_hand"} ;
-				String[] path = new String[]{"hand.png", "elbow.png", "pelvis.png", "elbow.png", "hand.png"} ;
-				int[] x = new int[]{ W / (N * 4), W / (N * 4), 2 * W / (N * 4), 3 * W / (N * 4),
+				String[] tag = new String[]{"left_hand", "left_elbow", "left_shoulder", "pelvis", "right_shoulder", "right_elbow", "right_hand"} ;
+				String[] path = new String[]{"hand.png", "elbow.png", "shoulder.png", "pelvis.png", "shoulder.png", "elbow.png", "hand.png"} ;
+				int[] x = new int[]{ W / (N * 4), W / (N * 4),W / (N * 4), 2 * W / (N * 4), 3 * W / (N * 4), 3 * W / (N * 4),
 						3 * W / (N * 4)};
-				int[] y = new int[]{ 3 * H / 4, H / 2, 2 * H / 4, H / 2, 3 * H / 4};
+				int[] y = new int[]{ 3 * H / 4, H / 2, H / 4,  2 * H / 4, H / 4, H / 2, 3 * H / 4};
 				for ( int i=0 ; i<tag.length ; i++ ){
 					File f = new File(home_dir + "/" + path[i]);
 					BufferedImage img = null;
@@ -262,7 +262,7 @@ public class ImageWindowSampleFrame extends JFrame {
 				g.drawImage(i, this.x, this.y, this.w, this.h, null);
 			} else {
 				g.setColor(Color.GREEN);
-				g.drawOval(this.x, this.y, this.w, this.h);
+				g.fillOval(this.x, this.y, this.w, this.h);
 			}
 			if ( this.flush ){
 				g.setColor(Color.RED);
@@ -342,8 +342,16 @@ public class ImageWindowSampleFrame extends JFrame {
 		@Override
 		public void paintComponent(Graphics g) {
 			this.bgImage.drawBackground(g, (this.w = this.getWidth()), (this.h = this.getHeight()));
+			int x = -1;
+			int y = -1;
 			for ( ImageData d : this.images ){
 				d.draw(g);
+				if ( x > 0 && y > 0 ){
+					g.setColor(Color.GREEN);
+					g.drawLine(x, y, d.x+d.w/2, d.y+d.h/2);
+				}
+				x = d.x + d.w/2;
+				y = d.y + d.h/2;
 			}
 		}
 
