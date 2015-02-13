@@ -1,11 +1,6 @@
 <launch>
   <arg name="ROSJAVA_TEST_HOME" default="$(find rosjava_test)" />
 
-  <node pkg="rosjava_test" type="run_node.sh"
-	name="image_window_node" output="screen" args="ImageWindowNode" >
-    <env name="IMG_HOME" value="$(arg ROSJAVA_TEST_HOME)/rosjava_image_util/img" />
-  </node>
-
   <node pkg="rosjava_test" type="eus_animeface.l" name="eus_animeface"
 	output="screen" >
     <remap from="/eus_animeface/feedback/outputpath"
@@ -14,8 +9,6 @@
 
   <node pkg="rosjava_test" type="aria-viewer.l" name="aria_viewer_right"
 	output="screen" >
-    <remap from="/sensor_image_node/command/string"
-	   to="/sensor_image_node/left/command/string" />
     <remap from="/image_window_node/image/in/raw"
 	   to="/image_window_node/left/image/in/raw" />
   </node>
@@ -40,6 +33,7 @@
 	 value="/sensor_image_node/left/overlay/command/string" />
   </node>
 
+  <!--
   <node pkg="rosjava_test" type="run_node.sh"
 	name="sensor_image_node_right" output="screen" args="DumpImageNode" >
     <env name="sensor_image_node/com_image_pub_topic_name"
@@ -47,7 +41,7 @@
     <env name="sensor_image_node/command_string_topic_name"
 	 value="/sensor_image_node/right/overlay/command/string" />
   </node>
-
+  -->
   <node pkg="rosjava_test" type="run_node.sh"
 	name="sensor_image_node_center" output="screen" args="DumpImageNode" >
     <env name="sensor_image_node/com_image_pub_topic_name"
@@ -55,4 +49,12 @@
     <env name="sensor_image_node/command_string_topic_name"
 	 value="/sensor_image_node/center/command/string" />
   </node>
+
+  <node pkg="rosjava_test" type="run_node.sh"
+	name="image_window_node" output="screen" args="ImageWindowNode" >
+    <env name="IMG_HOME" value="$(arg ROSJAVA_TEST_HOME)/rosjava_image_util/img" />
+    <env name="image_window_node/right/raw_image_sub_topic_name"
+	 value="/image_window_node/left/image/in/raw" />
+  </node>
+
 </launch>
