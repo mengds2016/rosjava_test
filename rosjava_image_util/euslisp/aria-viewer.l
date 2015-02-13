@@ -24,16 +24,12 @@
 (send-all (send *robot* :joint-list) :min-angle -10000)
 (send-all (send *robot* :joint-list) :max-angle 10000)
 
-(ros::advertise "/sensor_image_node/command/string"
-                std_msgs::string
-                1)
 (ros::advertise "/image_window_node/image/in/raw"
                 sensor_msgs::image
                 1)
 (ros::advertise "/aria_viewer/joint_states"
                 sensor_msgs::jointstate
                 1)
-
 
 (defmethod robot-model
   (:6dof-inverse-kinematics
@@ -347,23 +343,5 @@
   (instance sensor_msgs::jointstate :init
 	    :name (send-all (send *robot* :joint-list) :name)
 	    :position (mapcar #'deg2rad (send-all (send *robot* :joint-list) :joint-angle))))
- ;;(send *viewer* :viewsurface :write-to-image-file *tmp_image_path*)
- ;;(ros::publish "/sensor_image_node/command/string"
- ;;(instance std_msgs::string :init
- ;;:data *tmp_image_path*))
  )
 
-#|
-
-
-(v+ (transform (send *viewer* :viewport :worldrot) v)
-    (send *viewer* :viewport :worldpos))
-
-(let* ((img (send *viewer* :viewsurface :getglimage)))
-  (ros::publish
-   "/image_window_node/image/in/raw"
-   (instance sensor_msgs::image :init
-	     :width (send img :width)
-	     :height (send img :height)
-	     :encoding "rgb8"
-	     :data (send img :entity))))
