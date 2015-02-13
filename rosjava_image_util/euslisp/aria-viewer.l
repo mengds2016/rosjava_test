@@ -14,7 +14,7 @@
 (objects *robot*)
 (send *irtviewer* :change-background #F(1.0 1.0 1.0))
 (send *irtviewer* :title "ARIA VIEWER")
-(send *irtviewer* :resize 400 556)
+;; (send *irtviewer* :resize 400 556)
 (send *irtviewer* :draw-objects)
 
 (send *viewer* :adjust-viewport
