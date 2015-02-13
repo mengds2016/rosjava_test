@@ -21,8 +21,11 @@
       (send *viewer* :viewsurface :width)
       (send *viewer* :viewsurface :height))
 
-;; (send-all (send *robot* :joint-list) :min-angle -10000)
-;; (send-all (send *robot* :joint-list) :max-angle 10000)
+(send-all (send *robot* :joint-list) :min-angle -50)
+(send-all (send *robot* :joint-list) :max-angle 50)
+(send *robot* :head :neck-p :max-angle 20)
+(send *robot* :arms :shouder-y :min-angle -30)
+(send *robot* :arms :shouder-y :max-angle +30)
 
 (ros::advertise "/image_window_node/image/in/raw"
                 sensor_msgs::image
@@ -36,10 +39,10 @@
     (target-coords
      &rest args
      &key (move-target) (link-list)
-     (min (float-vector -5000 -5000  -5000 -200 -200 -100))
-     (max (float-vector  5000  5000   250  200  200  100))
+     (min (float-vector -1000 -1000  -1000 0 0 0))
+     (max (float-vector  1000  1000   1000 0 0 0))
      (root-link-virtual-joint-weight
-      (scale 1e-3 (float-vector 1 1 1 1 1 1)))
+      (scale 1e-3 (float-vector 1 1 1 0 0 0)))
      (joint-args nil)
      &allow-other-keys)
     (with-append-root-joint
@@ -79,12 +82,12 @@
    args
    &key
    (robot *robot*)
-   (move-target (list (send robot :head :end-coords)
+   (move-target (list (send robot :get :reye-end-coords)
+		      (send robot :get :leye-end-coords)
+		      (send robot :head :end-coords)
 		      (send robot :rarm :end-coords)
 		      (send robot :larm :end-coords)
 		      (send robot :torso :end-coords)
-		      (send robot :get :reye-end-coords)
-		      (send robot :get :leye-end-coords)
 		      (send robot :get :relbow-end-coords)
 		      (send robot :get :lelbow-end-coords)
 		      (send robot :get :rshoulder-end-coords)
@@ -93,8 +96,8 @@
 	       #'(lambda (mt)
 		   (send robot :link-list (send mt :parent)))
 	       move-target))
-   (target-msg (list *chin* *left-hand* *right-hand* *pelvis*
-		     *left-eye* *right-eye*
+   (target-msg (list *left-eye* *right-eye*
+		     *chin* *left-hand* *right-hand* *pelvis*
 		     *left-elbow* *right-elbow*
 		     *left-shoulder* *right-shoulder*
 		     ))
@@ -119,6 +122,20 @@
    (revert-if-fail t)
    &allow-other-keys
    )
+  (let* ((d1 (norm (v- (send (car target-coords) :worldpos)
+		       (send (cadr target-coords) :worldpos))))
+	 (d2 (norm (v- (send (car move-target) :worldpos)
+		       (send (cadr move-target) :worldpos))))
+	 (gain -10.0)
+	 (min 10))
+    (print (- d1 d2))
+    (cond
+     ((or (< (aref *right-eye* 0) 0)
+	  (< (aref *left-eye* 0) 0)) 'nop)
+     ((< (abs (- d1 d2)) min) 'conv)
+     (t
+      (send *robot* :translate
+	    (scale (* gain (- d1 d2)) (calc-null-direction)) :world))))
   ;; (send-all target-coords
   ;; :draw-on :flush t :color #F(0 1 0) :size 10)
   ;; (read-line)
@@ -297,10 +314,18 @@
 	(send *viewer* :viewsurface :height))
   (if flush (send *viewer* :draw-objects)))
 
+(defun reset-callback
+  (msg)
+  (send *robot* :reset-pose)
+  (dotimes (i 3) (send *robot* :newcoords (make-coords)))
+  (send *viewer* :draw-objects))
+
 (ros::subscribe "/aria_viewer/window_size"
 		std_msgs::int32multiarray
 		#'window-size-callback)
-
+(ros::subscribe "/image_window_node/drop_file/path"
+		std_msgs::string
+		#'reset-callback)
 (ros::subscribe "/image_window_node/left_shoulder/rect/normalize"
 		std_msgs::float32multiarray
 		#'copy-rect-callback *left-shoulder*)
@@ -342,6 +367,7 @@
  (ros::spin-once)
  (x::window-main-one)
  ;;  (update-head-position :flush nil)
+ 
  (solve-point-ik :stop 3 :debug-view nil :revert-if-fail nil)
  ;; (send *robot* :newcoords
  ;;       (make-coords
