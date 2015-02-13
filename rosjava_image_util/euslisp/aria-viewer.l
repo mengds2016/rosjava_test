@@ -266,7 +266,8 @@
 
 (defun window-size-callback (msg &key (flush nil))
   (if (>= (length (send msg :data)) 2)
-      (send *irtviewer* :resize (aref (send msg :data) 0)
+      (send *irtviewer* :resize
+	    (round (* 0.95 (aref (send msg :data) 0)))
 	    (aref (send msg :data) 1)))
   (send *viewer* :adjust-viewport
 	(send *viewer* :viewsurface :width)
@@ -313,6 +314,12 @@
  (x::window-main-one)
  ;;  (update-head-position :flush nil)
  (solve-point-ik :stop 3 :debug-view nil :revert-if-fail nil)
+ ;; (send *robot* :newcoords
+ ;;       (make-coords
+ ;; 	:rot (copy-object (send *robot* :worldrot))
+ ;; 	:pos (let* ((p (send *robot* :worldpos))
+ ;; 		    (nd (calc-null-direction)))
+ ;; 	       (v- p (scale (v. p nd) nd)))))
  (send *viewer* :draw-objects :flush nil)
  ;;
  ;; (send *viewer* :viewsurface :color #f(1 0 0))
