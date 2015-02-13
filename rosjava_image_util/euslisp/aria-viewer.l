@@ -21,8 +21,8 @@
       (send *viewer* :viewsurface :width)
       (send *viewer* :viewsurface :height))
 
-(send-all (send *robot* :joint-list) :min-angle -10000)
-(send-all (send *robot* :joint-list) :max-angle 10000)
+;; (send-all (send *robot* :joint-list) :min-angle -10000)
+;; (send-all (send *robot* :joint-list) :max-angle 10000)
 
 (ros::advertise "/image_window_node/image/in/raw"
                 sensor_msgs::image
@@ -86,13 +86,18 @@
 		      (send robot :get :reye-end-coords)
 		      (send robot :get :leye-end-coords)
 		      (send robot :get :relbow-end-coords)
-		      (send robot :get :lelbow-end-coords)))
+		      (send robot :get :lelbow-end-coords)
+		      (send robot :get :rshoulder-end-coords)
+		      (send robot :get :lshoulder-end-coords)))
    (link-list (mapcar
 	       #'(lambda (mt)
 		   (send robot :link-list (send mt :parent)))
 	       move-target))
    (target-msg (list *chin* *left-hand* *right-hand* *pelvis*
-		     *left-eye* *right-eye* *left-elbow* *right-elbow*))
+		     *left-eye* *right-eye*
+		     *left-elbow* *right-elbow*
+		     *left-shoulder* *right-shoulder*
+		     ))
    (_screen-target-point
     (mapcar #'screen-to-point (mapcar #'normalize-rectangle-centroid-pos target-msg)))
    (screen-target-point-min-gain
@@ -123,6 +128,9 @@
     (list robot :6dof-inverse-kinematics  target-coords)
     args
     (list
+     ;; :root-link-virtual-joint-weight (float-vector 0 0 0 0 0 0)
+     ;; :min (float-vector 0 0 0 0 0 0)
+     ;; :max (float-vector 0 0 0 0 0 0)
      :move-target move-target
      :link-list link-list
      :translation-axis translation-axis
@@ -174,6 +182,19 @@
        :name :lelbow-end-coords
        :coords (send (send *robot* :larm :elbow-p :child-link) :copy-worldcoords)
        :parent (send *robot* :larm :elbow-p :child-link)))
+
+(send *robot* :put :rshoulder-end-coords
+      (make-cascoords
+       :name :rshoulder-end-coords
+       :coords (send (send *robot* :rarm :shoulder-p :child-link) :copy-worldcoords)
+       :parent (send *robot* :rarm :shoulder-p :child-link)))
+
+(send *robot* :put :lshoulder-end-coords
+      (make-cascoords
+       :name :lshoulder-end-coords
+       :coords (send (send *robot* :larm :shoulder-p :child-link) :copy-worldcoords)
+       :parent (send *robot* :larm :shoulder-p :child-link)))
+
 
 (defun update-head-position
   (&key (flush t))
@@ -250,6 +271,8 @@
   (if flush (send *viewer* :viewsurface :flush))
   ivec)
 
+(defvar *left-shoulder* (float-vector -1 0 0 0))
+(defvar *right-shoulder* (float-vector -1 0 0 0))
 (defvar *left-elbow* (float-vector -1 0 0 0))
 (defvar *right-elbow* (float-vector -1 0 0 0))
 (defvar *left-hand* (float-vector -1 0 0 0))
@@ -278,18 +301,24 @@
 		std_msgs::int32multiarray
 		#'window-size-callback)
 
-(ros::subscribe "/image_window_node/left_hand/rect/normalize"
+(ros::subscribe "/image_window_node/left_shoulder/rect/normalize"
 		std_msgs::float32multiarray
-		#'copy-rect-callback *left-hand*)
-(ros::subscribe "/image_window_node/right_hand/rect/normalize"
+		#'copy-rect-callback *left-shoulder*)
+(ros::subscribe "/image_window_node/right_shoulder/rect/normalize"
 		std_msgs::float32multiarray
-		#'copy-rect-callback *right-hand*)
+		#'copy-rect-callback *right-shoulder*)
 (ros::subscribe "/image_window_node/left_elbow/rect/normalize"
 		std_msgs::float32multiarray
 		#'copy-rect-callback *left-elbow*)
 (ros::subscribe "/image_window_node/right_elbow/rect/normalize"
 		std_msgs::float32multiarray
 		#'copy-rect-callback *right-elbow*)
+(ros::subscribe "/image_window_node/left_hand/rect/normalize"
+		std_msgs::float32multiarray
+		#'copy-rect-callback *left-hand*)
+(ros::subscribe "/image_window_node/right_hand/rect/normalize"
+		std_msgs::float32multiarray
+		#'copy-rect-callback *right-hand*)
 (ros::subscribe "/eus_animeface/eyes/left/rectangle/normalize"
 		std_msgs::float32multiarray
 		#'copy-rect-callback *left-eye*)
