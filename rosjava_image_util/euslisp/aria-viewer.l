@@ -14,19 +14,19 @@
 (objects *robot*)
 (send *irtviewer* :change-background #F(1.0 1.0 1.0))
 (send *irtviewer* :title "ARIA VIEWER")
-(send *irtviewer* :resize 400 556)
+;; (send *irtviewer* :resize 400 556)
 (send *irtviewer* :draw-objects)
 
 (send *viewer* :adjust-viewport
       (send *viewer* :viewsurface :width)
       (send *viewer* :viewsurface :height))
 
-(send-all (send *robot* :joint-list) :min-angle -10000)
-(send-all (send *robot* :joint-list) :max-angle 10000)
+(send-all (send *robot* :joint-list) :min-angle -50)
+(send-all (send *robot* :joint-list) :max-angle 50)
+(send *robot* :head :neck-p :max-angle 20)
+(send *robot* :arms :shouder-y :min-angle -30)
+(send *robot* :arms :shouder-y :max-angle +30)
 
-(ros::advertise "/sensor_image_node/command/string"
-                std_msgs::string
-                1)
 (ros::advertise "/image_window_node/image/in/raw"
                 sensor_msgs::image
                 1)
@@ -34,16 +34,15 @@
                 sensor_msgs::jointstate
                 1)
 
-
 (defmethod robot-model
   (:6dof-inverse-kinematics
     (target-coords
      &rest args
      &key (move-target) (link-list)
-     (min (float-vector -5000 -5000  -5000 -200 -200 -100))
-     (max (float-vector  5000  5000   250  200  200  100))
+     (min (float-vector -1000 -1000  -1000 0 0 0))
+     (max (float-vector  1000  1000   1000 0 0 0))
      (root-link-virtual-joint-weight
-      (scale 1e-3 (float-vector 1 1 1 1 1 1)))
+      (scale 1e-3 (float-vector 1 1 1 0 0 0)))
      (joint-args nil)
      &allow-other-keys)
     (with-append-root-joint
@@ -83,20 +82,25 @@
    args
    &key
    (robot *robot*)
-   (move-target (list (send robot :head :end-coords)
+   (move-target (list (send robot :get :reye-end-coords)
+		      (send robot :get :leye-end-coords)
+		      (send robot :head :end-coords)
 		      (send robot :rarm :end-coords)
 		      (send robot :larm :end-coords)
 		      (send robot :torso :end-coords)
-		      (send robot :get :reye-end-coords)
-		      (send robot :get :leye-end-coords)
 		      (send robot :get :relbow-end-coords)
-		      (send robot :get :lelbow-end-coords)))
+		      (send robot :get :lelbow-end-coords)
+		      (send robot :get :rshoulder-end-coords)
+		      (send robot :get :lshoulder-end-coords)))
    (link-list (mapcar
 	       #'(lambda (mt)
 		   (send robot :link-list (send mt :parent)))
 	       move-target))
-   (target-msg (list *chin* *left-hand* *right-hand* *pelvis*
-		     *left-eye* *right-eye* *left-elbow* *right-elbow*))
+   (target-msg (list *left-eye* *right-eye*
+		     *chin* *left-hand* *right-hand* *pelvis*
+		     *left-elbow* *right-elbow*
+		     *left-shoulder* *right-shoulder*
+		     ))
    (_screen-target-point
     (mapcar #'screen-to-point (mapcar #'normalize-rectangle-centroid-pos target-msg)))
    (screen-target-point-min-gain
@@ -118,6 +122,20 @@
    (revert-if-fail t)
    &allow-other-keys
    )
+  (let* ((d1 (norm (v- (send (car target-coords) :worldpos)
+		       (send (cadr target-coords) :worldpos))))
+	 (d2 (norm (v- (send (car move-target) :worldpos)
+		       (send (cadr move-target) :worldpos))))
+	 (gain -10.0)
+	 (min 10))
+    (print (- d1 d2))
+    (cond
+     ((or (< (aref *right-eye* 0) 0)
+	  (< (aref *left-eye* 0) 0)) 'nop)
+     ((< (abs (- d1 d2)) min) 'conv)
+     (t
+      (send *robot* :translate
+	    (scale (* gain (- d1 d2)) (calc-null-direction)) :world))))
   ;; (send-all target-coords
   ;; :draw-on :flush t :color #F(0 1 0) :size 10)
   ;; (read-line)
@@ -127,6 +145,9 @@
     (list robot :6dof-inverse-kinematics  target-coords)
     args
     (list
+     ;; :root-link-virtual-joint-weight (float-vector 0 0 0 0 0 0)
+     ;; :min (float-vector 0 0 0 0 0 0)
+     ;; :max (float-vector 0 0 0 0 0 0)
      :move-target move-target
      :link-list link-list
      :translation-axis translation-axis
@@ -178,6 +199,19 @@
        :name :lelbow-end-coords
        :coords (send (send *robot* :larm :elbow-p :child-link) :copy-worldcoords)
        :parent (send *robot* :larm :elbow-p :child-link)))
+
+(send *robot* :put :rshoulder-end-coords
+      (make-cascoords
+       :name :rshoulder-end-coords
+       :coords (send (send *robot* :rarm :shoulder-p :child-link) :copy-worldcoords)
+       :parent (send *robot* :rarm :shoulder-p :child-link)))
+
+(send *robot* :put :lshoulder-end-coords
+      (make-cascoords
+       :name :lshoulder-end-coords
+       :coords (send (send *robot* :larm :shoulder-p :child-link) :copy-worldcoords)
+       :parent (send *robot* :larm :shoulder-p :child-link)))
+
 
 (defun update-head-position
   (&key (flush t))
@@ -254,6 +288,8 @@
   (if flush (send *viewer* :viewsurface :flush))
   ivec)
 
+(defvar *left-shoulder* (float-vector -1 0 0 0))
+(defvar *right-shoulder* (float-vector -1 0 0 0))
 (defvar *left-elbow* (float-vector -1 0 0 0))
 (defvar *right-elbow* (float-vector -1 0 0 0))
 (defvar *left-hand* (float-vector -1 0 0 0))
@@ -270,29 +306,44 @@
 
 (defun window-size-callback (msg &key (flush nil))
   (if (>= (length (send msg :data)) 2)
-      (send *irtviewer* :resize (aref (send msg :data) 0)
+      (send *irtviewer* :resize
+	    (round (* 0.95 (aref (send msg :data) 0)))
 	    (aref (send msg :data) 1)))
   (send *viewer* :adjust-viewport
 	(send *viewer* :viewsurface :width)
 	(send *viewer* :viewsurface :height))
   (if flush (send *viewer* :draw-objects)))
 
+(defun reset-callback
+  (msg)
+  (send *robot* :reset-pose)
+  (dotimes (i 3) (send *robot* :newcoords (make-coords)))
+  (send *viewer* :draw-objects))
+
 (ros::subscribe "/aria_viewer/window_size"
 		std_msgs::int32multiarray
 		#'window-size-callback)
-
-(ros::subscribe "/image_window_node/left_hand/rect/normalize"
+(ros::subscribe "/image_window_node/drop_file/path"
+		std_msgs::string
+		#'reset-callback)
+(ros::subscribe "/image_window_node/left_shoulder/rect/normalize"
 		std_msgs::float32multiarray
-		#'copy-rect-callback *left-hand*)
-(ros::subscribe "/image_window_node/right_hand/rect/normalize"
+		#'copy-rect-callback *left-shoulder*)
+(ros::subscribe "/image_window_node/right_shoulder/rect/normalize"
 		std_msgs::float32multiarray
-		#'copy-rect-callback *right-hand*)
+		#'copy-rect-callback *right-shoulder*)
 (ros::subscribe "/image_window_node/left_elbow/rect/normalize"
 		std_msgs::float32multiarray
 		#'copy-rect-callback *left-elbow*)
 (ros::subscribe "/image_window_node/right_elbow/rect/normalize"
 		std_msgs::float32multiarray
 		#'copy-rect-callback *right-elbow*)
+(ros::subscribe "/image_window_node/left_hand/rect/normalize"
+		std_msgs::float32multiarray
+		#'copy-rect-callback *left-hand*)
+(ros::subscribe "/image_window_node/right_hand/rect/normalize"
+		std_msgs::float32multiarray
+		#'copy-rect-callback *right-hand*)
 (ros::subscribe "/eus_animeface/eyes/left/rectangle/normalize"
 		std_msgs::float32multiarray
 		#'copy-rect-callback *left-eye*)
@@ -316,7 +367,14 @@
  (ros::spin-once)
  (x::window-main-one)
  ;;  (update-head-position :flush nil)
+ 
  (solve-point-ik :stop 3 :debug-view nil :revert-if-fail nil)
+ ;; (send *robot* :newcoords
+ ;;       (make-coords
+ ;; 	:rot (copy-object (send *robot* :worldrot))
+ ;; 	:pos (let* ((p (send *robot* :worldpos))
+ ;; 		    (nd (calc-null-direction)))
+ ;; 	       (v- p (scale (v. p nd) nd)))))
  (send *viewer* :draw-objects :flush nil)
  ;;
  ;; (send *viewer* :viewsurface :color #f(1 0 0))
@@ -347,23 +405,5 @@
   (instance sensor_msgs::jointstate :init
 	    :name (send-all (send *robot* :joint-list) :name)
 	    :position (mapcar #'deg2rad (send-all (send *robot* :joint-list) :joint-angle))))
- ;;(send *viewer* :viewsurface :write-to-image-file *tmp_image_path*)
- ;;(ros::publish "/sensor_image_node/command/string"
- ;;(instance std_msgs::string :init
- ;;:data *tmp_image_path*))
  )
 
-#|
-
-
-(v+ (transform (send *viewer* :viewport :worldrot) v)
-    (send *viewer* :viewport :worldpos))
-
-(let* ((img (send *viewer* :viewsurface :getglimage)))
-  (ros::publish
-   "/image_window_node/image/in/raw"
-   (instance sensor_msgs::image :init
-	     :width (send img :width)
-	     :height (send img :height)
-	     :encoding "rgb8"
-	     :data (send img :entity))))
