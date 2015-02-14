@@ -55,7 +55,7 @@ public class TextPubNode implements NodeMain {
 								|| actionId == EditorInfo.IME_ACTION_DONE
 								|| event.getAction() == KeyEvent.ACTION_DOWN
 								&& event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
-							if (!event.isShiftPressed()) {
+							if (event == null || !event.isShiftPressed()) {
 								std_msgs.String msg = TextPubNode.this.text_pub.newMessage();
 								msg.setData(TextPubNode.this.edit_text.getText().toString());
 								TextPubNode.this.text_pub.publish(msg);

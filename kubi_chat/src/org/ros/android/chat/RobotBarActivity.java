@@ -131,6 +131,7 @@ public class RobotBarActivity extends RosDialogActivity implements SurfaceHolder
 				RobotBarActivity.this.startActivity(i);
 			}
 		} );
+		
 	}
 	
 	public void initializeNodes(){
@@ -138,11 +139,13 @@ public class RobotBarActivity extends RosDialogActivity implements SurfaceHolder
 		this.chatnode = new RosChatNode(this.getApplicationContext());
 
 		this.image_view_left = (CompressedImageView) findViewById(R.id.compressed_image_view_left) ;
+		this.image_view_left.setNodeName(node_name + "/image_view_left");
 		this.image_view_left.setTopicName( node_name + "/request/" + "image_left/raw/compressed") ;
 		this.image_view_left.setMessageType(sensor_msgs.CompressedImage._TYPE);
 		this.image_view_left.setTalker(this.chatnode) ;
 		
 		this.image_view_right = (CompressedImageView) findViewById(R.id.compressed_image_view_right) ;
+		this.image_view_right.setNodeName(node_name + "/image_view_right");
 		this.image_view_right.setTopicName( node_name + "/request/" + "image_right/raw/compressed") ;
 		this.image_view_right.setMessageType(sensor_msgs.CompressedImage._TYPE);
 		this.image_view_right.setTalker(this.chatnode) ;
