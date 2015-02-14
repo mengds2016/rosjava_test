@@ -12,12 +12,12 @@
         android:gravity="center"
         android:orientation="horizontal" >
 
-        <Button
+        <ImageButton
             android:id="@+id/pose_craete_back_to_home_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:background="@drawable/ic_menu_revert" />
+            android:src="@drawable/ic_menu_revert" />
 
         <View
             android:layout_width="0dp"
@@ -44,12 +44,12 @@
             android:layout_weight="1"
             android:hint="Pose title..." />
 
-        <Button
+        <ImageButton
             android:id="@+id/pose_register_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:background="@drawable/ic_input_add" />
+            android:src="@drawable/ic_input_add" />
 
         <View
             android:layout_width="100dp"
