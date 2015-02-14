@@ -34,7 +34,7 @@
     </LinearLayout>
     
     <View
-        android:layout_width="fill_parent"
+        android:layout_width="1dp"
         android:layout_height="0dp"
         android:layout_weight="1" />
 
@@ -71,7 +71,7 @@
     </LinearLayout>
 
     <View
-        android:layout_width="fill_parent"
+        android:layout_width="1dp"
         android:layout_height="0dp"
         android:layout_weight="1" />
 
@@ -108,7 +108,7 @@
     </LinearLayout>
 
     <View
-        android:layout_width="fill_parent"
+        android:layout_width="1dp"
         android:layout_height="0dp"
         android:layout_weight="1" />
 
@@ -120,7 +120,7 @@
 
         <View
             android:layout_width="30dp"
-            android:layout_height="fill_parent"
+            android:layout_height="1dp"
             android:layout_weight="0" />
 
         <ImageView
@@ -133,7 +133,7 @@
 
         <View
             android:layout_width="30dp"
-            android:layout_height="fill_parent"
+            android:layout_height="1dp"
             android:layout_weight="0" />
 
         <HorizontalScrollView
@@ -165,7 +165,7 @@
     </LinearLayout>
 
     <View
-        android:layout_width="fill_parent"
+        android:layout_width="1dp"
         android:layout_height="0dp"
         android:layout_weight="1" />
 

@@ -7,14 +7,14 @@
 
     <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
         android:gravity="center"
         android:orientation="horizontal" >
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="0"
             android:gravity="center"
             android:orientation="horizontal" >
@@ -22,7 +22,7 @@
             <ToggleButton
                 android:id="@+id/kubi_toggle_button"
                 android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
+                android:layout_height="wrap_content"
                 android:disabledAlpha="0.3"
                 android:textOff="首"
                 android:textOn="首" />
@@ -30,7 +30,7 @@
             <ToggleButton
                 android:id="@+id/me_toggle_button"
                 android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
+                android:layout_height="wrap_content"
                 android:disabledAlpha="0.3"
                 android:textOff="目"
                 android:textOn="目" />
@@ -38,7 +38,7 @@
             <ToggleButton
                 android:id="@+id/mimi_toggle_button"
                 android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
+                android:layout_height="wrap_content"
                 android:disabledAlpha="0.3"
                 android:textOff="耳"
                 android:textOn="耳" />
@@ -46,7 +46,7 @@
             <ToggleButton
                 android:id="@+id/oto_toggle_button"
                 android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
+                android:layout_height="wrap_content"
                 android:disabledAlpha="0.3"
                 android:textOff="音"
                 android:textOn="音" />
@@ -60,7 +60,7 @@
         <Button
             android:id="@+id/demo_craete_move_button"
             android:layout_width="130dp"
-            android:layout_height="fill_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="0"
             android:drawableRight="@drawable/ic_menu_forward"
             android:text="デモ作成" />
