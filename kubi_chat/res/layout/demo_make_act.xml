@@ -123,18 +123,26 @@
             android:layout_height="1dp"
             android:layout_weight="0" />
 
-        <ImageView
-            android:id="@+id/selected_pose_image_view"
+        <!--
+        <LinearLayout
+	        android:id="@+id/selected_pose_image_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:scaleType="fitXY"
-            android:src="@drawable/fuza1" />
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:scaleType="fitXY"
+                android:src="@drawable/fuza1" />
+        </LinearLayout>
 
         <View
             android:layout_width="30dp"
             android:layout_height="1dp"
             android:layout_weight="0" />
+        -->
 
         <HorizontalScrollView
             android:layout_width="0dp"
@@ -146,12 +154,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent" >
 
-                 <ImageButton
+                <ImageButton
                     android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
                     android:adjustViewBounds="true"
                     android:scaleType="fitXY"
                     android:src="@drawable/fuza1"
+                    android:onClick="onClickMotionIcon"
                     android:tag="fuza1" />
 
                 <ImageButton
@@ -160,14 +169,16 @@
                     android:adjustViewBounds="true"
                     android:scaleType="fitXY"
                     android:src="@drawable/fuza2"
+                    android:onClick="onClickMotionIcon"
                     android:tag="fuza2" />
-                
+
                 <ImageButton
                     android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
                     android:adjustViewBounds="true"
                     android:scaleType="fitXY"
                     android:src="@drawable/my1"
+                    android:onClick="onClickMotionIcon"
                     android:tag="my1" />
 
                 <ImageButton
@@ -176,6 +187,7 @@
                     android:adjustViewBounds="true"
                     android:scaleType="fitXY"
                     android:src="@drawable/my2"
+                    android:onClick="onClickMotionIcon"
                     android:tag="my2" />
 
                 <ImageButton
@@ -184,14 +196,16 @@
                     android:adjustViewBounds="true"
                     android:scaleType="fitXY"
                     android:src="@drawable/my3"
+                    android:onClick="onClickMotionIcon"
                     android:tag="my3" />
-                
-                 <ImageButton
+
+                <ImageButton
                     android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
                     android:adjustViewBounds="true"
                     android:scaleType="fitXY"
                     android:src="@drawable/my4"
+                    android:onClick="onClickMotionIcon"
                     android:tag="my4" />
             </LinearLayout>
         </HorizontalScrollView>
