@@ -32,11 +32,12 @@
             android:drawableRight="@drawable/ic_menu_forward"
             android:text="動作作成" />
     </LinearLayout>
-    
-     <View android:layout_width="1dp"
-           android:layout_height="10dp"
-           android:layout_weight="0" />
-    
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="10dp"
+        android:layout_weight="0" />
+
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -68,10 +69,11 @@
             android:layout_height="1dp"
             android:layout_weight="0" />
     </LinearLayout>
-    
-     <View android:layout_width="1dp"
-           android:layout_height="10dp"
-           android:layout_weight="0" />
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="10dp"
+        android:layout_weight="0" />
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -105,10 +107,11 @@
             android:layout_weight="0" />
     </LinearLayout>
 
-     <View android:layout_width="1dp"
-           android:layout_height="10dp"
-           android:layout_weight="0" />
-     
+    <View
+        android:layout_width="1dp"
+        android:layout_height="10dp"
+        android:layout_weight="0" />
+
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="100dp"
@@ -143,28 +146,38 @@
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent" >
 
-                <Button
-                    android:layout_width="100dp"
+                <ImageButton
+                    android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
-                    android:text="ぽ" />
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/my1"
+                    android:tag="my1" />
 
-                <Button
-                    android:layout_width="100dp"
+                <ImageButton
+                    android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
-                    android:text="ー" />
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/my2"
+                    android:tag="my2" />
 
-                <Button
-                    android:layout_width="100dp"
+                <ImageButton
+                    android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
-                    android:text="ず" />
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/my3"
+                    android:tag="my3" />
             </LinearLayout>
         </HorizontalScrollView>
     </LinearLayout>
 
-     <View android:layout_width="1dp"
-           android:layout_height="0dp"
-           android:layout_weight="1" />
-     
+    <View
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
     <!--
     <HorizontalScrollView
         android:layout_width="fill_parent"
