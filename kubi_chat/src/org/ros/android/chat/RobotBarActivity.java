@@ -410,13 +410,7 @@ public class RobotBarActivity extends RosDialogActivity implements
 	// }
 	// }
 
-	@Override
-	public void onResume() {
-		super.onResume();
-		if (this.pose_node != null) {
-			this.pose_node.onResume();
-		}
-
+	public void updateDemoIcons(){
 		if ( rb_node != null ){
 			new Thread(new Runnable() {
 				@Override
@@ -472,6 +466,15 @@ public class RobotBarActivity extends RosDialogActivity implements
 				}
 			}).start();
 		}
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		if (this.pose_node != null) {
+			this.pose_node.onResume();
+		}
+		updateDemoIcons();
 	}
 
 	@Override

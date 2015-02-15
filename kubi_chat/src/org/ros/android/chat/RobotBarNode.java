@@ -9,23 +9,22 @@ import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 import org.ros.node.parameter.ParameterTree;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 public class RobotBarNode extends AbstractNodeMain {
 
 	final private String TAG = "RobotBarNode";
-	private Context context;
+	private RobotBarActivity context;
 	private ParameterTree rosparam;
-	final private static String demo_head_string = "/robot_bar/demo";
-	final private static String motion_head_string = "/robot_bar/motion";
-	final private static String sound_head_string = "/robot_bar/sound";
+	final public static String demo_head_string = "/robot_bar/demo";
+	final public static String motion_head_string = "/robot_bar/motion";
+	final public static String sound_head_string = "/robot_bar/sound";
 
 //	private String[] default_motion_tag = new String[] { "fuza1", "fuza2",
 //			"my1", "my2", "my3", "my4" };
 
-	public RobotBarNode(Context con) {
+	public RobotBarNode(RobotBarActivity con) {
 		this.context = con;
 	}
 
@@ -37,7 +36,7 @@ public class RobotBarNode extends AbstractNodeMain {
 	@Override
 	public void onStart(final ConnectedNode connectedNode) {
 		this.rosparam = connectedNode.getParameterTree();
-
+		this.context.updateDemoIcons();
 		// for (String imageName : this.default_motion_tag) {
 		// R.drawable rDrawable = new R.drawable();
 		// Field field;

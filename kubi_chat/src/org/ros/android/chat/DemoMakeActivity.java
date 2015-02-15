@@ -1,10 +1,14 @@
 package org.ros.android.chat;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,12 +25,13 @@ public class DemoMakeActivity extends Activity {
 
 	final private String TAG = "DemoMakeActivity";
 
-	private EditText edit_text;
+	private EditText demo_title_edit;
 	private ImageButton back_button;
 	private Button move_to_pose_button;
+	private ImageButton register_button;
 
-	private LinearLayout tagged_demo_button;
-//	private LinearLayout selected_motion_layout;
+	private LinearLayout tagged_motion_button_layout;
+	// private LinearLayout selected_motion_layout;
 	private View selected_motion_view;
 	private ArrayList<TaggedIcon> demo_icons;
 
@@ -36,11 +41,12 @@ public class DemoMakeActivity extends Activity {
 		setContentView(R.layout.demo_make_act);
 
 		this.demo_icons = new ArrayList<TaggedIcon>();
-		this.tagged_demo_button = (LinearLayout) this
+		this.tagged_motion_button_layout = (LinearLayout) this
 				.findViewById(R.id.taged_pose_image_buttons);
-//		this.selected_motion_layout = (LinearLayout) this
-//				.findViewById(R.id.selected_pose_image_view);
-		this.selected_motion_view = this.tagged_demo_button.getChildAt(0);
+		// this.selected_motion_layout = (LinearLayout) this
+		// .findViewById(R.id.selected_pose_image_view);
+		this.selected_motion_view = this.tagged_motion_button_layout
+				.getChildAt(0);
 		this.selected_motion_view.setBackgroundColor(Color.GREEN);
 
 		this.back_button = (ImageButton) findViewById(R.id.demo_craete_back_to_home_button);
@@ -60,18 +66,42 @@ public class DemoMakeActivity extends Activity {
 				DemoMakeActivity.this.startActivity(i);
 			}
 		});
+
+		this.demo_title_edit = (EditText) findViewById(R.id.demo_title_edit);
+		this.register_button = (ImageButton) findViewById(R.id.demo_register_button);
+		this.register_button.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (RobotBarActivity.rb_node != null
+						&& DemoMakeActivity.this.demo_title_edit.getText()
+								.length() > 0) {
+					byte[] icon = null;
+					try {
+						ImageButton ib = (ImageButton) DemoMakeActivity.this.selected_motion_view;
+						BitmapDrawable bd = (BitmapDrawable) ib.getDrawable();
+						Bitmap bm = bd.getBitmap();
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						bm.compress(CompressFormat.PNG, 50, baos);
+						icon = baos.toByteArray();
+					} catch (Exception e) {
+					}
+					RobotBarActivity.rb_node.registerDemo(
+							DemoMakeActivity.this.demo_title_edit.getText()
+									.toString(), icon,
+							DemoMakeActivity.this.selected_motion_view.getTag()
+									.toString(), null);
+				}
+			}
+		});
 	}
 
-	@Override
-	public void onResume() {
-		super.onResume();
-
+	public void updateMotionIcons(){
 		if (RobotBarActivity.rb_node != null) {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
 					int cnt = RobotBarActivity.rb_node
-							.getNewDemos(DemoMakeActivity.this.demo_icons);
+							.getNewDemos(DemoMakeActivity.this.demo_icons, RobotBarActivity.rb_node.motion_head_string);
 					for (int i = 0; i < cnt; i++) {
 						TaggedIcon ic = DemoMakeActivity.this.demo_icons.get(i);
 						if (ic.icon != null) {
@@ -91,7 +121,7 @@ public class DemoMakeActivity extends Activity {
 							DemoMakeActivity.this.runOnUiThread(new Runnable() {
 								@Override
 								public void run() {
-									DemoMakeActivity.this.tagged_demo_button
+									DemoMakeActivity.this.tagged_motion_button_layout
 											.addView(imageButton);
 								}
 							});
@@ -108,7 +138,7 @@ public class DemoMakeActivity extends Activity {
 							DemoMakeActivity.this.runOnUiThread(new Runnable() {
 								@Override
 								public void run() {
-									DemoMakeActivity.this.tagged_demo_button
+									DemoMakeActivity.this.tagged_motion_button_layout
 											.addView(bt);
 								}
 							});
@@ -117,18 +147,25 @@ public class DemoMakeActivity extends Activity {
 				}
 			}).start();
 		}
-
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		updateMotionIcons();
 	}
 
 	public void onClickMotionIcon(final View v) {
 		this.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				DemoMakeActivity.this.selected_motion_view.setBackgroundColor(Color.GRAY);
+				DemoMakeActivity.this.selected_motion_view
+						.setBackgroundColor(Color.GRAY);
 				DemoMakeActivity.this.selected_motion_view = v;
-				DemoMakeActivity.this.selected_motion_view.setBackgroundColor(Color.GREEN);
-				//DemoMakeActivity.this.selected_motion_layout.removeAllViews();
-				//DemoMakeActivity.this.selected_motion_layout.addView(v);
+				DemoMakeActivity.this.selected_motion_view
+						.setBackgroundColor(Color.GREEN);
+				// DemoMakeActivity.this.selected_motion_layout.removeAllViews();
+				// DemoMakeActivity.this.selected_motion_layout.addView(v);
 			}
 		});
 	}
