@@ -100,6 +100,28 @@ public class RobotBarNode extends AbstractNodeMain {
 		}
 		this.rosparam.set(demo_head_string + "/tag", tags);
 	}
+	
+	public void registerSound(String tag, String voice_text, byte[] data, byte[] icon) {
+		if ( this.rosparam == null || tag == null ) return ;
+		if (icon != null) {
+			this.rosparam.set(sound_head_string + "/" + tag + "/icon",
+					Base64.encode(icon));
+		}
+		if (voice_text != null) {
+			this.rosparam.set(sound_head_string + "/" + tag + "/text", voice_text);
+		}
+		if (data != null) {
+			this.rosparam.set(sound_head_string + "/" + tag + "/data", Base64.encode(data));
+		}
+		String tags;
+		if (!this.rosparam.has(sound_head_string + "/tag")) {
+			tags = tag;
+		} else {
+			tags = this.rosparam.getString(sound_head_string + "/tag") + " "
+					+ tag;
+		}
+		this.rosparam.set(sound_head_string + "/tag", tags);
+	}
 
 	public TaggedIcon genTaggedIconWithTag(String tag, String head) {
 		String data;

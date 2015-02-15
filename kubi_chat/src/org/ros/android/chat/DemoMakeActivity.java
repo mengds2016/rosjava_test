@@ -25,7 +25,7 @@ public class DemoMakeActivity extends Activity {
 
 	final private String TAG = "DemoMakeActivity";
 
-	private EditText demo_title_edit;
+	private EditText demo_title_edit, voice_text_edit;
 	private ImageButton back_button;
 	private Button move_to_pose_button;
 	private ImageButton register_button;
@@ -68,6 +68,7 @@ public class DemoMakeActivity extends Activity {
 		});
 
 		this.demo_title_edit = (EditText) findViewById(R.id.demo_title_edit);
+		this.voice_text_edit = (EditText) findViewById(R.id.voice_text_edit);
 		this.register_button = (ImageButton) findViewById(R.id.demo_register_button);
 		this.register_button.setOnClickListener(new OnClickListener() {
 			@Override
@@ -85,23 +86,33 @@ public class DemoMakeActivity extends Activity {
 						icon = baos.toByteArray();
 					} catch (Exception e) {
 					}
+					String voice_text = DemoMakeActivity.this.voice_text_edit
+							.getText().toString();
+					if (voice_text.length() > 0) {
+						RobotBarActivity.rb_node.registerSound(
+								DemoMakeActivity.this.demo_title_edit.getText()
+										.toString(), voice_text, null, null);
+					}
 					RobotBarActivity.rb_node.registerDemo(
 							DemoMakeActivity.this.demo_title_edit.getText()
 									.toString(), icon,
 							DemoMakeActivity.this.selected_motion_view.getTag()
-									.toString(), null);
+									.toString(),
+							DemoMakeActivity.this.demo_title_edit.getText()
+									.toString());
 				}
 			}
 		});
 	}
 
-	public void updateMotionIcons(){
+	public void updateMotionIcons() {
 		if (RobotBarActivity.rb_node != null) {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
-					int cnt = RobotBarActivity.rb_node
-							.getNewDemos(DemoMakeActivity.this.demo_icons, RobotBarActivity.rb_node.motion_head_string);
+					int cnt = RobotBarActivity.rb_node.getNewDemos(
+							DemoMakeActivity.this.demo_icons,
+							RobotBarActivity.rb_node.motion_head_string);
 					for (int i = 0; i < cnt; i++) {
 						TaggedIcon ic = DemoMakeActivity.this.demo_icons.get(i);
 						if (ic.icon != null) {
@@ -148,7 +159,7 @@ public class DemoMakeActivity extends Activity {
 			}).start();
 		}
 	}
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();
