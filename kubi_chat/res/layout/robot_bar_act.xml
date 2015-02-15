@@ -203,20 +203,45 @@
             android:layout_width="wrap_content"
             android:layout_height="fill_parent" >
 
-            <Button
-                android:layout_width="300dp"
+            <ImageButton
+                android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
-                android:text="A" />
+                android:adjustViewBounds="true"
+                android:scaleType="fitXY"
+                android:src="@drawable/my1"
+                android:tag="my1" />
 
-            <Button
-                android:layout_width="300dp"
+            <ImageButton
+                android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
-                android:text="B" />
+                android:adjustViewBounds="true"
+                android:scaleType="fitXY"
+                android:src="@drawable/my2"
+                android:tag="my2" />
 
-            <Button
-                android:layout_width="300dp"
+            <ImageButton
+                android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
-                android:text="C" />
+                android:adjustViewBounds="true"
+                android:scaleType="fitXY"
+                android:src="@drawable/my3"
+                android:tag="my3" />
+            
+             <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:adjustViewBounds="true"
+                android:scaleType="fitXY"
+                android:src="@drawable/my4"
+                android:tag="my4" />
+            
+            <Button
+                android:layout_width="80dp"
+                android:layout_height="fill_parent"
+                android:adjustViewBounds="true"
+                android:scaleType="fitXY"
+                android:text="  my5  "
+                android:tag="my5" />
         </LinearLayout>
     </HorizontalScrollView>
 
