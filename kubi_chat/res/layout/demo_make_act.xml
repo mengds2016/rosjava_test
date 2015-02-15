@@ -118,12 +118,12 @@
         android:layout_weight="0"
         android:orientation="horizontal" >
 
+                <!--
         <View
             android:layout_width="30dp"
             android:layout_height="1dp"
             android:layout_weight="0" />
 
-        <!--
         <LinearLayout
 	        android:id="@+id/selected_pose_image_view"
             android:layout_width="wrap_content"
