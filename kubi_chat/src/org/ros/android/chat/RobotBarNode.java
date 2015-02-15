@@ -19,9 +19,11 @@ public class RobotBarNode extends AbstractNodeMain {
 	private Context context;
 	private ParameterTree rosparam;
 	final private static String demo_head_string = "/robot_bar/demo";
+	final private static String motion_head_string = "/robot_bar/motion";
+	final private static String sound_head_string = "/robot_bar/sound";
 
-	private String[] default_motion_tag = new String[] { "fuza1", "fuza2",
-			"my1", "my2", "my3", "my4" };
+//	private String[] default_motion_tag = new String[] { "fuza1", "fuza2",
+//			"my1", "my2", "my3", "my4" };
 
 	public RobotBarNode(Context con) {
 		this.context = con;
@@ -51,11 +53,15 @@ public class RobotBarNode extends AbstractNodeMain {
 		// }
 		// }
 	}
+	
+	public int getNewDemos(ArrayList<TaggedIcon> oldDemo){
+		return getNewDemos(oldDemo, demo_head_string);
+	}
 
-	public int getNewDemos(ArrayList<TaggedIcon> oldDemo) {
+	public int getNewDemos(ArrayList<TaggedIcon> oldDemo, String head) {
 		int ret = 0;
-		if (this.rosparam != null && this.rosparam.has(demo_head_string + "/tag")) {
-			String tags = this.rosparam.getString(demo_head_string + "/tag");
+		if (this.rosparam != null && this.rosparam.has(head + "/tag")) {
+			String tags = this.rosparam.getString(head + "/tag");
 			String[] tags_array = tags.split(" ");
 			for (String tag : tags_array) {
 				boolean isOld = false;
@@ -67,7 +73,7 @@ public class RobotBarNode extends AbstractNodeMain {
 				}
 				if (!isOld) {
 					ret++;
-					oldDemo.add(this.genTaggedIconWithTag(tag));
+					oldDemo.add(this.genTaggedIconWithTag(tag, head));
 				}
 			}
 		}
@@ -96,7 +102,7 @@ public class RobotBarNode extends AbstractNodeMain {
 		this.rosparam.set(demo_head_string + "/tag", tags);
 	}
 
-	public TaggedIcon genTaggedIconWithTag(String tag) {
+	public TaggedIcon genTaggedIconWithTag(String tag, String head) {
 		String data;
 		if (this.rosparam != null && this.rosparam.has(demo_head_string + "/" + tag + "/icon")) {
 			data = this.rosparam.getString(demo_head_string + "/" + tag
