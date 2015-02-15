@@ -1,6 +1,7 @@
 package org.ros.android.chat;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Intent;
@@ -25,6 +26,7 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import org.ros.android.RosDialogActivity;
+import org.ros.android.chat.RobotBarNode.TaggedIcon;
 import org.ros.android.chat.RosChatNode.RosFloatVectorCallback;
 import org.ros.android.chat.RosChatNode.RosStringCallback;
 import org.ros.android.chat.R;
@@ -56,6 +58,7 @@ public class RobotBarActivity extends RosDialogActivity implements
 	private AndroidPosePubNode pose_node;
 	private KubiControlNode kubi_node;
 	private TextPubNode text_node;
+	public static RobotBarNode rb_node;
 
 	private Button move_to_demo_button;
 
@@ -70,6 +73,8 @@ public class RobotBarActivity extends RosDialogActivity implements
 	}
 
 	private LinearLayout toggle_button_layout;
+	private LinearLayout tagged_demo_button;
+	private ArrayList<TaggedIcon> demo_icons;
 
 	public RobotBarActivity() {
 		super(node_name, node_name, node_name);
@@ -83,51 +88,13 @@ public class RobotBarActivity extends RosDialogActivity implements
 		this.image_publishing = false;
 
 		this.toggle_button_layout = (LinearLayout) findViewById(R.id.toggle_button_outer);
+		this.tagged_demo_button = (LinearLayout) findViewById(R.id.taged_image_buttons);
+		this.demo_icons = new ArrayList<TaggedIcon>();
 
 		this.surf = (SurfaceView) findViewById(R.id.camera_surface);
 		SurfaceHolder holder = this.surf.getHolder();
 		holder.addCallback(this);
 		holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-
-		// replace tagged button images
-		// LinearLayout tagged_button = (LinearLayout)
-		// findViewById(R.id.taged_image_buttons) ;
-		// tagged_button.removeAllViews();
-		// if ( client_p ){
-		// // replace tagged button images
-		// String[] tagNames = new
-		// String[]{"fuza1","fuza2","my1","my2","my3","my4"};
-		// for (String imageName : tagNames) {
-		// R.drawable rDrawable = new R.drawable();
-		// Field field;
-		// int resId;
-		// try {
-		// field = rDrawable.getClass().getField(imageName);
-		// resId = field.getInt(rDrawable);
-		// Bitmap image = BitmapFactory.decodeResource(getResources(),
-		// resId);
-		// //
-		// ImageButton imageButton = new ImageButton(this);
-		// imageButton.setScaleType(ScaleType.FIT_XY);
-		// imageButton.setAdjustViewBounds(true);
-		// imageButton.setImageBitmap(image);
-		// imageButton.setTag(imageName);
-		// imageButton.setOnClickListener(new OnClickListener(){
-		// @Override
-		// public void onClick(View v) {
-		// RobotBarActivity.this.chatnode.publishStringStatus("tag:" +
-		// v.getTag());
-		// }
-		// });
-		// tagged_button.addView(imageButton);
-		// } catch (Exception e) {
-		// System.out.println("[place tagged image] " + imageName + " fail!! ");
-		// e.printStackTrace();
-		// }
-		// }
-		// } else {
-		// tagged_button.setWeightSum(0);
-		// }
 
 		this.move_to_demo_button = (Button) findViewById(R.id.demo_craete_move_button);
 		this.move_to_demo_button.setOnClickListener(new OnClickListener() {
@@ -154,7 +121,7 @@ public class RobotBarActivity extends RosDialogActivity implements
 			for (int i = 0; i < this.toggle_button_layout.getChildCount(); i++) {
 				ToggleButton tb = (ToggleButton) this.toggle_button_layout
 						.getChildAt(i);
-				if ( tb.isChecked() ){
+				if (tb.isChecked()) {
 					msg += "o";
 				} else {
 					msg += "x";
@@ -246,13 +213,15 @@ public class RobotBarActivity extends RosDialogActivity implements
 		if (!client_p) {
 			this.kubi_node = new KubiControlNode(this, node_name);
 		}
+
+		rb_node = new RobotBarNode(this);
 	}
 
 	@Override
 	protected void init(NodeMainExecutor nodeMainExecutor) {
 
 		initializeNodes();
-		
+
 		NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(
 				getHostname(), getMasterUri());
 		this.runOnUiThread(new Runnable() {
@@ -274,6 +243,7 @@ public class RobotBarActivity extends RosDialogActivity implements
 		nodeMainExecutor.execute(this.text_node, nodeConfiguration);
 		if (this.kubi_node != null)
 			nodeMainExecutor.execute(this.kubi_node, nodeConfiguration);
+		nodeMainExecutor.execute(rb_node, nodeConfiguration);
 
 		// vibration
 		nodeMainExecutor.execute(new AbstractNodeMain() {
@@ -446,6 +416,62 @@ public class RobotBarActivity extends RosDialogActivity implements
 		if (this.pose_node != null) {
 			this.pose_node.onResume();
 		}
+
+		if ( rb_node != null ){
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					int cnt = rb_node
+							.getNewDemos(RobotBarActivity.this.demo_icons);
+					for (int i = 0; i < cnt; i++) {
+						TaggedIcon ic = RobotBarActivity.this.demo_icons.get(i);
+						if (ic.icon != null) {
+							final ImageButton imageButton = new ImageButton(
+									RobotBarActivity.this);
+							imageButton.setScaleType(ScaleType.FIT_XY);
+							imageButton.setAdjustViewBounds(true);
+							imageButton.setImageBitmap(ic.icon);
+							imageButton.setTag(ic.tag);
+							imageButton
+									.setOnClickListener(new OnClickListener() {
+										@Override
+										public void onClick(View v) {
+											RobotBarActivity.this.chatnode
+													.publishStringStatus("tag:"
+															+ v.getTag());
+										}
+									});
+							RobotBarActivity.this.runOnUiThread(new Runnable() {
+								@Override
+								public void run() {
+									RobotBarActivity.this.tagged_demo_button
+											.addView(imageButton);
+								}
+							});
+						} else {
+							final Button bt = new Button(RobotBarActivity.this);
+							bt.setTag(ic.tag);
+							bt.setText(ic.tag);
+							bt.setOnClickListener(new OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									RobotBarActivity.this.chatnode
+											.publishStringStatus("tag:"
+													+ v.getTag());
+								}
+							});
+							RobotBarActivity.this.runOnUiThread(new Runnable() {
+								@Override
+								public void run() {
+									RobotBarActivity.this.tagged_demo_button
+											.addView(bt);
+								}
+							});
+						}
+					}
+				}
+			}).start();
+		}
 	}
 
 	@Override
@@ -470,6 +496,10 @@ public class RobotBarActivity extends RosDialogActivity implements
 		this.audio_node.onDestroy();
 		if (this.kubi_node != null)
 			this.kubi_node.onDestroy();
+		if (rb_node != null) {
+			rb_node.onDestroy();
+			rb_node = null;
+		}
 	}
 
 	@Override
@@ -533,7 +563,7 @@ public class RobotBarActivity extends RosDialogActivity implements
 					this.kubi_node.pantltPublish();
 					Thread.sleep(100);
 				}
-				if (this.chatnode != null ){
+				if (this.chatnode != null) {
 					onClickControlToggle(null);
 					Thread.sleep(100);
 				}
