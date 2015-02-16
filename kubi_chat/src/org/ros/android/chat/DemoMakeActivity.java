@@ -35,7 +35,7 @@ public class DemoMakeActivity extends Activity {
 	private LinearLayout tagged_motion_button_layout;
 	// private LinearLayout selected_motion_layout;
 	private View selected_motion_view;
-	private ArrayList<TaggedIcon> demo_icons;
+	public static ArrayList<TaggedIcon> demo_icons;
 	//private Drawable demo_bg_icon, voice_text_bg_icon;
 
 	private ProgressDialog pDialog;
@@ -43,18 +43,21 @@ public class DemoMakeActivity extends Activity {
 	private int voice_text_button_color ;
 	private int active_color = Color.RED;
 	private int negative_color = Color.TRANSPARENT;
+	
+	private boolean rosparam_loading;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.demo_make_act);
 
+		this.rosparam_loading = false;
+		
 		this.pDialog = new ProgressDialog(this);
 		this.pDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 		this.pDialog.setIndeterminate(false);
 		this.pDialog.setCancelable(true);
 
-		this.demo_icons = new ArrayList<TaggedIcon>();
 		this.tagged_motion_button_layout = (LinearLayout) this
 				.findViewById(R.id.taged_pose_image_buttons);
 		// this.selected_motion_layout = (LinearLayout) this
@@ -172,15 +175,64 @@ public class DemoMakeActivity extends Activity {
 				}
 				DemoMakeActivity.this.voice_text_button.setBackgroundColor(DemoMakeActivity.this.voice_text_button_color);
 			}});
+		
+		if ( demo_icons == null ) demo_icons = new ArrayList<TaggedIcon>();
+		if ( demo_icons.size() > 0 ) registerIcons(demo_icons.size());
+
+	}
+	
+	public void registerIcons(int cnt){
+		for (int i = 0; i < cnt; i++) {
+			TaggedIcon ic = demo_icons.get(i);
+			if (ic.icon != null) {
+				final ImageButton imageButton = new ImageButton(this);
+				imageButton.setScaleType(ScaleType.FIT_XY);
+				imageButton.setAdjustViewBounds(true);
+				imageButton.setImageBitmap(ic.icon);
+				imageButton.setTag(ic.tag);
+				imageButton
+						.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								onClickMotionIcon(v);
+							}
+						});
+				DemoMakeActivity.this.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						DemoMakeActivity.this.tagged_motion_button_layout
+								.addView(imageButton);
+					}
+				});
+			} else {
+				final Button bt = new Button(this);
+				bt.setTag(ic.tag);
+				bt.setText(ic.name);
+				bt.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						onClickMotionIcon(v);
+					}
+				});
+				DemoMakeActivity.this.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						DemoMakeActivity.this.tagged_motion_button_layout
+								.addView(bt);
+					}
+				});
+			}
+		}
 	}
 
 	public void updateMotionIcons() {
-		if (RobotBarActivity.rb_node != null) {
+		if (RobotBarActivity.rb_node != null && ! this.rosparam_loading ) {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
+					DemoMakeActivity.this.rosparam_loading = true;
 					int cnt = RobotBarActivity.rb_node.getNewDemos(
-							DemoMakeActivity.this.demo_icons,
+							DemoMakeActivity.demo_icons,
 							RobotBarNode.motion_head_string);
 					if ( cnt < 0 ){
 						DemoMakeActivity.this.runOnUiThread(
@@ -189,49 +241,10 @@ public class DemoMakeActivity extends Activity {
 									public void run(){
 										Toast.makeText(DemoMakeActivity.this, "error: server missing", Toast.LENGTH_LONG).show();
 									}});
+					} else {
+						DemoMakeActivity.this.registerIcons(cnt);
 					}
-					for (int i = 0; i < cnt; i++) {
-						TaggedIcon ic = DemoMakeActivity.this.demo_icons.get(i);
-						if (ic.icon != null) {
-							final ImageButton imageButton = new ImageButton(
-									DemoMakeActivity.this);
-							imageButton.setScaleType(ScaleType.FIT_XY);
-							imageButton.setAdjustViewBounds(true);
-							imageButton.setImageBitmap(ic.icon);
-							imageButton.setTag(ic.tag);
-							imageButton
-									.setOnClickListener(new OnClickListener() {
-										@Override
-										public void onClick(View v) {
-											onClickMotionIcon(v);
-										}
-									});
-							DemoMakeActivity.this.runOnUiThread(new Runnable() {
-								@Override
-								public void run() {
-									DemoMakeActivity.this.tagged_motion_button_layout
-											.addView(imageButton);
-								}
-							});
-						} else {
-							final Button bt = new Button(DemoMakeActivity.this);
-							bt.setTag(ic.tag);
-							bt.setText(ic.tag);
-							bt.setOnClickListener(new OnClickListener() {
-								@Override
-								public void onClick(View v) {
-									onClickMotionIcon(v);
-								}
-							});
-							DemoMakeActivity.this.runOnUiThread(new Runnable() {
-								@Override
-								public void run() {
-									DemoMakeActivity.this.tagged_motion_button_layout
-											.addView(bt);
-								}
-							});
-						}
-					}
+					DemoMakeActivity.this.rosparam_loading = false;
 				}
 			}).start();
 		}

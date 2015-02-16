@@ -37,9 +37,9 @@ public class RobotBarNode extends AbstractNodeMain {
 	public GraphName getDefaultNodeName() {
 		return GraphName.of(this.nodename);
 	}
-	
-	public void publishStringStatus(String str){
-		if ( this.string_publisher != null ){
+
+	public void publishStringStatus(String str) {
+		if (this.string_publisher != null) {
 			std_msgs.String msg = this.string_publisher.newMessage();
 			msg.setData(str);
 			this.string_publisher.publish(msg);
@@ -50,8 +50,9 @@ public class RobotBarNode extends AbstractNodeMain {
 	public void onStart(final ConnectedNode connectedNode) {
 		this.rosparam = connectedNode.getParameterTree();
 		this.context.updateDemoIcons();
-		
-		this.string_publisher = connectedNode.newPublisher(this.nodename + "/status/string", std_msgs.String._TYPE);
+
+		this.string_publisher = connectedNode.newPublisher(this.nodename
+				+ "/status/string", std_msgs.String._TYPE);
 		// for (String imageName : this.default_motion_tag) {
 		// R.drawable rDrawable = new R.drawable();
 		// Field field;
@@ -88,7 +89,7 @@ public class RobotBarNode extends AbstractNodeMain {
 					}
 					if (!isOld) {
 						ret++;
-						oldDemo.add(0,this.genTaggedIconWithTag(tag, head));
+						oldDemo.add(0, this.genTaggedIconWithTag(tag, head));
 					}
 				}
 			}
@@ -98,20 +99,36 @@ public class RobotBarNode extends AbstractNodeMain {
 		return ret;
 	}
 
+	public String serializedString(String in) {
+		StringBuilder buf = new StringBuilder();
+		for (int i = 0; i < in.length(); i++) {
+			int num = (int) in.charAt(i);
+			buf.append(String.format("%04x", num));
+		}
+		return buf.toString();
+	}
+
 	public boolean registerDemo(String tag, byte[] icon, String mtag,
 			String stag) {
 		if (this.rosparam == null || tag == null)
 			return false;
+		String name = tag;
+		tag = serializedString(tag);
 		try {
+			if (name != null) {
+				this.rosparam.set(demo_head_string + "/" + tag + "/name", name);
+			}
 			if (icon != null) {
 				this.rosparam.set(demo_head_string + "/" + tag + "/icon",
 						Base64.encode(icon));
 			}
 			if (mtag != null) {
+				mtag = serializedString(mtag);
 				this.rosparam.set(demo_head_string + "/" + tag + "/motion",
 						mtag);
 			}
 			if (stag != null) {
+				stag = serializedString(stag);
 				this.rosparam
 						.set(demo_head_string + "/" + tag + "/sound", stag);
 			}
@@ -133,7 +150,13 @@ public class RobotBarNode extends AbstractNodeMain {
 			byte[] icon) {
 		if (this.rosparam == null || tag == null)
 			return false;
+		String name = tag;
+		tag = serializedString(tag);
 		try {
+			if (name != null) {
+				this.rosparam
+						.set(sound_head_string + "/" + tag + "/name", name);
+			}
 			if (icon != null) {
 				this.rosparam.set(sound_head_string + "/" + tag + "/icon",
 						Base64.encode(icon));
@@ -163,15 +186,21 @@ public class RobotBarNode extends AbstractNodeMain {
 	public TaggedIcon genTaggedIconWithTag(String tag, String head)
 			throws Exception {
 		String data;
-		if (this.rosparam != null
-				&& this.rosparam.has(demo_head_string + "/" + tag + "/icon")) {
-			data = this.rosparam.getString(demo_head_string + "/" + tag
-					+ "/icon");
-			byte[] icon = Base64.decode(data);
-			return new TaggedIcon(tag, BitmapFactory.decodeByteArray(icon, 0,
-					icon.length));
+		Bitmap img = null;
+		String name = tag;
+		if (this.rosparam != null) {
+			if (this.rosparam.has(demo_head_string + "/" + tag + "/icon")) {
+				data = this.rosparam.getString(demo_head_string + "/" + tag
+						+ "/icon");
+				byte[] icon = Base64.decode(data);
+				img = BitmapFactory.decodeByteArray(icon, 0, icon.length);
+			}
+			if (this.rosparam.has(demo_head_string + "/" + tag + "/name")) {
+				name = this.rosparam.getString(demo_head_string + "/" + tag
+						+ "/name");
+			}
 		}
-		return new TaggedIcon(tag, null);
+		return new TaggedIcon(tag, img, name);
 	}
 
 	public void onDestroy() {
@@ -186,10 +215,12 @@ public class RobotBarNode extends AbstractNodeMain {
 	public class TaggedIcon {
 		public String tag;
 		public Bitmap icon;
+		public String name;
 
-		public TaggedIcon(String tag, Bitmap icon) {
+		public TaggedIcon(String tag, Bitmap icon, String name) {
 			this.tag = tag;
 			this.icon = icon;
+			this.name = name;
 		}
 	}
 }

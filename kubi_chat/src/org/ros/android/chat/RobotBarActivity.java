@@ -1,13 +1,10 @@
 package org.ros.android.chat;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -79,7 +76,9 @@ public class RobotBarActivity extends RosDialogActivity implements
 	private LinearLayout toggle_button_layout;
 	private LinearLayout tagged_demo_button;
 	private ArrayList<TaggedIcon> demo_icons;
-
+	
+	private boolean rosparam_loading;
+	
 	public RobotBarActivity() {
 		super(node_name, node_name, node_name);
 	}
@@ -89,11 +88,14 @@ public class RobotBarActivity extends RosDialogActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.robot_bar_act);
 
+		this.rosparam_loading = false;
+
 		this.image_publishing = false;
 
 		this.toggle_button_layout = (LinearLayout) findViewById(R.id.toggle_button_outer);
 		this.tagged_demo_button = (LinearLayout) findViewById(R.id.taged_image_buttons);
 		this.demo_icons = new ArrayList<TaggedIcon>();
+		DemoMakeActivity.demo_icons = new ArrayList<TaggedIcon>();
 
 		this.surf = (SurfaceView) findViewById(R.id.camera_surface);
 		SurfaceHolder holder = this.surf.getHolder();
@@ -122,6 +124,7 @@ public class RobotBarActivity extends RosDialogActivity implements
 				}).start();
 			}
 		});
+		
 	}
 
 	// for robot_bar_act layout
@@ -236,6 +239,13 @@ public class RobotBarActivity extends RosDialogActivity implements
 	@Override
 	protected void init(NodeMainExecutor nodeMainExecutor) {
 
+		runOnUiThread(new Runnable(){
+			@Override
+			public void run(){
+				RobotBarActivity.this.pDialog.show();
+				Toast.makeText(RobotBarActivity.this, "connecting...", Toast.LENGTH_LONG).show();
+			}});
+
 		initializeNodes();
 
 		NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(
@@ -295,6 +305,12 @@ public class RobotBarActivity extends RosDialogActivity implements
 							param.getPreviewSize().height);
 		}
 
+		runOnUiThread(new Runnable(){
+			@Override
+			public void run(){
+				RobotBarActivity.this.pDialog.dismiss();
+				Toast.makeText(RobotBarActivity.this, "connected!", Toast.LENGTH_LONG).show();
+			}});
 	}
 
 	// private void openCamera(SurfaceHolder holder) throws IOException {
@@ -427,10 +443,11 @@ public class RobotBarActivity extends RosDialogActivity implements
 	// }
 
 	public void updateDemoIcons() {
-		if (rb_node != null) {
+		if (rb_node != null && !this.rosparam_loading) {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
+					RobotBarActivity.this.rosparam_loading = true;
 					int cnt = rb_node
 							.getNewDemos(RobotBarActivity.this.demo_icons);
 					if ( cnt < 0 ){
@@ -469,7 +486,7 @@ public class RobotBarActivity extends RosDialogActivity implements
 						} else {
 							final Button bt = new Button(RobotBarActivity.this);
 							bt.setTag(ic.tag);
-							bt.setText(ic.tag);
+							bt.setText(ic.name);
 							bt.setOnClickListener(new OnClickListener() {
 								@Override
 								public void onClick(View v) {
@@ -487,9 +504,10 @@ public class RobotBarActivity extends RosDialogActivity implements
 							});
 						}
 					}
-					if ( RobotBarActivity.this.pDialog.isShowing() ){
-						RobotBarActivity.this.pDialog.dismiss();
-					}
+//					if ( RobotBarActivity.this.pDialog.isShowing() ){
+//						RobotBarActivity.this.pDialog.dismiss();
+//					}
+					RobotBarActivity.this.rosparam_loading = false;
 				}
 			}).start();
 		}
