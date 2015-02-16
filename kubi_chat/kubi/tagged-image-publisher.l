@@ -10,18 +10,48 @@
 	(cons "my1" "pad_my_back")
 	(cons "fuza1" "donbiki")))
 
+(defun gather-tagged-demo
+  (tag
+   &key
+   (demo-head "/robot_bar/demo")
+   (motion-head "/robot_bar/motion")
+   (sound-head "/robot_bar/sound")
+   )
+  (let* ((motion-tag (ros::get-param (format nil "~A/~A/motion" demo-head tag)))
+	 (sound-tag (ros::get-param (format nil "~A/~A/sound" demo-head tag)))
+	 (sound-text (ros::get-param (format nil "~A/~A/text" sound-head sound-tag)))
+	 )
+    (format t "[gather-tagged-demo] ~A~%  motion: ~A~%  sound: ~A~%"
+	    tag motion-tag sound-text)
+    (if motion-tag
+	(ros::publish "/aria/commandline"
+		      (instance std_msgs::String :init
+				:data motion-tag)))
+    (if sound-text
+	(ros::publish "/voice_echo/mei"
+		      (instance std_msgs::String :init
+				:data sound-text)))
+    ))
+
 (defun status-callback
   (msg)
-  (let* ((str (send msg :data)) val)
+  (format t "[status-callback] ~A~%" (send msg :data))
+  (let* ((str (send msg :data)) tag val)
     (cond
+     ((substringp "toggle:" str) 'nop)
      ((and (>= (length str) (length "tag:"))
+	   (setq tag (subseq str (length "tag:")))
 	   (string-equal "tag:" (subseq str 0 (length "tag:")))
 	   (setq val (cdr (find-if #'(lambda (l) (substringp (car l) str))
 				   *tag-map*))))
       (format t "[tagged-image] publish ~A~%" val)
       (ros::publish "/aria/commandline"
 		    (instance std_msgs::String :init
-			      :data val))))))
+			      :data val)))
+     ((and (substringp "tag:" str) 'nop
+	   (and tag (> (length tag) 0)))
+      (gather-tagged-demo tag))
+     )))
 ;; (setq str (subseq str (length "tag:")))
 ;; (cond
 ;;  ((string-equal str "my4")
@@ -37,6 +67,8 @@
 ;;  )))))
 
 (ros::advertise "/aria/commandline"
+		std_msgs::String)
+(ros::advertise "/voice_echo/mei"
 		std_msgs::String)
 (ros::subscribe "/ros_chat/status/string"
 		std_msgs::String
