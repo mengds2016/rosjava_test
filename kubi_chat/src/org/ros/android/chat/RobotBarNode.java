@@ -21,8 +21,8 @@ public class RobotBarNode extends AbstractNodeMain {
 	final public static String motion_head_string = "/robot_bar/motion";
 	final public static String sound_head_string = "/robot_bar/sound";
 
-//	private String[] default_motion_tag = new String[] { "fuza1", "fuza2",
-//			"my1", "my2", "my3", "my4" };
+	// private String[] default_motion_tag = new String[] { "fuza1", "fuza2",
+	// "my1", "my2", "my3", "my4" };
 
 	public RobotBarNode(RobotBarActivity con) {
 		this.context = con;
@@ -52,88 +52,109 @@ public class RobotBarNode extends AbstractNodeMain {
 		// }
 		// }
 	}
-	
-	public int getNewDemos(ArrayList<TaggedIcon> oldDemo){
+
+	public int getNewDemos(ArrayList<TaggedIcon> oldDemo) {
 		return getNewDemos(oldDemo, demo_head_string);
 	}
 
 	public int getNewDemos(ArrayList<TaggedIcon> oldDemo, String head) {
 		int ret = 0;
-		if (this.rosparam != null && this.rosparam.has(head + "/tag")) {
-			String tags = this.rosparam.getString(head + "/tag");
-			String[] tags_array = tags.split(" ");
-			for (String tag : tags_array) {
-				boolean isOld = false;
-				for (TaggedIcon old : oldDemo) {
-					if (old.tag.contentEquals(tag)) {
-						isOld = true;
-						break;
+		try {
+			if (this.rosparam != null && this.rosparam.has(head + "/tag")) {
+				String tags = this.rosparam.getString(head + "/tag");
+				String[] tags_array = tags.split(" ");
+				for (String tag : tags_array) {
+					boolean isOld = false;
+					for (TaggedIcon old : oldDemo) {
+						if (old.tag.contentEquals(tag)) {
+							isOld = true;
+							break;
+						}
+					}
+					if (!isOld) {
+						ret++;
+						oldDemo.add(0,this.genTaggedIconWithTag(tag, head));
 					}
 				}
-				if (!isOld) {
-					ret++;
-					oldDemo.add(this.genTaggedIconWithTag(tag, head));
-				}
 			}
+		} catch (Exception e) {
+			ret = -1;
 		}
 		return ret;
 	}
 
-	public void registerDemo(String tag, byte[] icon, String mtag, String stag) {
-		if ( this.rosparam == null || tag == null ) return ;
-		if (icon != null) {
-			this.rosparam.set(demo_head_string + "/" + tag + "/icon",
-					Base64.encode(icon));
+	public boolean registerDemo(String tag, byte[] icon, String mtag,
+			String stag) {
+		if (this.rosparam == null || tag == null)
+			return false;
+		try {
+			if (icon != null) {
+				this.rosparam.set(demo_head_string + "/" + tag + "/icon",
+						Base64.encode(icon));
+			}
+			if (mtag != null) {
+				this.rosparam.set(demo_head_string + "/" + tag + "/motion",
+						mtag);
+			}
+			if (stag != null) {
+				this.rosparam
+						.set(demo_head_string + "/" + tag + "/sound", stag);
+			}
+			String tags;
+			if (!this.rosparam.has(demo_head_string + "/tag")) {
+				tags = tag;
+			} else {
+				tags = this.rosparam.getString(demo_head_string + "/tag") + " "
+						+ tag;
+			}
+			this.rosparam.set(demo_head_string + "/tag", tags);
+		} catch (Exception e) {
+			return false;
 		}
-		if (mtag != null) {
-			this.rosparam.set(demo_head_string + "/" + tag + "/motion", mtag);
-		}
-		if (stag != null) {
-			this.rosparam.set(demo_head_string + "/" + tag + "/sound", stag);
-		}
-		String tags;
-		if (!this.rosparam.has(demo_head_string + "/tag")) {
-			tags = tag;
-		} else {
-			tags = this.rosparam.getString(demo_head_string + "/tag") + " "
-					+ tag;
-		}
-		this.rosparam.set(demo_head_string + "/tag", tags);
-	}
-	
-	public void registerSound(String tag, String voice_text, byte[] data, byte[] icon) {
-		if ( this.rosparam == null || tag == null ) return ;
-		if (icon != null) {
-			this.rosparam.set(sound_head_string + "/" + tag + "/icon",
-					Base64.encode(icon));
-		}
-		if (voice_text != null) {
-			this.rosparam.set(sound_head_string + "/" + tag + "/text", voice_text);
-		}
-		if (data != null) {
-			this.rosparam.set(sound_head_string + "/" + tag + "/data", Base64.encode(data));
-		}
-		String tags;
-		if (!this.rosparam.has(sound_head_string + "/tag")) {
-			tags = tag;
-		} else {
-			tags = this.rosparam.getString(sound_head_string + "/tag") + " "
-					+ tag;
-		}
-		this.rosparam.set(sound_head_string + "/tag", tags);
+		return true;
 	}
 
-	public TaggedIcon genTaggedIconWithTag(String tag, String head) {
+	public boolean registerSound(String tag, String voice_text, byte[] data,
+			byte[] icon) {
+		if (this.rosparam == null || tag == null)
+			return false;
+		try {
+			if (icon != null) {
+				this.rosparam.set(sound_head_string + "/" + tag + "/icon",
+						Base64.encode(icon));
+			}
+			if (voice_text != null) {
+				this.rosparam.set(sound_head_string + "/" + tag + "/text",
+						voice_text);
+			}
+			if (data != null) {
+				this.rosparam.set(sound_head_string + "/" + tag + "/data",
+						Base64.encode(data));
+			}
+			String tags;
+			if (!this.rosparam.has(sound_head_string + "/tag")) {
+				tags = tag;
+			} else {
+				tags = this.rosparam.getString(sound_head_string + "/tag")
+						+ " " + tag;
+			}
+			this.rosparam.set(sound_head_string + "/tag", tags);
+		} catch (Exception e) {
+			return false;
+		}
+		return true;
+	}
+
+	public TaggedIcon genTaggedIconWithTag(String tag, String head)
+			throws Exception {
 		String data;
-		if (this.rosparam != null && this.rosparam.has(demo_head_string + "/" + tag + "/icon")) {
+		if (this.rosparam != null
+				&& this.rosparam.has(demo_head_string + "/" + tag + "/icon")) {
 			data = this.rosparam.getString(demo_head_string + "/" + tag
 					+ "/icon");
-			try {
-				byte[] icon = Base64.decode(data);
-				return new TaggedIcon(tag, BitmapFactory.decodeByteArray(icon,
-						0, icon.length));
-			} catch (Exception e) {
-			}
+			byte[] icon = Base64.decode(data);
+			return new TaggedIcon(tag, BitmapFactory.decodeByteArray(icon, 0,
+					icon.length));
 		}
 		return new TaggedIcon(tag, null);
 	}

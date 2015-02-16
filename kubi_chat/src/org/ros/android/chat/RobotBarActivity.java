@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -23,6 +24,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import org.ros.android.RosDialogActivity;
@@ -65,6 +67,8 @@ public class RobotBarActivity extends RosDialogActivity implements
 	private Thread chat_observer;
 	private boolean image_publishing;
 
+	private ProgressDialog pDialog;
+
 	private static boolean client_p = true;
 	public static String node_name = "kubi_chat";
 	static {
@@ -96,16 +100,28 @@ public class RobotBarActivity extends RosDialogActivity implements
 		holder.addCallback(this);
 		holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
+		this.pDialog = new ProgressDialog(this);
+		this.pDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		this.pDialog.setIndeterminate(false);
+		this.pDialog.setCancelable(true);
+
 		this.move_to_demo_button = (Button) findViewById(R.id.demo_craete_move_button);
 		this.move_to_demo_button.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Intent i = new Intent(RobotBarActivity.this
-						.getApplicationContext(), DemoMakeActivity.class);
-				RobotBarActivity.this.startActivity(i);
+				RobotBarActivity.this.pDialog.show();
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						Intent i = new Intent(RobotBarActivity.this
+								.getApplicationContext(),
+								DemoMakeActivity.class);
+						RobotBarActivity.this.startActivity(i);
+						RobotBarActivity.this.pDialog.dismiss();
+					}
+				}).start();
 			}
 		});
-
 	}
 
 	// for robot_bar_act layout
@@ -410,13 +426,21 @@ public class RobotBarActivity extends RosDialogActivity implements
 	// }
 	// }
 
-	public void updateDemoIcons(){
-		if ( rb_node != null ){
+	public void updateDemoIcons() {
+		if (rb_node != null) {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
 					int cnt = rb_node
 							.getNewDemos(RobotBarActivity.this.demo_icons);
+					if ( cnt < 0 ){
+						RobotBarActivity.this.runOnUiThread(
+								new Runnable(){
+									@Override
+									public void run(){
+										Toast.makeText(RobotBarActivity.this, "error", Toast.LENGTH_LONG).show();
+									}});
+					}
 					for (int i = 0; i < cnt; i++) {
 						TaggedIcon ic = RobotBarActivity.this.demo_icons.get(i);
 						if (ic.icon != null) {
@@ -463,11 +487,14 @@ public class RobotBarActivity extends RosDialogActivity implements
 							});
 						}
 					}
+					if ( RobotBarActivity.this.pDialog.isShowing() ){
+						RobotBarActivity.this.pDialog.dismiss();
+					}
 				}
 			}).start();
 		}
 	}
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();

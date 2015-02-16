@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -16,6 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import android.widget.ImageView.ScaleType;
 
 import org.ros.android.chat.R;
@@ -35,10 +37,17 @@ public class DemoMakeActivity extends Activity {
 	private View selected_motion_view;
 	private ArrayList<TaggedIcon> demo_icons;
 
+	private ProgressDialog pDialog;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.demo_make_act);
+
+		this.pDialog = new ProgressDialog(this);
+		this.pDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		this.pDialog.setIndeterminate(false);
+		this.pDialog.setCancelable(true);
 
 		this.demo_icons = new ArrayList<TaggedIcon>();
 		this.tagged_motion_button_layout = (LinearLayout) this
@@ -73,34 +82,52 @@ public class DemoMakeActivity extends Activity {
 		this.register_button.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (RobotBarActivity.rb_node != null
-						&& DemoMakeActivity.this.demo_title_edit.getText()
-								.length() > 0) {
-					byte[] icon = null;
-					try {
-						ImageButton ib = (ImageButton) DemoMakeActivity.this.selected_motion_view;
-						BitmapDrawable bd = (BitmapDrawable) ib.getDrawable();
-						Bitmap bm = bd.getBitmap();
-						ByteArrayOutputStream baos = new ByteArrayOutputStream();
-						bm.compress(CompressFormat.PNG, 50, baos);
-						icon = baos.toByteArray();
-					} catch (Exception e) {
+				DemoMakeActivity.this.pDialog.show();
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						if (RobotBarActivity.rb_node != null
+								&& DemoMakeActivity.this.demo_title_edit
+										.getText().length() > 0) {
+							byte[] icon = null;
+							try {
+								ImageButton ib = (ImageButton) DemoMakeActivity.this.selected_motion_view;
+								BitmapDrawable bd = (BitmapDrawable) ib
+										.getDrawable();
+								Bitmap bm = bd.getBitmap();
+								ByteArrayOutputStream baos = new ByteArrayOutputStream();
+								bm.compress(CompressFormat.PNG, 50, baos);
+								icon = baos.toByteArray();
+							} catch (Exception e) {
+							}
+							String voice_text = DemoMakeActivity.this.voice_text_edit
+									.getText().toString();
+							boolean error = true;
+							if (voice_text.length() > 0) {
+								error = error & RobotBarActivity.rb_node.registerSound(
+										DemoMakeActivity.this.demo_title_edit
+												.getText().toString(),
+										voice_text, null, null);
+							}
+							error = error & RobotBarActivity.rb_node.registerDemo(
+									DemoMakeActivity.this.demo_title_edit
+											.getText().toString(), icon,
+									DemoMakeActivity.this.selected_motion_view
+											.getTag().toString(),
+									DemoMakeActivity.this.demo_title_edit
+											.getText().toString());
+							if ( ! error ){
+								DemoMakeActivity.this.runOnUiThread(
+										new Runnable(){
+											@Override
+											public void run(){
+												Toast.makeText(DemoMakeActivity.this, "error", Toast.LENGTH_LONG).show();
+											}});
+							}
+							DemoMakeActivity.this.pDialog.dismiss();
+						}
 					}
-					String voice_text = DemoMakeActivity.this.voice_text_edit
-							.getText().toString();
-					if (voice_text.length() > 0) {
-						RobotBarActivity.rb_node.registerSound(
-								DemoMakeActivity.this.demo_title_edit.getText()
-										.toString(), voice_text, null, null);
-					}
-					RobotBarActivity.rb_node.registerDemo(
-							DemoMakeActivity.this.demo_title_edit.getText()
-									.toString(), icon,
-							DemoMakeActivity.this.selected_motion_view.getTag()
-									.toString(),
-							DemoMakeActivity.this.demo_title_edit.getText()
-									.toString());
-				}
+				}).start();
 			}
 		});
 	}
@@ -112,7 +139,15 @@ public class DemoMakeActivity extends Activity {
 				public void run() {
 					int cnt = RobotBarActivity.rb_node.getNewDemos(
 							DemoMakeActivity.this.demo_icons,
-							RobotBarActivity.rb_node.motion_head_string);
+							RobotBarNode.motion_head_string);
+					if ( cnt < 0 ){
+						DemoMakeActivity.this.runOnUiThread(
+								new Runnable(){
+									@Override
+									public void run(){
+										Toast.makeText(DemoMakeActivity.this, "error", Toast.LENGTH_LONG).show();
+									}});
+					}
 					for (int i = 0; i < cnt; i++) {
 						TaggedIcon ic = DemoMakeActivity.this.demo_icons.get(i);
 						if (ic.icon != null) {
