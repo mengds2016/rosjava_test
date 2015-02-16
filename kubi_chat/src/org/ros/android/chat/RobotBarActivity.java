@@ -438,7 +438,7 @@ public class RobotBarActivity extends RosDialogActivity implements
 								new Runnable(){
 									@Override
 									public void run(){
-										Toast.makeText(RobotBarActivity.this, "error", Toast.LENGTH_LONG).show();
+										Toast.makeText(RobotBarActivity.this, "error: server missing", Toast.LENGTH_LONG).show();
 									}});
 					}
 					for (int i = 0; i < cnt; i++) {

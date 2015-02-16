@@ -30,14 +30,19 @@ public class DemoMakeActivity extends Activity {
 	private EditText demo_title_edit, voice_text_edit;
 	private ImageButton back_button;
 	private Button move_to_pose_button;
-	private ImageButton register_button;
+	private ImageButton register_button, voice_text_button;
 
 	private LinearLayout tagged_motion_button_layout;
 	// private LinearLayout selected_motion_layout;
 	private View selected_motion_view;
 	private ArrayList<TaggedIcon> demo_icons;
+	//private Drawable demo_bg_icon, voice_text_bg_icon;
 
 	private ProgressDialog pDialog;
+	
+	private int voice_text_button_color ;
+	private int active_color = Color.RED;
+	private int negative_color = Color.TRANSPARENT;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -56,6 +61,7 @@ public class DemoMakeActivity extends Activity {
 		// .findViewById(R.id.selected_pose_image_view);
 		this.selected_motion_view = this.tagged_motion_button_layout
 				.getChildAt(0);
+		//this.demo_bg_icon = this.selected_motion_view.getBackground();
 		this.selected_motion_view.setBackgroundColor(Color.GREEN);
 
 		this.back_button = (ImageButton) findViewById(R.id.demo_craete_back_to_home_button);
@@ -75,7 +81,7 @@ public class DemoMakeActivity extends Activity {
 				DemoMakeActivity.this.startActivity(i);
 			}
 		});
-
+		
 		this.demo_title_edit = (EditText) findViewById(R.id.demo_title_edit);
 		this.voice_text_edit = (EditText) findViewById(R.id.voice_text_edit);
 		this.register_button = (ImageButton) findViewById(R.id.demo_register_button);
@@ -121,15 +127,51 @@ public class DemoMakeActivity extends Activity {
 										new Runnable(){
 											@Override
 											public void run(){
-												Toast.makeText(DemoMakeActivity.this, "error", Toast.LENGTH_LONG).show();
+												Toast.makeText(DemoMakeActivity.this, "error: server missing", Toast.LENGTH_LONG).show();
+											}});
+							} else {
+								DemoMakeActivity.this.runOnUiThread(
+										new Runnable(){
+											@Override
+											public void run(){
+												Toast.makeText(DemoMakeActivity.this, "registered", Toast.LENGTH_LONG).show();
 											}});
 							}
-							DemoMakeActivity.this.pDialog.dismiss();
+						} else {
+							DemoMakeActivity.this.runOnUiThread(
+									new Runnable(){
+										@Override
+										public void run(){
+											Toast.makeText(DemoMakeActivity.this, "error: no title", Toast.LENGTH_LONG).show();
+										}});	
 						}
+						DemoMakeActivity.this.pDialog.dismiss();
 					}
 				}).start();
 			}
 		});
+		
+		this.voice_text_button_color = this.negative_color;
+		this.voice_text_button = (ImageButton) findViewById(R.id.voice_text_button);
+		this.voice_text_button.setBackgroundColor(this.voice_text_button_color);
+		this.voice_text_button.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				//DemoMakeActivity.this.voice_text_button.setBackgroundColor(Color.GRAY);
+				String voice_text = DemoMakeActivity.this.voice_text_edit.getText().toString();
+				if ( DemoMakeActivity.this.voice_text_button_color == DemoMakeActivity.this.active_color ){
+					DemoMakeActivity.this.voice_text_button_color = DemoMakeActivity.this.negative_color;
+					if ( RobotBarActivity.rb_node != null && voice_text.length() > 0){
+						RobotBarActivity.rb_node.publishStringStatus("sound-record-off:"+voice_text);
+					}
+				} else {
+					DemoMakeActivity.this.voice_text_button_color = DemoMakeActivity.this.active_color;
+					if ( RobotBarActivity.rb_node != null && voice_text.length() > 0){
+						RobotBarActivity.rb_node.publishStringStatus("sound-record-on:"+voice_text);
+					}
+				}
+				DemoMakeActivity.this.voice_text_button.setBackgroundColor(DemoMakeActivity.this.voice_text_button_color);
+			}});
 	}
 
 	public void updateMotionIcons() {
@@ -145,7 +187,7 @@ public class DemoMakeActivity extends Activity {
 								new Runnable(){
 									@Override
 									public void run(){
-										Toast.makeText(DemoMakeActivity.this, "error", Toast.LENGTH_LONG).show();
+										Toast.makeText(DemoMakeActivity.this, "error: server missing", Toast.LENGTH_LONG).show();
 									}});
 					}
 					for (int i = 0; i < cnt; i++) {
@@ -205,9 +247,10 @@ public class DemoMakeActivity extends Activity {
 		this.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				DemoMakeActivity.this.selected_motion_view
+				DemoMakeActivity.this.selected_motion_view//.setBackground(DemoMakeActivity.this.demo_bg_icon);
 						.setBackgroundColor(Color.GRAY);
 				DemoMakeActivity.this.selected_motion_view = v;
+				//DemoMakeActivity.this.demo_bg_icon = DemoMakeActivity.this.selected_motion_view.getBackground();
 				DemoMakeActivity.this.selected_motion_view
 						.setBackgroundColor(Color.GREEN);
 				// DemoMakeActivity.this.selected_motion_layout.removeAllViews();

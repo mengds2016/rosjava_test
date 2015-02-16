@@ -8,6 +8,7 @@ import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 import org.ros.node.parameter.ParameterTree;
+import org.ros.node.topic.Publisher;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,22 +22,36 @@ public class RobotBarNode extends AbstractNodeMain {
 	final public static String motion_head_string = "/robot_bar/motion";
 	final public static String sound_head_string = "/robot_bar/sound";
 
+	private Publisher<std_msgs.String> string_publisher;
+	private String nodename;
+
 	// private String[] default_motion_tag = new String[] { "fuza1", "fuza2",
 	// "my1", "my2", "my3", "my4" };
 
 	public RobotBarNode(RobotBarActivity con) {
 		this.context = con;
+		this.nodename = RobotBarActivity.node_name + "/robot_bar_node";
 	}
 
 	@Override
 	public GraphName getDefaultNodeName() {
-		return GraphName.of("robot_bar_node");
+		return GraphName.of(this.nodename);
+	}
+	
+	public void publishStringStatus(String str){
+		if ( this.string_publisher != null ){
+			std_msgs.String msg = this.string_publisher.newMessage();
+			msg.setData(str);
+			this.string_publisher.publish(msg);
+		}
 	}
 
 	@Override
 	public void onStart(final ConnectedNode connectedNode) {
 		this.rosparam = connectedNode.getParameterTree();
 		this.context.updateDemoIcons();
+		
+		this.string_publisher = connectedNode.newPublisher(this.nodename + "/status/string", std_msgs.String._TYPE);
 		// for (String imageName : this.default_motion_tag) {
 		// R.drawable rDrawable = new R.drawable();
 		// Field field;
