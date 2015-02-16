@@ -95,7 +95,7 @@
             android:hint="Voice text..." />
 
         <ImageButton
-            android:id="@+id/demo_register_button"
+            android:id="@+id/voice_text_button"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
             android:layout_weight="0"
