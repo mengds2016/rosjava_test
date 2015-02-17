@@ -1,14 +1,14 @@
 <launch>
  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
- <node pkg="image_transport" type="republish" name="android_camera_image_transport"
-       args="compressed in:=/chat/status/camera/image raw out:=/chat/status/camera/image/raw" />
+ <node pkg="mjpeg_server" type="mjpeg_server" name="mjpeg_server" />
+
+ <!-- test -->
  <node pkg="usb_cam" type="usb_cam_node" name="client_usb_cam">
    <remap from="/client_usb_cam/image_raw"
-	  to="/chat/request/image/raw" />
-   <remap from="/client_usb_cam/image_raw/compressed"
-	  to="/chat/request/image/raw/compressed" />
+	  to="/right_usb_cam_node_for_republish/image_raw" />
  </node>
- <node pkg="mjpeg_server" type="mjpeg_server" name="mjpeg_server" />
+ <node pkg="image_transport" type="republish" name="android_camera_image_transport"
+       args="compressed in:=/right_usb_cam_node_for_republish/image_raw raw out:=/left_usb_cam_node_for_republish/image_raw" />
 
  <!-- audio -->
  <param name="ROSJAVA_VOICE_SPEAKER_REQUEST_TOPIC" value="/ros_chat/audio/out" />

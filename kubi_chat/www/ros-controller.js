@@ -12,7 +12,7 @@ var ros_controller = function(opt) {
 
     this.string_topic = new ROSLIB.Topic({
         ros: this.ros,
-        name: "/aria/commandline",
+        name: "/ros_chat/status/string",
         messageType: 'std_msgs/String'
     });
 
@@ -44,7 +44,7 @@ function insert_container(tag, container, command_list, topic_list){
     } else {
 	elem.title = tag;
 	for ( ; i<command_list.length; i++ ){
-	    buf += "<input type=\"image\" src=\"" + command_list[i] + "\" name=\"" + command_list[i] + "\" value=\"forward\" onclick=\"rc.publish_string_command('" + topic_list[i] + "');\"></input>" ;
+	    buf += "<input style=\"margin:10px;\" type=\"image\" src=\"" + command_list[i] + "\" name=\"" + command_list[i] + "\" value=\"forward\" onclick=\"rc.publish_string_command('tag:" + topic_list[i] + "');\"></input>" ;
 	}
     }
     elem.innerHTML=buf;
