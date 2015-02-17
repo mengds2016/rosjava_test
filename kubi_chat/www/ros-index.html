@@ -9,6 +9,7 @@
     <script type="text/javascript"
 	    src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"
 	    ></script>
+    <script type="text/javascript" src="3rdparty/jscolor/jscolor.js"></script>
     <style type="text/css">
       .checkbox { width:50px;height:50px; }
       input:hover {
@@ -51,10 +52,18 @@
     <div id="top_column"
 	 style="position: absolute; top: 0px;">
       <div id="top_insert_container">
-	<input type="checkbox" class="checkbox">首</input>
-	<input type="checkbox" class="checkbox">目</input>
-	<input type="checkbox" class="checkbox">耳</input>
-	<input type="checkbox" class="checkbox">コップ</input>
+	<input id="neck_checkbox" type="checkbox" class="checkbox">首</input>
+	<input id="eye_checkbox" type="checkbox" class="checkbox">目</input>
+	<input id="mimi_checkbox" type="checkbox" class="checkbox">耳</input>
+	<input id="cup_checkbox" type="checkbox" class="checkbox">コップ</input>
+      </div>
+    </div>
+    <div id="top_column_right"
+	 style="position: absolute; top: 0px; right:0px;">
+      <div id="top_insert_container_right">
+	<input id="head_color" class="color" style="width:60px;"> HEAD COLOR</input>
+	<br />
+	<input id="hope_color" class="color" style="width:60px;"> CHEEK COLOR</input>
       </div>
     </div>
     <!-- -->
