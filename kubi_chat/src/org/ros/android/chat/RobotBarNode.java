@@ -123,7 +123,7 @@ public class RobotBarNode extends AbstractNodeMain {
 						Base64.encode(icon));
 			}
 			if (mtag != null) {
-				mtag = serializedString(mtag);
+				// mtag = serializedString(mtag);
 				this.rosparam.set(demo_head_string + "/" + tag + "/motion",
 						mtag);
 			}
@@ -189,14 +189,14 @@ public class RobotBarNode extends AbstractNodeMain {
 		Bitmap img = null;
 		String name = tag;
 		if (this.rosparam != null) {
-			if (this.rosparam.has(demo_head_string + "/" + tag + "/icon")) {
-				data = this.rosparam.getString(demo_head_string + "/" + tag
+			if (this.rosparam.has(head + "/" + tag + "/icon")) {
+				data = this.rosparam.getString(head + "/" + tag
 						+ "/icon");
 				byte[] icon = Base64.decode(data);
 				img = BitmapFactory.decodeByteArray(icon, 0, icon.length);
 			}
-			if (this.rosparam.has(demo_head_string + "/" + tag + "/name")) {
-				name = this.rosparam.getString(demo_head_string + "/" + tag
+			if (this.rosparam.has(head + "/" + tag + "/name")) {
+				name = this.rosparam.getString(head + "/" + tag
 						+ "/name");
 			}
 		}
