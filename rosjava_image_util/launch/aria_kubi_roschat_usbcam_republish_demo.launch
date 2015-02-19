@@ -1,0 +1,27 @@
+<launch>
+  <group ns="left_usb_cam_node_for_republish" >
+    <node pkg="uvc_camera" type="uvc_camera_node" name="uvc_camera"
+	  output="screen">
+      <param name="width" type="int" value="640" />
+      <param name="height" type="int" value="480" />
+      <param name="fps" type="int" value="10" />
+      <param name="frame" type="string" value="wide_stereo" />
+      <param name="device" type="string" value="/dev/video0" />
+    </node>
+    <node name="topic_downrate" pkg="topic_tools" type="throttle" args="messages image_raw 10.0" />
+  </group>
+
+  <group ns="right_usb_cam_node_for_republish" >
+    <node pkg="uvc_camera" type="uvc_camera_node" name="uvc_camera"
+	  output="screen">
+      <param name="width" type="int" value="640" />
+      <param name="height" type="int" value="480" />
+      <param name="fps" type="int" value="10" />
+      <param name="frame" type="string" value="wide_stereo" />
+      <param name="device" type="string" value="/dev/video1" />
+    </node>
+    <node name="topic_downrate" pkg="topic_tools" type="throttle" args="messages image_raw 10.0" />
+  </group>
+
+  <include file="$(find rosjava_test)/rosjava_image_util/launch/kubi_roschat_usbcam_republish_demo.launch" />
+</launch>
