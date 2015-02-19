@@ -1,24 +1,42 @@
 <launch>
   <arg name="ROSJAVA_TEST_HOME" default="$(find rosjava_test)" />
   <arg name="IMG_REPUB_NODE_NAME" default="image_republish_node" />
-  <arg name="REPUB_OUTPUT_TOPIC" default="/ros_chat/request/image/raw" />
+  <arg name="REPUB_OUTPUT_TOPIC" default="/ros_chat/request/image_right/raw" />
+  <arg name="RIGHT_IMAGE_ROTATE_CNT" default="1" />
+  <arg name="LEFT_IMAGE_ROTATE_CNT" default="3" />
 
-  <node pkg="usb_cam" type="usb_cam_node" name="usb_cam_node_for_republish">
-    <!--
-    <remap from="/usb_cam_node_for_republish/image_raw/compressed"
-	   to="/$(arg IMG_REPUB_NODE_NAME)/image/in/compressed" />
-    -->
+  <!--
+  <node pkg="usb_cam" type="usb_cam_node" name="usb_cam_node_for_republish" />
+  -->
+
+  <node pkg="rosjava_test" type="run_node.sh"
+	name="$(arg IMG_REPUB_NODE_NAME)_right" output="screen"
+	args="ImageRepublishNode" >
+    <env name="ROSJAVA_IMAGE_REPUBLISH_MAX_RATE" value="3.0" />
+    <env name="ROSJAVA_IMAGE_REPUBLISH_SCALE" value="0.3" />
+    <env name="ROSJAVA_IMAGE_REPUBLISH_NODE_NAME" value="$(arg IMG_REPUB_NODE_NAME)_right" />
+    <env name="ROSJAVA_IMAGE_REPUBLISH_ROTATE" value="$(arg RIGHT_IMAGE_ROTATE_CNT)" />
+    <env name="$(arg IMG_REPUB_NODE_NAME)_right/com_image_sub_topic_name"
+	 value="/right_usb_cam_node_for_republish/image_raw/compressed" />
+    <env name="$(arg IMG_REPUB_NODE_NAME)_right/raw_image_sub_topic_name"
+	 value="/camera/bottom/camera/image_raw" />
+    <env name="$(arg IMG_REPUB_NODE_NAME)_right/com_image_pub_topic_name"
+	 value="/ros_chat/request/image_right/raw/compressed" />
   </node>
 
   <node pkg="rosjava_test" type="run_node.sh"
-	name="$(arg IMG_REPUB_NODE_NAME)" output="screen" args="ImageRepublishNode" >
+	name="$(arg IMG_REPUB_NODE_NAME)_left" output="screen"
+	args="ImageRepublishNode" >
     <env name="ROSJAVA_IMAGE_REPUBLISH_MAX_RATE" value="3.0" />
     <env name="ROSJAVA_IMAGE_REPUBLISH_SCALE" value="0.3" />
-    <env name="ROSJAVA_IMAGE_REPUBLISH_NODE_NAME" value="$(arg IMG_REPUB_NODE_NAME)" />
-    <env name="$(arg IMG_REPUB_NODE_NAME)/com_image_sub_topic_name"
-	 value="/usb_cam_node_for_republish/image_raw/compressed" />
-    <env name="$(arg IMG_REPUB_NODE_NAME)/com_image_pub_topic_name"
-	 value="$(arg REPUB_OUTPUT_TOPIC)/compressed" />
+    <env name="ROSJAVA_IMAGE_REPUBLISH_NODE_NAME" value="$(arg IMG_REPUB_NODE_NAME)_left" />
+    <env name="ROSJAVA_IMAGE_REPUBLISH_ROTATE" value="$(arg LEFT_IMAGE_ROTATE_CNT)" />
+    <env name="$(arg IMG_REPUB_NODE_NAME)_left/com_image_sub_topic_name"
+	 value="/left_usb_cam_node_for_republish/image_raw/compressed" />
+    <env name="$(arg IMG_REPUB_NODE_NAME)_left/raw_image_sub_topic_name"
+	 value="/camera/top/camera/image_raw" />
+    <env name="$(arg IMG_REPUB_NODE_NAME)_left/com_image_pub_topic_name"
+	 value="/ros_chat/request/image_left/raw/compressed" />
   </node>
 
   <!--
@@ -26,8 +44,12 @@
 	args="compressed in:=/$(arg IMG_REPUB_NODE_NAME)/image/out compressed out:=$(arg REPUB_OUTPUT_TOPIC)" />
   -->
 
-  <node pkg="image_view" type="image_view" name="image_view_for_republish"
-	args="image:=$(arg REPUB_OUTPUT_TOPIC) _image_transport:=compressed">
+  <node pkg="image_view" type="image_view" name="left_image_view_for_republish"
+	args="image:=/ros_chat/request/image_left/raw _image_transport:=compressed">
+  </node>
+
+  <node pkg="image_view" type="image_view" name="right_image_view_for_republish"
+	args="image:=/ros_chat/request/image_right/raw _image_transport:=compressed">
   </node>
 
   <!-- For small image test -->
@@ -43,11 +65,16 @@
 	args="ImageRepublishNode" >
     <env name="ROSJAVA_IMAGE_REPUBLISH_MAX_RATE" value="3.0" />
     <env name="ROSJAVA_IMAGE_REPUBLISH_SCALE" value="0.2" />
+    <!--
     <env name="ROSJAVA_IMAGE_REPUBLISH_ROTATE" value="3" />
+    -->
     <env name="ROSJAVA_IMAGE_REPUBLISH_NODE_NAME"
 	 value="$(arg IMG_REPUB_NODE_NAME)_small" />
     <env name="$(arg IMG_REPUB_NODE_NAME)_small/com_image_sub_topic_name"
+	 value="/kubi_chat/request/image/raw/compressed" />
+    <!--
 	 value="/kubi_chat/status/camera/image/compressed" />
+    -->
     <env name="$(arg IMG_REPUB_NODE_NAME)_small/com_image_pub_topic_name"
 	 value="$(arg REPUB_OUTPUT_TOPIC)/small/compressed" />
   </node>
