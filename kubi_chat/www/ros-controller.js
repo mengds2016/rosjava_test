@@ -5,7 +5,7 @@ var ros_controller = function(opt) {
 
     this.drive_topic = new ROSLIB.Topic({
         ros: this.ros,
-        name: "/aria/color",
+        name: "/arialed/face_led",
         messageType: 'std_msgs/Float32MultiArray'
     });
 
@@ -59,8 +59,11 @@ function publish_status_data(){
 	var red = parseInt(head.value.substr(0,2),16);
 	var grn = parseInt(head.value.substr(2,4),16);
 	var blu = parseInt(head.value.substr(4,6),16);
+	red = red * 64 / 255.5;
+	grn = grn * 64 / 255.5;
+	blu = blu * 64 / 255.5;
 	var msg = new ROSLIB.Message(
-            {data: [0,3,red,grn,blu]}
+            {data: [0,4,red,grn,blu]}
 	);
 	rc.drive_topic.publish(msg);
     }
@@ -71,8 +74,11 @@ function publish_status_data(){
 	var red = parseInt(cheek.value.substr(0,2),16);
 	var grn = parseInt(cheek.value.substr(2,4),16);
 	var blu = parseInt(cheek.value.substr(4,6),16);
+	red = red * 64 / 255.5;
+	grn = grn * 64 / 255.5;
+	blu = blu * 64 / 255.5;
 	var msg = new ROSLIB.Message(
-            {data: [3,5,red,grn,blu]}
+            {data: [5,10,red,grn,blu]}
 	);
 	rc.drive_topic.publish(msg);
     }
