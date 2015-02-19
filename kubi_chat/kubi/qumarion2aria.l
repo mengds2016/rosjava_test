@@ -2,11 +2,10 @@
 
 (require "package://aria_model/euslisp/aria-interface.l")
 
-(ros::unsubscribe "/currentor_socket/sensor_array/position")
-
 ;;(require "euslib/drivers/qumarion/Win32/qumarion.l")
 ;;(defvar *robot* (hrp2jsknt-simple-detail))
 (aria-init)
+(ros::unsubscribe "/currentor_socket/sensor_array/position")
 (defvar *init* :main)
 
 (defvar *joint-state-hash* (make-hash-table))
@@ -117,7 +116,6 @@
 
 (defun main-loop
   nil
-  (ros::rate 5)
   (do-until-key
    (if (not (ros::ok)) (return-from nil nil))
    (ros::spin-once)
@@ -125,8 +123,10 @@
    (send *viewer* :draw-objects)
    (publish-now-joint-state)
    (print 'running)
-   (x::window-main-one)
-   (ros::sleep)
+   (cond
+    ((and (boundp '*viewer*) *viewer*)
+     (x::window-main-one)
+     (ros::sleep)))
    ;; (model2real :sleep-time 1000)
    ;; (unix:sleep 1)
    ))
@@ -148,5 +148,18 @@
  "/aria_joint_command/joint_state_fix_leg"
  sensor_msgs::JointState)
 
-;; (if (eq *init* :main) (main-loop))
-
+(ros::rate 5)
+(do-until-key
+ (if (not (ros::ok)) (return-from nil nil))
+ (ros::sleep)
+ (ros::spin-once)
+ (qumarion2aria)
+ (publish-now-joint-state)
+ ;; (print 'running)
+ (cond
+  ((and (boundp '*viewer*) *viewer*)
+   (send *viewer* :draw-objects)
+   (x::window-main-one)))
+ ;; (model2real :sleep-time 1000)
+ ;; (unix:sleep 1)
+ )
