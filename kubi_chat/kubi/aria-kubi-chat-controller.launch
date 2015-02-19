@@ -15,6 +15,8 @@
 	name="tagged_image_publisher" >
     <remap from="/aria/commandline" to="/aria/commandline/org" />
   </node>
+  <node pkg="rosjava_test" type="aria-record-viewer.l"
+	name="aria_record_viewer" />
   <!-- face detection -->
   <node pkg="opencv_face_recog_node"
 	type="face_detect_node"
