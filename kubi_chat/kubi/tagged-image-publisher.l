@@ -10,6 +10,15 @@
 	(cons "my1" "pad_my_back")
 	(cons "fuza1" "donbiki")))
 
+(defvar *root-dir* (format nil "~A/kubi_chat/kubi" (ros::rospack-find "rosjava_test")))
+
+(defun check-motion-tag
+  (tag)
+  (find-if
+   #'(lambda (d)
+       (string-equal d (format nil "~A.dat" tag)))
+   (directory (format nil "~A/motion" *root-dir*))))
+
 (defun gather-tagged-demo
   (tag
    &key
@@ -24,9 +33,13 @@
     (format t "[gather-tagged-demo] ~A~%  motion: ~A~%  sound: ~A~%"
 	    tag motion-tag sound-text)
     (if motion-tag
-	(ros::publish "/aria/commandline"
-		      (instance std_msgs::String :init
-				:data motion-tag)))
+	(if (check-motion-tag motion-tag)
+	    (ros::publish "/aria/commandline/euslisp"
+			  (instance std_msgs::String :init
+				    :data motion-tag))
+	  (ros::publish "/aria/commandline"
+			(instance std_msgs::String :init
+				  :data motion-tag))))
     (if sound-text
 	(ros::publish "/voice_echo/mei"
 		      (instance std_msgs::String :init
@@ -69,6 +82,8 @@
 (ros::advertise "/aria/commandline"
 		std_msgs::String)
 (ros::advertise "/voice_echo/mei"
+		std_msgs::String)
+(ros::advertise "/aria/commandline/euslisp"
 		std_msgs::String)
 (ros::subscribe "/ros_chat/status/string"
 		std_msgs::String
