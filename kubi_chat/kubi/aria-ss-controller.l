@@ -7,7 +7,7 @@
 
 ;; (require "aria-imu-controller.l")
 
-(defvar *robot-type* :pepper)
+(defvar *robot-type* :aria)
 
 (cond
  ((eq *robot-type* :aria)

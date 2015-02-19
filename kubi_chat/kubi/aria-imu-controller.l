@@ -5,7 +5,7 @@
 
 (ros::roseus "aria_imu_controller")
 
-(defvar *robot-type* :pepper)
+(defvar *robot-type* :aria)
 
 (cond
  ((eq *robot-type* :aria)

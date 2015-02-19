@@ -15,6 +15,9 @@
 (defvar *max-record-time* 30)
 (defvar *record-title* nil)
 
+(defvar *motion-root-dir*
+  (format nil "~A/kubi_chat/kubi/motion" (ros::rospack-find "rosjava_test")))
+
 (defun joint-state-callback
   (msg)
   (let ((names (send msg :name))
@@ -64,7 +67,7 @@
 (defun register-motion
   nil
   (let* ((tag (gen-tag-from-string *record-title*))
-	 (out (open (format nil "motion/~A.dat" tag) :direction :output)))
+	 (out (open (format nil "~A/~A.dat" *motion-root-dir* tag) :direction :output)))
     (mapcar
      #'(lambda (val)
 	 (format out "~A~%" val))
@@ -86,15 +89,13 @@
 		      (if tags (format nil "~A ~A" tags tag)
 			tag))
       ))
-    (ros::set-param (format nil "/robot_bar/~A/name" tag) name)
+    (ros::set-param (format nil "/robot_bar/motion/~A/name" tag) name)
     (send *viewer* :viewsurface :write-to-image-file "/tmp/tmp.png")
     (unix:system
      (format nil
-	     "base64 /tmp/tmp.png > /tmp/tmp.dat; rosparam set /robot_bar/~A/icon \"`cat /tmp/tmp.dat | tr -d '\n'`\"" tag))
+	     "base64 /tmp/tmp.png > /tmp/tmp.dat; rosparam set /robot_bar/motion/~A/icon \"`cat /tmp/tmp.dat`\"" tag))
     ))
 
-(defvar *motion-root-dir*
-  (format nil "~A/kubi_chat/kubi/motion" (ros::rospack-find "rosjava_test")))
 (defun play-tagged-motion
   (msg)
   (let* ((tag (send msg :data))
@@ -125,7 +126,7 @@
 
 (ros::subscribe
  "/aria/commandline/euslisp"
- sensor_msgs::JointState
+ std_msgs::string
  #'play-tagged-motion 1)
 
 (ros::subscribe
@@ -153,13 +154,14 @@
               :encoding "bgr8"
               :step (* (send img :width) 3)
               :data (send img :entity))))
- (if *record-av-buf*
-     (push (send *robot* :angle-vector) *record-av-buf*))
+ ;; (if *record-av-buf*
+ ;; (push (send *robot* :angle-vector) *record-av-buf*))
  (cond
   ((and (numberp *recording?*)
 	(< *recording?* 0))
-   (setq *recording?* nil)
-   (register-motion))
+   (register-motion)
+   (setq *record-av-buf* nil)
+   (setq *recording?* nil))
   ((numberp *recording?*)
    (decf *recording?*)
    (push (copy-seq (send *robot* :angle-vector)) *record-av-buf*)))
