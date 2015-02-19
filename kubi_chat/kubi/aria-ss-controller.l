@@ -7,9 +7,27 @@
 
 ;; (require "aria-imu-controller.l")
 
-(require "package://aria_model/euslisp/aria-interface.l")
+(defvar *robot-type* :pepper)
 
-(aria-init :viewer? nil)
+(cond
+ ((eq *robot-type* :aria)
+  (require "package://aria_model/euslisp/aria-interface.l")
+  (aria-init :viewer? nil)
+  (ros::unsubscribe "/kduino/converted_imu"))
+ ((eq *robot-type* :pepper)
+  (require "package://peppereus/pepper-interface.l")
+  (setq *robot* (instance pepper-robot :init))
+  (setq *ri* (instance pepper-interface :init))
+  (defmethod pepper-robot
+    (:reset-manip-pose
+     nil
+     (send self :angle-vector #f(0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0)))
+    )
+  )
+ )
+
+;;(require "package://aria_model/euslisp/aria-interface.l")
+;;(aria-init :viewer? nil)
 
 (defvar *kubi-command-timer* 0)
 (defvar *head-only-time* 0)
@@ -83,7 +101,8 @@
 	(jlist (send *robot* :joint-list)))
   ;; (model2real :sleep-time sleep-time)
   ;; (return-from beer-model2real nil)
-  (send *ri* :_angle-vector
+  (send *ri*
+	(if (eq *robot-type* :aria) :_angle-vector :angle-vector)
 	(map float-vector
 	     #'(lambda (j v)
 		 (cond

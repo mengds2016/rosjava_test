@@ -5,6 +5,26 @@
 
 (ros::roseus "aria_imu_controller")
 
+(defvar *robot-type* :pepper)
+
+(cond
+ ((eq *robot-type* :aria)
+  (require "package://aria_model/euslisp/aria-interface.l")
+  (aria-init)
+  (ros::unsubscribe "/kduino/converted_imu"))
+ ((eq *robot-type* :pepper)
+  (require "package://peppereus/pepper-interface.l")
+  (setq *robot* (instance pepper-robot :init))
+  (setq *ri* (instance pepper-interface :init))
+  (defmethod pepper-robot
+    (:reset-manip-pose
+     nil
+     (send self :angle-vector #f(0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0)))
+    )
+  )
+ )
+
+
 (require "package://aria_model/euslisp/aria-interface.l")
 
 (aria-init)
@@ -168,7 +188,7 @@
 			     )))
 		    :worldrot)))
 	     ;; (matrix-exponent (map float-vector #'* '(1 1 -1) (matrix-log r)))
-	     (matrix-exponent (map float-vector #'* '(-1 1 -1) (matrix-log r)))
+	     (matrix-exponent (map float-vector #'* '(1 1 -1) (matrix-log r)))
 	     )))
     (send *tablet-obj* :newcoords
 	  (send (send *fove-obj* :copy-worldcoords) :translate #F(300 0 0) :local))

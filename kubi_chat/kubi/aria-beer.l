@@ -5,10 +5,23 @@
 
 (ros::roseus "aria_beer")
 
-(require "package://aria_model/euslisp/aria-interface.l")
-
-(aria-init)
-(ros::unsubscribe "/kduino/converted_imu")
+(defvar *robot-type* :pepper)
+(cond
+ ((eq *robot-type* :aria)
+  (require "package://aria_model/euslisp/aria-interface.l")
+  (aria-init)
+  (ros::unsubscribe "/kduino/converted_imu"))
+ ((eq *robot-type* :pepper)
+  (require "package://peppereus/pepper-interface.l")
+  (setq *robot* (instance pepper-robot :init))
+  (setq *ri* (instance pepper-interface :init))
+  (defmethod pepper-robot
+    (:reset-manip-pose
+     nil
+     (send self :angle-vector #f(0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0)))
+    )
+  )
+ )
 
 (send *robot* :head :neck-p :min-angle -30)
 (send *robot* :head :neck-p :max-angle +30)
@@ -185,7 +198,8 @@
 	(jlist (send *robot* :joint-list)))
   ;; (model2real :sleep-time sleep-time)
   ;; (return-from beer-model2real nil)
-  (send *ri* :_angle-vector
+  (send *ri*
+	(if (eq *robot-type* :aria) :_angle-vector :angle-vector)
 	(map float-vector
 	     #'(lambda (j v)
 		 (cond
