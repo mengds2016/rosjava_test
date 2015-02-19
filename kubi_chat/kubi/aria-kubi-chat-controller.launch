@@ -4,6 +4,8 @@
 	output="screen" />
   <node pkg="rosjava_test" type="aria-imu-controller.l"
 	name="aria_imu_controller" />
+  <node pkg="rosjava_test" type="qumarion2aria.l"
+	name="qumarion2aria" />
   <!--
   <node pkg="rosjava_test" type="aria-beer.l"
 	name="aria_beer_controller"
