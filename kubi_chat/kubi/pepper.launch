@@ -1,0 +1,43 @@
+<launch>
+
+  <arg name="nao_ip" default="$(optenv NAO_IP 127.0.0.1)" />
+  <arg name="nao_port" default="$(optenv NAO_PORT 9559)" />
+
+  <node pkg="rosjava_test" type="string-republisher.l" name="str_repub1" >
+    <remap from="/string_republisher/in" to="/voice_echo/mei" />
+    <remap from="/string_republisher/out" to="/speech" />
+  </node>
+
+  <node pkg="rosjava_test" type="string-republisher.l" name="str_repub2" >
+    <remap from="/string_republisher/in" to="/ros_chat/text/string" />
+    <remap from="/string_republisher/out" to="/speech" />
+  </node>
+
+  <include file="$(find nao_apps)/launch/speech.launch" />
+
+  <node pkg="nao_pose" type="pose_controller.py" name="pose_controller"
+	args="--pip=$(arg nao_ip) --pport=$(arg nao_port)" output="screen" />
+
+ <include file="$(find naoqi_sensors)/launch/camera.launch" ns="camera/top" >
+    <arg name="nao_ip" value="$(arg nao_ip)" />
+    <arg name="nao_port" value="$(arg nao_port)" />
+    <arg name="source" value="0" />
+    <arg name="color_space" value="13" />
+    <arg name="brightness" value="0" />
+ </include>
+  <include file="$(find naoqi_sensors)/launch/camera.launch" ns="camera/bottom" >
+    <arg name="nao_ip" value="$(arg nao_ip)" />
+    <arg name="nao_port" value="$(arg nao_port)" />
+    <arg name="source" value="1" />
+    <arg name="color_space" value="13" />
+    <arg name="brightness" value="0" />
+  </include>
+  <include file="$(find naoqi_sensors)/launch/camera.launch" ns="camera/depth" >
+    <arg name="nao_ip" value="$(arg nao_ip)" />
+    <arg name="nao_port" value="$(arg nao_port)" />
+    <arg name="source" value="2" />
+    <arg name="color_space" value="17" />
+    <arg name="resolution" value="1" />
+  </include>
+
+</launch>
