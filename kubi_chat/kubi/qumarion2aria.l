@@ -65,6 +65,7 @@
   (send robot :larm :shoulder-r :joint-angle
 	(or (+ 90 (send map :get 'l_shoulder1))
 	    (send robot :larm :shoulder-r :joint-angle)))
+  (send robot :arms :shoulder-y :joint-angle 0)
   (send robot :rarm :elbow-y :joint-angle
 	(or (* -1 (send map :get 'r_shoulder2))
 	    (send robot :rarm :elbow-y :joint-angle)))
@@ -125,8 +126,10 @@
    (publish-now-joint-state)
    (print 'running)
    (x::window-main-one)
-   (ros::sleep))
-  )
+   (ros::sleep)
+   ;; (model2real :sleep-time 1000)
+   ;; (unix:sleep 1)
+   ))
 
 (ros::load-ros-manifest "sensor_msgs")
 (ros::roseus "qumarion2aria")
