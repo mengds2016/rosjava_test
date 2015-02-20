@@ -51,7 +51,8 @@
 	     (let* ((thre 0.4)
 		    (beer-tilt *beer-tilt*))
 	       ;; (format t "[kanpai triger] ~A > ~A~%" beer-tilt thre)
-	       (> beer-tilt thre)
+	       ;; (> beer-tilt thre)
+	       nil
 	       )))
     (cons :event-callback
 	  '(lambda (&rest args)
@@ -88,7 +89,7 @@
 	      (t 'nop))
 	     ;;
 	     (if *sync-imu*
-		 (tmp-model2real :sleep-time 1000 :wait? t)
+		 (tmp-model2real :sleep-time 1000 :wait? t :only-head? t)
 	       (unix:sleep 1))
 	     ))
     (cons :event-end '(lambda (&rest args) nil)))
