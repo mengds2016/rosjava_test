@@ -5,9 +5,26 @@
 (ros::load-ros-manifest "sensor_msgs")
 (ros::roseus "qumarion2aria")
 
-(aria-init)
-(ros::unsubscribe "/currentor_socket/sensor_array/position")
+(defvar *robot-type* :aria)
 
+(cond
+ ((eq *robot-type* :aria)
+  (require "package://aria_model/euslisp/aria-interface.l")
+  (aria-init :viewer? nil)
+  (ros::unsubscribe "/kduino/converted_imu"))
+ ((eq *robot-type* :pepper)
+  (require "package://peppereus/pepper-interface.l")
+  (setq *robot* (instance pepper-robot :init))
+  (setq *ri* (instance pepper-interface :init))
+  (defmethod pepper-robot
+    (:reset-manip-pose
+     nil
+     (send self :angle-vector #f(0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0)))
+    )
+  )
+ )
+
+(objects (list *robot*))
 (send *irtviewer* :resize 200 200)
 
 (defvar *recording?* nil)
@@ -73,10 +90,15 @@
 	 (format out "~A~%" val))
      (reverse *record-av-buf*))
     (close out)
-    (setq *record-av-buf* nil)
-    (rosparam-register-tag tag *record-title*)
     (send *irtviewer* :title "NOP")
     (send *irtviewer* :change-background #F(1.0 1.0 1.0))
+    (if *record-av-buf*
+	(send *robot* :angle-vector
+	      (nth (/ (length *record-av-buf*) 2) *record-av-buf*)))
+    (send *viewer* :draw-objects)
+    (rosparam-register-tag tag *record-title*)
+    (setq *record-av-buf* nil)
+    (setq *recording?* nil)
     ))
 
 (defun rosparam-register-tag
@@ -114,15 +136,21 @@
        #'(lambda (av)
 	   (send *robot* :angle-vector av)
 	   (send *viewer* :draw-objects)
-	   (model2real :sleep-time 1000)
+	   ;; (model2real :sleep-time 1000)
+	   (send *ri*
+		 (if (eq *robot-type* :aria) :_angle-vector :angle-vector)
+		 (send *robot* :angle-vector) 1000)
 	   (unix:sleep 1))
        (reverse data))
+      (close in)
       ))))
 
 (ros::subscribe
- "/aria_joint_command/joint_state_fix_leg"
+ (if (eq *robot-type* :aria)
+     "/aria_joint_command/joint_state_fix_leg"
+   "/pepper_joint_command/joint_state_fix_leg")
  sensor_msgs::JointState
- #'joint-state-callback 1)
+ #'joint-state-callback 10)
 
 (ros::subscribe
  "/aria/commandline/euslisp"
@@ -137,32 +165,35 @@
 (ros::advertise "/aira_record_viewer/image/in/raw"
                 sensor_msgs::image 1)
 
-(ros::rate 1)
-(do-until-key
- (if (not (ros::ok)) (return-from nil nil))
- (ros::sleep)
- (ros::spin-once)
- (x::window-main-one)
- (send *viewer* :draw-objects :flush nil)
- (send *viewer* :viewsurface :flush)
- (let* ((img (send *viewer* :viewsurface :getglimage)))
-   (ros::publish
-    "/aira_record_viewer/image/in/raw"
-    (instance sensor_msgs::image :init
-              :width (send img :width)
-              :height (send img :height)
-              :encoding "bgr8"
-              :step (* (send img :width) 3)
-              :data (send img :entity))))
- ;; (if *record-av-buf*
- ;; (push (send *robot* :angle-vector) *record-av-buf*))
- (cond
-  ((and (numberp *recording?*)
-	(< *recording?* 0))
-   (register-motion)
-   (setq *record-av-buf* nil)
-   (setq *recording?* nil))
-  ((numberp *recording?*)
-   (decf *recording?*)
-   (push (copy-seq (send *robot* :angle-vector)) *record-av-buf*)))
- )
+(ros::rate 10)
+(let* ((cnt 10))
+  (do-until-key
+   (if (not (ros::ok)) (return-from nil nil))
+   (ros::sleep)
+   (ros::spin-once)
+   (x::window-main-one)
+   (send *viewer* :draw-objects :flush nil)
+   (send *viewer* :viewsurface :flush)
+   (print cnt)
+   (cond
+    ((minusp (decf cnt))
+     (setq cnt 10)
+     (let* ((img (send *viewer* :viewsurface :getglimage)))
+       (ros::publish
+	"/aira_record_viewer/image/in/raw"
+	(instance sensor_msgs::image :init
+		  :width (send img :width)
+		  :height (send img :height)
+		  :encoding "bgr8"
+		  :step (* (send img :width) 3)
+		  :data (send img :entity))))
+     ;; (if *record-av-buf*
+     ;; (push (send *robot* :angle-vector) *record-av-buf*))
+     (cond
+      ((and (numberp *recording?*)
+	    (< *recording?* 0))
+       (register-motion))
+      ((numberp *recording?*)
+       (decf *recording?*)
+       (push (copy-seq (send *robot* :angle-vector)) *record-av-buf*)))))
+   ))
