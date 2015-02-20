@@ -146,10 +146,27 @@
 (defun sync-callback
   (msg)
   (cond
-   ((substringp "toggle:o" (send msg :data))
-    (setq *sync-imu* t))
-   ((substringp "toggle:x" (send msg :data))
-    (setq *sync-imu* nil))))
+   ((substringp "toggle:" (send msg :data))
+    (cond
+     ((substringp "toggle:o" (send msg :data))
+      (setq *sync-imu* t))
+     ((substringp "toggle:x" (send msg :data))
+      (setq *sync-imu* nil)))
+    (cond
+     ((eq #\o (aref (send msg :data) (length "toggle:o")))
+      (ros::publish "/beer_server/all_on_switch"
+		    (instance std_msgs::uint16 :init :data 10))
+      )
+     ((eq #\x (aref (send msg :data) (length "toggle:o")))
+      (ros::publish "/beer_server/all_off_switch"
+		    (instance std_msgs::uint16 :init :data 10))
+      ))
+    )))
+
+(ros::advertise "/beer_server/all_on_switch"
+		std_msgs::uint16)
+(ros::advertise "/beer_server/all_off_switch"
+		std_msgs::uint16)
 
 (ros::subscribe "/aria/commandline"
 		std_msgs::string
