@@ -15,6 +15,12 @@ var ros_controller = function(opt) {
         messageType: 'std_msgs/String'
     });
 
+    this.voice_topic = new ROSLIB.Topic({
+        ros: this.ros,
+        name: "/voice_echo/mei",
+        messageType: 'std_msgs/String'
+    });
+
     ros_controller.prototype.publish_drive_command = function(v,r){
         var msg = new ROSLIB.Message(
             {data: [v,r]}
@@ -74,9 +80,9 @@ function publish_status_data(){
 	var red = parseInt(cheek.value.substr(0,2),16);
 	var grn = parseInt(cheek.value.substr(2,4),16);
 	var blu = parseInt(cheek.value.substr(4,6),16);
-	red = red * 64 / 255.5;
-	grn = grn * 64 / 255.5;
-	blu = blu * 64 / 255.5;
+	red = red * 63 / 255.0;
+	grn = grn * 63 / 255.0;
+	blu = blu * 63 / 255.0;
 	var msg = new ROSLIB.Message(
             {data: [5,10,red,grn,blu]}
 	);
@@ -85,10 +91,25 @@ function publish_status_data(){
     //
     var toggle="toggle:";
     toggle += document.getElementById("neck_checkbox").checked ? "o" : "x";
-    toggle += document.getElementById("eye_checkbox").checked ? "o" : "x";
-    toggle += document.getElementById("mimi_checkbox").checked ? "o" : "x";
+    // toggle += document.getElementById("eye_checkbox").checked ? "o" : "x";
+    // toggle += document.getElementById("mimi_checkbox").checked ? "o" : "x";
     toggle += document.getElementById("cup_checkbox").checked ? "o" : "x";
     rc.publish_string_command(toggle);
 }
 
 setInterval('publish_status_data()',500);
+
+function voice_text(e){
+    if (!e) var e = window.event;
+    if(e.keyCode == 13){
+	var input = document.getElementById("voice_text");
+	var str = input.value;
+	var msg = new ROSLIB.Message(
+            {data: str}
+        );
+	console.log("command line " + str);
+        rc.voice_topic.publish(msg);
+	input.value = "";
+        return false;
+    }
+}

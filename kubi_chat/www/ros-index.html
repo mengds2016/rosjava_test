@@ -54,9 +54,9 @@
 	 style="position: absolute; top: 0px;">
       <div id="top_insert_container">
 	<input id="neck_checkbox" type="checkbox" class="checkbox">首</input>
-	<input id="eye_checkbox" type="checkbox" class="checkbox">目</input>
-	<input id="mimi_checkbox" type="checkbox" class="checkbox">耳</input>
-	<input id="cup_checkbox" type="checkbox" class="checkbox">コップ</input>
+	<input id="cup_checkbox" type="checkbox" class="checkbox">注</input>
+	<input id="voice_text" type="text" name="voice_text"
+	       onKeyPress="voice_text();" ></input>
       </div>
     </div>
     <div id="top_column_right"
@@ -69,7 +69,7 @@
     </div>
     <!-- -->
     <script language="javascript">
-      insert_container('tag','bottom_insert_container',['rosparam_data/ad.png','rosparam_data/hoge.png'],['ad','hoge']);
+      insert_container('tag','bottom_insert_container',['rosparam_data/pour.png','rosparam_data/serve.png','rosparam_data/standby.png'],['pour','serve','standby']);
     </script>
   </body>
 </html>
