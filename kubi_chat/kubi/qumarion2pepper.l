@@ -38,7 +38,7 @@
 	  (send (send msg :pose) :orientation :y)
 	  (send (send msg :pose) :orientation :z)))))
 
-(defun qumarion2aria
+(defun qumarion2pepper
   (&optional (robot *robot*)
 	     (map *joint-state-hash*)
 	     (pose *pose-matrix*))
@@ -59,9 +59,11 @@
   (send robot :head :neck-r :joint-angle
 	(or (send map :get 'neck0) (send robot :head :neck-r :joint-angle)))
   (send robot :rarm :shoulder-p :joint-angle
-	(or (send map :get 'r_shoulder0) (send robot :rarm :shoulder-p :joint-angle)))
+	(or (+ 90 (* -1 (send map :get 'r_shoulder0)))
+	    (send robot :rarm :shoulder-p :joint-angle)))
   (send robot :larm :shoulder-p :joint-angle
-	(or (send map :get 'l_shoulder0) (send robot :larm :shoulder-p :joint-angle)))
+	(or (+ 90 (send map :get 'l_shoulder0))
+	    (send robot :larm :shoulder-p :joint-angle)))
   (send robot :rarm :shoulder-r :joint-angle
 	(or (+ -90 (send map :get 'r_shoulder1))
 	    (send robot :rarm :shoulder-r :joint-angle)))
@@ -70,22 +72,22 @@
 	    (send robot :larm :shoulder-r :joint-angle)))
   (send robot :arms :shoulder-y :joint-angle 0)
   (send robot :rarm :elbow-y :joint-angle
-	(or (* -1 (send map :get 'r_shoulder2))
+	(or (* +1 (send map :get 'r_shoulder2))
 	    (send robot :rarm :elbow-y :joint-angle)))
   (send robot :larm :elbow-y :joint-angle
-	(or (* -1 (send map :get 'l_shoulder2))
+	(or (* +1 (send map :get 'l_shoulder2))
 	    (send robot :larm :elbow-y :joint-angle)))
-  (send robot :rarm :elbow-p :joint-angle
-	(or (* +1 (send map :get 'r_elbow0))
-	    (send robot :rarm :elbow-p :joint-angle)))
-  (send robot :larm :elbow-p :joint-angle
+  (send robot :rarm :elbow-r :joint-angle
+	(or (* -1 (send map :get 'r_elbow0))
+	    (send robot :rarm :elbow-r :joint-angle)))
+  (send robot :larm :elbow-r :joint-angle
 	(or (* -1 (send map :get 'l_elbow0))
-	    (send robot :larm :elbow-p :joint-angle)))
+	    (send robot :larm :elbow-r :joint-angle)))
   (send robot :rarm :wrist-y :joint-angle
-	(or (- 0 (send map :get 'r_hand0))
+	(or (+ 90 (send map :get 'r_hand0))
 	    (send robot :rarm :wrist-y :joint-angle)))
   (send robot :larm :wrist-y :joint-angle
-	(or (- 0 (send map :get 'l_hand0))
+	(or (+ -90 (send map :get 'l_hand0))
 	    (send robot :larm :wrist-y :joint-angle)))
   (send robot :rarm :wrist-p :joint-angle
 	(or (- 0 (send map :get 'r_hand1))
@@ -106,7 +108,7 @@
 (defun publish-now-joint-state
   nil
   (ros::publish
-   "/aria_joint_command/joint_state_fix_leg"
+   "/pepper_joint_command/joint_state_fix_leg"
    (instance sensor_msgs::jointstate
 	     :init
 	     :name
@@ -124,7 +126,7 @@
   (do-until-key
    (if (not (ros::ok)) (return-from nil nil))
    (ros::spin-once)
-   (qumarion2aria)
+   (qumarion2pepper)
    (send *viewer* :draw-objects)
    (publish-now-joint-state)
    (print 'running)
@@ -135,7 +137,7 @@
    ))
 
 (ros::load-ros-manifest "sensor_msgs")
-(ros::roseus "qumarion2aria")
+(ros::roseus "qumarion2pepper")
 
 (ros::subscribe
  "/qumarion_stream_interface/joint_state"
@@ -148,8 +150,22 @@
  #'pose-callback 1)
 
 (ros::advertise
- "/aria_joint_command/joint_state_fix_leg"
+ "/pepper_joint_command/joint_state_fix_leg"
  sensor_msgs::JointState)
 
 ;; (if (eq *init* :main) (main-loop))
-
+(ros::rate 5)
+(do-until-key
+ (if (not (ros::ok)) (return-from nil nil))
+ (ros::sleep)
+ (ros::spin-once)
+ (qumarion2pepper)
+ (publish-now-joint-state)
+ ;; (print 'running)
+ (cond
+  ((and (boundp '*viewer*) *viewer*)
+   (send *viewer* :draw-objects)
+   (x::window-main-one)))
+ ;; (model2real :sleep-time 1000)
+ ;; (unix:sleep 1)
+ )
