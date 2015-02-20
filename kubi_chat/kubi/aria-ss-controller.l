@@ -34,6 +34,7 @@
 (defvar *beer-tilt* 0)
 (defvar *pan-tilt-vector* (float-vector 0 0))
 (defvar *control-mode* :user)
+(defvar *sync-imu* nil)
 
 ;; (defvar *kanpai-flag* 0)
 (defvar *mode-id*)
@@ -86,8 +87,9 @@
 	       )
 	      (t 'nop))
 	     ;;
-	     (tmp-model2real :sleep-time 1000 :wait? t)
-	     ;; (unix:sleep 1)
+	     (if *sync-imu*
+		 (tmp-model2real :sleep-time 1000 :wait? t)
+	       (unix:sleep 1))
 	     ))
     (cons :event-end '(lambda (&rest args) nil)))
    ))
@@ -141,6 +143,14 @@
 
 (defun control-mode-callback (msg) (setq *control-mode* (send msg :data)))
 
+(defun sync-callback
+  (msg)
+  (cond
+   ((substringp "toggle:o" (send msg :data))
+    (setq *sync-imu* t))
+   ((substringp "toggle:x" (send msg :data))
+    (setq *sync-imu* nil))))
+
 (ros::subscribe "/aria/commandline"
 		std_msgs::string
 		#'aria-command-callback)
@@ -159,6 +169,9 @@
 (ros::subscribe "/aria_imu_controller/control_mode"
 		std_msgs::string
 		#'control-mode-callback)
+(ros::subscribe "/ros_chat/status/string"
+		std_msgs::string
+		#'sync-callback)
 
 (ros::advertise "/kubi_chat/request/pan_tilt_vector"
 		std_msgs::float32multiarray
