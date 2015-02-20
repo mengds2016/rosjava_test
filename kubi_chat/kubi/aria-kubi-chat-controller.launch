@@ -44,4 +44,10 @@
   <node pkg="mei_talk_util" type="voice_echo.l" name="voice_echo_node" >
     <remap from="/voice_echo/mei" to="/ros_chat/text/string" />
   </node>
+
+  <!--
+  <node pkg="image_transport" type="republish"
+        name="image_transport_for_small"
+        args="raw in:=/aira_record_viewer/image/in/raw compressed out:=/ros_chat/request/image/raw/small" />
+  -->
 </launch>

@@ -143,6 +143,7 @@
 
 (defun control-mode-callback (msg) (setq *control-mode* (send msg :data)))
 
+(defvar *pouring* nil)
 (defun sync-callback
   (msg)
   (cond
@@ -153,11 +154,19 @@
      ((substringp "toggle:x" (send msg :data))
       (setq *sync-imu* nil)))
     (cond
-     ((eq #\o (aref (send msg :data) (length "toggle:o")))
+     ((and
+       (eq #\o (aref (send msg :data) (length "toggle:o")))
+       (not *pouring*))
+      (setq *pouring* t)
+      (print 'switch-on)
       (ros::publish "/beer_server/all_on_switch"
 		    (instance std_msgs::uint16 :init :data 10))
       )
-     ((eq #\x (aref (send msg :data) (length "toggle:o")))
+     ((and
+       (eq #\x (aref (send msg :data) (length "toggle:o")))
+       *pouring*)
+      (setq *pouring* nil)
+      (print 'switch-off)
       (ros::publish "/beer_server/all_off_switch"
 		    (instance std_msgs::uint16 :init :data 10))
       ))

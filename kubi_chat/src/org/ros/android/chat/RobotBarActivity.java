@@ -43,7 +43,7 @@ public class RobotBarActivity extends RosDialogActivity implements
 	final private String TAG = "RobotBarActivity";
 
 	private CompressedImageView image_view_left, image_view_right;
-	private CompressedImageView image_view_small;
+	public static CompressedImageView image_view_small;
 	private TextView bottom_notf;
 	private EditText edit_text;
 
@@ -169,11 +169,11 @@ public class RobotBarActivity extends RosDialogActivity implements
 		this.image_view_right.setMessageType(sensor_msgs.CompressedImage._TYPE);
 		this.image_view_right.setTalker(this.chatnode);
 
-		this.image_view_small = (CompressedImageView) findViewById(R.id.compressed_image_view_small);
-		this.image_view_small.setTopicName(node_name + "/request/"
+		image_view_small = (CompressedImageView) findViewById(R.id.compressed_image_view_small);
+		image_view_small.setTopicName(node_name + "/request/"
 				+ "image/raw/small/compressed");
-		this.image_view_small.setMessageType(sensor_msgs.CompressedImage._TYPE);
-		this.image_view_small.setNodeName(node_name
+		image_view_small.setMessageType(sensor_msgs.CompressedImage._TYPE);
+		image_view_small.setNodeName(node_name
 				+ "/compressed_image_view_small");
 
 		this.audio_node = new AudioPubSubNode(node_name);
@@ -261,7 +261,7 @@ public class RobotBarActivity extends RosDialogActivity implements
 		});
 		nodeMainExecutor.execute(this.image_view_left, nodeConfiguration);
 		nodeMainExecutor.execute(this.image_view_right, nodeConfiguration);
-		nodeMainExecutor.execute(this.image_view_small, nodeConfiguration);
+		nodeMainExecutor.execute(image_view_small, nodeConfiguration);
 		nodeMainExecutor.execute(this.image_publisher, nodeConfiguration);
 		nodeMainExecutor.execute(this.chatnode, nodeConfiguration);
 		nodeMainExecutor.execute(this.audio_node, nodeConfiguration);
@@ -548,6 +548,7 @@ public class RobotBarActivity extends RosDialogActivity implements
 			rb_node.onDestroy();
 			rb_node = null;
 		}
+		image_view_small = null;
 	}
 
 	@Override

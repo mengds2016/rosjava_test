@@ -6,8 +6,10 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import org.ros.android.chat.R;
@@ -22,6 +24,7 @@ public class PoseMakeActivity extends Activity{
 	private int motion_button_color ;
 	private int active_color = Color.RED;
 	private int negative_color = Color.TRANSPARENT;
+	private LinearLayout ll ;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -66,6 +69,15 @@ public class PoseMakeActivity extends Activity{
 				}
 				PoseMakeActivity.this.motion_record_button.setBackgroundColor(PoseMakeActivity.this.motion_button_color);
 			}});
+		
+//		this.ll = (LinearLayout) findViewById(R.id.pose_make_footer_layout);
+//		if ( RobotBarActivity.image_view_small != null ){
+//			ViewGroup.LayoutParams p = RobotBarActivity.image_view_small.getLayoutParams();
+//			p.width = ViewGroup.LayoutParams.FILL_PARENT;
+//			p.height = ViewGroup.LayoutParams.FILL_PARENT;
+//			RobotBarActivity.image_view_small.setLayoutParams(p);
+//			this.ll.addView( RobotBarActivity.image_view_small );
+//		}
 	}
 
 	@Override

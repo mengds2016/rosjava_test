@@ -37,8 +37,8 @@
                 android:disabledAlpha="0.3"
                 android:onClick="onClickControlToggle"
                 android:tag="me"
-                android:textOff="目"
-                android:textOn="目" />
+                android:textOff="注"
+                android:textOn="注" />
 
             <ToggleButton
                 android:id="@+id/mimi_toggle_button"
