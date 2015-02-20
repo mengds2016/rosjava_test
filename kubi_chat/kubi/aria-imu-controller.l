@@ -11,6 +11,7 @@
  ((eq *robot-type* :aria)
   (require "package://aria_model/euslisp/aria-interface.l")
   (aria-init)
+  (format t "aria~%")
   (ros::unsubscribe "/kduino/converted_imu"))
  ((eq *robot-type* :pepper)
   (require "package://peppereus/pepper-interface.l")
@@ -75,6 +76,7 @@
 
 (defvar *control-mode* :user)
 (defvar *last-user-command-receive-time* (car (unix:gettimeofday)))
+(defvar *last-imu-command-receive-time* (car (unix:gettimeofday)))
 
 (send *beer-obj* :set-color #F(1 1 0))
 (send *fove-obj* :set-color #F(0 0 1))
@@ -86,6 +88,7 @@
   ;; (format t "[cup-ui-imu-callback]~%")
   (setq *control-mode* :user) ;; usr flag
   (setq *last-user-command-receive-time* (car (unix:gettimeofday)))
+  (setq *last-imu-command-receive-time* (car (unix:gettimeofday)))
   (let* ((qv (float-vector
 	      (send (send (send msg :pose) :orientation) :w)
 	      (send (send (send msg :pose) :orientation) :x)
@@ -151,6 +154,7 @@
   ;; (format t "[cup-ui-imu-callback]~%")
   (setq *control-mode* :user) ;; usr flag
   (setq *last-user-command-receive-time* (car (unix:gettimeofday)))
+  (setq *last-imu-command-receive-time* (car (unix:gettimeofday)))
   (let* ((qv (float-vector
 	      (send (send (send msg :pose) :orientation) :w)
 	      (send (send (send msg :pose) :orientation) :x)
@@ -200,6 +204,7 @@
   (format t "[cup-ui-imu-callback]~%")
   (setq *control-mode* :user) ;; usr flag
   (setq *last-user-command-receive-time* (car (unix:gettimeofday)))
+  (setq *last-imu-command-receive-time* (car (unix:gettimeofday)))
   (let* ((qv (float-vector
 	      (send (send msg :orientation) :w)
 	      (send (send msg :orientation) :x)
@@ -240,6 +245,7 @@
   (format t "[fove-imu-callback]~%")
   (setq *control-mode* :user) ;; usr flag
   (setq *last-user-command-receive-time* (car (unix:gettimeofday)))
+  (setq *last-imu-command-receive-time* (car (unix:gettimeofday)))
   (let* ((qv (float-vector
 	      (send (send msg :orientation) :w)
 	      (send (send msg :orientation) :x)
@@ -408,44 +414,51 @@
  ;;
  (imu-angle-vector-blend (send *beer-obj* :copy-worldcoords))
  ;;
- (send-all (send *robot* :links) :worldcoords)
- (send *robot* :inverse-kinematics
-       (list (send *fove-obj* :copy-worldcoords)
-	     (send *beer-obj* :copy-worldcoords))
-       :move-target
-       (list *fove-end-coords* *beer-end-coords*)
-       :link-list
-       (list
-	(send *robot* :link-list (send *fove-end-coords* :parent)
-	      (send *robot* :head :root-link))
-	(send *robot* :link-list (send *beer-end-coords* :parent)
-	      (send *robot* :rarm :root-link)))
-       :collision-avoidance-link-pair
-       (apply
-	#'append
-	(mapcar
-	 #'(lambda (hl)
-	     (mapcar
-	      #'(lambda (bl) (list hl bl))
-	      (cdr (send *robot* :torso :links))))
-	 (send *robot* :rarm :links)))
-       :avoid-collision-distance 100
-       :avoid-collision-null-gain 3.
-       :avoid-collision-joint-gain 3.
-       :rotation-axis (list t t)
-       :translation-axis (list nil nil)
-       :stop 5
-       :revert-if-fail nil
-       :debug-view nil)
- (send *robot* :torso :waist-p :joint-angle 0)
- (send *robot* :torso :waist-r :joint-angle 0)
- (send *robot* :torso :waist-y :joint-angle 0)
- (send-all (send *robot* :larm :joint-list) :joint-angle 0)
- ;;
- (send *beer-obj* :newcoords
-       (send *beer-end-coords* :copy-worldcoords))
- (send *fove-obj* :newcoords
-       (send *fove-end-coords* :copy-worldcoords))
+ (cond
+  ((< (- (car (unix:gettimeofday))
+	 *last-user-command-receive-time* )
+      1)
+   (send-all (send *robot* :links) :worldcoords)
+   (send *robot* :inverse-kinematics
+	 (list (send *fove-obj* :copy-worldcoords)
+	       (send *beer-obj* :copy-worldcoords))
+	 :move-target
+	 (list *fove-end-coords* *beer-end-coords*)
+	 :link-list
+	 (list
+	  (send *robot* :link-list (send *fove-end-coords* :parent)
+		(send *robot* :head :root-link))
+	  (send *robot* :link-list (send *beer-end-coords* :parent)
+		(send *robot* :rarm :root-link)))
+	 :collision-avoidance-link-pair
+	 (apply
+	  #'append
+	  (mapcar
+	   #'(lambda (hl)
+	       (mapcar
+		#'(lambda (bl) (list hl bl))
+		(cdr (send *robot* :torso :links))))
+	   (send *robot* :rarm :links)))
+	 :avoid-collision-distance 100
+	 :avoid-collision-null-gain 3.
+	 :avoid-collision-joint-gain 3.
+	 :rotation-axis (list t t)
+	 :translation-axis (list nil nil)
+	 :stop 5
+	 :revert-if-fail nil
+	 :debug-view nil)
+   (send *robot* :torso :waist-p :joint-angle 0)
+   (send *robot* :torso :waist-r :joint-angle 0)
+   (send *robot* :torso :waist-y :joint-angle 0)
+   (send-all (send *robot* :larm :joint-list) :joint-angle 0)
+   (send-all (send *robot* :rarm :joint-list) :joint-angle 0)
+   ;;
+   (send *beer-obj* :newcoords
+	 (send *beer-end-coords* :copy-worldcoords))
+   (send *fove-obj* :newcoords
+	 (send *fove-end-coords* :copy-worldcoords))
+   )
+  (t (print 'no-command)))
  ;;
  (ros::publish "/aria_imu_controller/angle_vector"
 	       (instance std_msgs::float32multiarray :init
