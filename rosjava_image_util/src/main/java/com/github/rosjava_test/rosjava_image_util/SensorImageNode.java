@@ -105,9 +105,16 @@ public class SensorImageNode extends AbstractNodeMain {
 								for (int i = 0; i < image.getWidth(); i++) {
 									for (int j = 0; j < image.getHeight(); j++) {
 										int pos = 3 * (i + j * image.getWidth());
-										int rgb = (((int) data[pos + 0] << 16) & 0xFF0000)
-												+ (((int) data[pos + 1] << 8) & 0x00FF00)
-												+ (((int) data[pos + 2] << 0) & 0x0000FF);
+										int rgb ;
+										if ( imageType == BufferedImage.TYPE_INT_RGB ){
+											rgb = (((int) data[pos + 0] << 16) & 0xFF0000)
+													+ (((int) data[pos + 1] << 8) & 0x00FF00)
+													+ (((int) data[pos + 2] << 0) & 0x0000FF);
+										} else {
+											rgb = (((int) data[pos + 0] << 0) & 0x0000FF)
+													+ (((int) data[pos + 1] << 8) & 0x00FF00)
+													+ (((int) data[pos + 2] << 16) & 0xFF0000);
+										}
 										buf.setRGB(i, j, rgb);
 									}
 								}
