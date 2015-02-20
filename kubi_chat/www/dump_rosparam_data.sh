@@ -79,9 +79,9 @@ function update_ros_index_html(){
 }
 
 
-# rosparam set /robot_bar/demo/tag "standby pour serve"
+# rosparam set /robot_bar/demo/tag "serve standby reset"
 # rosparam set /robot_bar/demo/standby/name "standby"
-# rosparam set /robot_bar/demo/pour/name "pour"
+# rosparam set /robot_bar/demo/reset/name "reset"
 # rosparam set /robot_bar/demo/serve/name "serve"
 
 ## get_all_image
