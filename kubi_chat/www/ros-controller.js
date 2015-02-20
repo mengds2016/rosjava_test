@@ -91,9 +91,9 @@ function publish_status_data(){
     //
     var toggle="toggle:";
     toggle += document.getElementById("neck_checkbox").checked ? "o" : "x";
-    // toggle += document.getElementById("eye_checkbox").checked ? "o" : "x";
-    // toggle += document.getElementById("mimi_checkbox").checked ? "o" : "x";
     toggle += document.getElementById("cup_checkbox").checked ? "o" : "x";
+    toggle += document.getElementById("body_checkbox").checked ? "o" : "x";
+    toggle += document.getElementById("sound_checkbox").checked ? "o" : "x";
     rc.publish_string_command(toggle);
 }
 
