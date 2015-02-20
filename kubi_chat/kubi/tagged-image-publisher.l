@@ -39,7 +39,10 @@
 				    :data motion-tag))
 	  (ros::publish "/aria/commandline"
 			(instance std_msgs::String :init
-				  :data motion-tag))))
+				  :data motion-tag)))
+      (ros::publish "/aria/commandline"
+		    (instance std_msgs::String :init
+			      :data tag)))
     (if sound-text
 	(ros::publish "/voice_echo/mei"
 		      (instance std_msgs::String :init
