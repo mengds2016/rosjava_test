@@ -64,6 +64,11 @@
         android:layout_weight="1"
         android:gravity="center"
         android:orientation="horizontal" >
+
+        <org.ros.android.chat.CompressedImageView
+            android:id="@+id/compressed_image_view_pose"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" />
     </LinearLayout>
 
 </LinearLayout>

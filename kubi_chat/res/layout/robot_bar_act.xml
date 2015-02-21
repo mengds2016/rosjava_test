@@ -47,8 +47,8 @@
                 android:disabledAlpha="0.3"
                 android:onClick="onClickControlToggle"
                 android:tag="mimi"
-                android:textOff="耳"
-                android:textOn="耳" />
+                android:textOff="体"
+                android:textOn="体" />
 
             <ToggleButton
                 android:id="@+id/oto_toggle_button"
@@ -218,10 +218,18 @@
                 android:adjustViewBounds="true"
                 android:onClick="onClickDemoIcon"
                 android:scaleType="fitXY"
+                android:src="@drawable/pull"
+                android:tag="pull" />
+
+            <!--
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:adjustViewBounds="true"
+                android:onClick="onClickDemoIcon"
+                android:scaleType="fitXY"
                 android:src="@drawable/fuza1"
                 android:tag="fuza1" />
-
-            <!-- 
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
@@ -230,7 +238,6 @@
                 android:scaleType="fitXY"
                 android:src="@drawable/fuza2"
                 android:tag="fuza2" />
-
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
@@ -248,7 +255,6 @@
                 android:scaleType="fitXY"
                 android:src="@drawable/my2"
                 android:tag="my2" />
-                 -->
 
             <ImageButton
                 android:layout_width="wrap_content"
@@ -267,6 +273,8 @@
                 android:scaleType="fitXY"
                 android:src="@drawable/my4"
                 android:tag="my4" />
+            -->
+
 
             <!--
             <Button
