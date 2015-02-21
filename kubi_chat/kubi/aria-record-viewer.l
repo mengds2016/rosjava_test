@@ -165,7 +165,7 @@
 (ros::advertise "/aira_record_viewer/image/in/raw"
                 sensor_msgs::image 1)
 
-(ros::rate 10)
+(ros::rate 5)
 (let* ((cnt 10))
   (do-until-key
    (if (not (ros::ok)) (return-from nil nil))
@@ -175,18 +175,18 @@
    (send *viewer* :draw-objects :flush nil)
    (send *viewer* :viewsurface :flush)
    (print cnt)
+   (let* ((img (send *viewer* :viewsurface :getglimage)))
+     (ros::publish
+      "/aira_record_viewer/image/in/raw"
+      (instance sensor_msgs::image :init
+		:width (send img :width)
+		:height (send img :height)
+		:encoding "bgr8"
+		:step (* (send img :width) 3)
+		:data (send img :entity))))
    (cond
     ((minusp (decf cnt))
-     (setq cnt 10)
-     (let* ((img (send *viewer* :viewsurface :getglimage)))
-       (ros::publish
-	"/aira_record_viewer/image/in/raw"
-	(instance sensor_msgs::image :init
-		  :width (send img :width)
-		  :height (send img :height)
-		  :encoding "bgr8"
-		  :step (* (send img :width) 3)
-		  :data (send img :entity))))
+     (setq cnt 5)
      ;; (if *record-av-buf*
      ;; (push (send *robot* :angle-vector) *record-av-buf*))
      (cond

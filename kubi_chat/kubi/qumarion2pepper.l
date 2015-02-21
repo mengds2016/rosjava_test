@@ -1,10 +1,13 @@
 #!/usr/bin/env roseus
 
+(ros::load-ros-manifest "sensor_msgs")
+(ros::roseus "qumarion2pepper")
+
+(require "package://peppereus/pepper-interface.l")
+
 (defun model2real
   (&key (sleep-time 1000))
   (send *ri* :angle-vector (send *robot* :angle-vector) sleep-time))
-
-(require "package://peppereus/pepper-interface.l")
 
 (setq *robot* (pepper))
 (setq *ri* (instance pepper-interface :init))
@@ -14,6 +17,8 @@
 
 (defvar *joint-state-hash* (make-hash-table))
 (defvar *pose-matrix* (unit-matrix))
+
+(defvar *body-control?* nil)
 
 (defun joint-state-callback
   (msg)
@@ -132,12 +137,29 @@
    (print 'running)
    (x::window-main-one)
    (ros::sleep)
-   ;; (model2real :sleep-time 1000)
-   ;; (unix:sleep 1)
+   (cond
+    (*body-control?*
+     ;; (model2real :sleep-time 1000)
+     (send *ri* :angle-vector (send *robot* :angle-vector) 1000)
+     (unix:sleep 1)))
    ))
 
-(ros::load-ros-manifest "sensor_msgs")
-(ros::roseus "qumarion2pepper")
+(defun sync-callback
+  (msg)
+  (cond
+   ((substringp "toggle:" (send msg :data))
+    (print (send msg :data))
+    (cond
+     ((eq #\o (aref (send msg :data) (length "toggle:oo")))
+      (setq *body-control?* t)
+      )
+     ((eq #\x (aref (send msg :data) (length "toggle:oo")))
+      (setq *body-control?* nil))
+     ))))
+
+(ros::subscribe "/ros_chat/status/string"
+		std_msgs::string
+		#'sync-callback)
 
 (ros::subscribe
  "/qumarion_stream_interface/joint_state"
@@ -153,19 +175,8 @@
  "/pepper_joint_command/joint_state_fix_leg"
  sensor_msgs::JointState)
 
-;; (if (eq *init* :main) (main-loop))
 (ros::rate 5)
-(do-until-key
- (if (not (ros::ok)) (return-from nil nil))
- (ros::sleep)
- (ros::spin-once)
- (qumarion2pepper)
- (publish-now-joint-state)
- ;; (print 'running)
- (cond
-  ((and (boundp '*viewer*) *viewer*)
-   (send *viewer* :draw-objects)
-   (x::window-main-one)))
- ;; (model2real :sleep-time 1000)
- ;; (unix:sleep 1)
- )
+(while (null *joint-state-msg*)
+  (ros::spin-once) (ros::sleep))
+
+(if (eq *init* :main) (main-loop))

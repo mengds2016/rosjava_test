@@ -26,7 +26,12 @@
   <node pkg="roseus" type="roseus"
 	name="aria_record_viewer"
 	args="&quot;(progn (setq *robot-type* :$(arg robot_type)) (load \&quot;package://rosjava_test/kubi_chat/kubi/aria-record-viewer.l\&quot;))&quot;"
-	output="screen" />
+	output="screen">
+    <!--
+	<remap from="/aira_record_viewer/image/in/raw"
+	to="/image_republish_node_small/image/in/raw" />
+    -->
+  </node>
   <!-- face detection -->
   <node pkg="opencv_face_recog_node"
 	type="face_detect_node"
@@ -45,9 +50,7 @@
     <remap from="/voice_echo/mei" to="/ros_chat/text/string" />
   </node>
 
-  <!--
   <node pkg="image_transport" type="republish"
         name="image_transport_for_small"
         args="raw in:=/aira_record_viewer/image/in/raw compressed out:=/ros_chat/request/image/raw/small" />
-  -->
 </launch>

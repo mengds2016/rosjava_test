@@ -1,5 +1,8 @@
 #!/usr/bin/env roseus
 
+(ros::load-ros-manifest "sensor_msgs")
+(ros::roseus "qumarion2aria")
+
 (require "package://aria_model/euslisp/aria-interface.l")
 
 ;;(require "euslib/drivers/qumarion/Win32/qumarion.l")
@@ -11,8 +14,13 @@
 (defvar *joint-state-hash* (make-hash-table))
 (defvar *pose-matrix* (unit-matrix))
 
+(defvar *body-control?* nil)
+
+(defvar *joint-state-msg*)
+
 (defun joint-state-callback
   (msg)
+  (setq *joint-state-msg* msg)
   (let ((names (send msg :name))
         (positions (send msg :position)))
     (map cons
@@ -131,8 +139,18 @@
    ;; (unix:sleep 1)
    ))
 
-(ros::load-ros-manifest "sensor_msgs")
-(ros::roseus "qumarion2aria")
+(defun sync-callback
+  (msg)
+  (cond
+   ((substringp "toggle:" (send msg :data))
+    (print (send msg :data))
+    (cond
+     ((eq #\o (aref (send msg :data) (length "toggle:oo")))
+      (setq *body-control?* t)
+      )
+     ((eq #\x (aref (send msg :data) (length "toggle:oo")))
+      (setq *body-control?* nil))
+     ))))
 
 (ros::subscribe
  "/qumarion_stream_interface/joint_state"
@@ -148,7 +166,15 @@
  "/aria_joint_command/joint_state_fix_leg"
  sensor_msgs::JointState)
 
+(ros::subscribe "/ros_chat/status/string"
+		std_msgs::string
+		#'sync-callback)
+
+
 (ros::rate 5)
+(while (null *joint-state-msg*)
+  (ros::spin-once) (ros::sleep))
+
 (do-until-key
  (if (not (ros::ok)) (return-from nil nil))
  (ros::sleep)
@@ -160,6 +186,8 @@
   ((and (boundp '*viewer*) *viewer*)
    (send *viewer* :draw-objects)
    (x::window-main-one)))
- ;; (model2real :sleep-time 1000)
- ;; (unix:sleep 1)
+ (cond
+  (*body-control?*
+   (model2real :sleep-time 1000)
+   (unix:sleep 1)))
  )
