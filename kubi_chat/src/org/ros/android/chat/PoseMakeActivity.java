@@ -25,6 +25,7 @@ public class PoseMakeActivity extends Activity{
 	private int active_color = Color.RED;
 	private int negative_color = Color.TRANSPARENT;
 	private LinearLayout ll ;
+	private CompressedImageView iview;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -70,6 +71,8 @@ public class PoseMakeActivity extends Activity{
 				PoseMakeActivity.this.motion_record_button.setBackgroundColor(PoseMakeActivity.this.motion_button_color);
 			}});
 		
+		this.iview = (CompressedImageView) findViewById(R.id.compressed_image_view_pose);
+		RobotBarActivity.image_view_small.relay_iview = this.iview;
 //		this.ll = (LinearLayout) findViewById(R.id.pose_make_footer_layout);
 //		if ( RobotBarActivity.image_view_small != null ){
 //			ViewGroup.LayoutParams p = RobotBarActivity.image_view_small.getLayoutParams();
@@ -90,14 +93,19 @@ public class PoseMakeActivity extends Activity{
 		super.onPause();
 	}
 	
+	public void _onDestroy(){
+		RobotBarActivity.image_view_small.relay_iview = null;
+	}
+	
 	@Override
 	public void onDestroy(){
 		super.onDestroy() ;
+		_onDestroy();
 	}
 	
 	@Override
 	public void finalize() throws Throwable{
-		onDestroy();
+		_onDestroy();
 		super.finalize();
 	}
 	

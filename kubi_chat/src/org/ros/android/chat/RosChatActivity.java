@@ -95,8 +95,10 @@ public class RosChatActivity extends RosDialogActivity implements SurfaceHolder.
 				try {
 					field = rDrawable.getClass().getField(imageName);
 					resId = field.getInt(rDrawable);
+					BitmapFactory.Options options = new  BitmapFactory.Options();
+					// options.inMutable = true;
 					Bitmap image = BitmapFactory.decodeResource(getResources(),
-							resId);
+							resId,options);
 					//
 					ImageButton imageButton = new ImageButton(this);
 					imageButton.setScaleType(ScaleType.FIT_XY);

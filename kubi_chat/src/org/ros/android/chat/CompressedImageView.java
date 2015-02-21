@@ -26,7 +26,8 @@ public class CompressedImageView extends ImageView implements NodeMain {
 	private RosChatNode talker ;
 	private RosChatNode chat ;
 	private String nodename = RosChatActivity.node_name + "/compressed_image_view";
-
+	public CompressedImageView relay_iview = null;
+	public boolean relay = false;
 
 	public CompressedImageView(Context context) {
 		super(context);
@@ -83,15 +84,17 @@ public class CompressedImageView extends ImageView implements NodeMain {
 									CompressedImageView.this.showBitmap
 											.recycle();
 								}
+								BitmapFactory.Options options = new  BitmapFactory.Options();
+								// options.inMutable = true;
 								CompressedImageView.this.showBitmap = BitmapFactory
 										.decodeByteArray(data,
 												buffer.arrayOffset(),
-												buffer.readableBytes());
+												buffer.readableBytes(), options);
 								CompressedImageView.this.setBitmap();
-								setImageBitmap(CompressedImageView.this.showBitmap);
+								// setImageBitmap(CompressedImageView.this.showBitmap);
 							}
 						});
-						postInvalidate();
+						// postInvalidate();
 					}
 				}, 1);
 	}
@@ -102,6 +105,12 @@ public class CompressedImageView extends ImageView implements NodeMain {
 
 	public void setBitmap(Bitmap bmp) {
 		this.showBitmap = bmp ;
+		if ( this.relay_iview != null ){
+			this.relay_iview.setBitmap(bmp);
+		}
+		if (this.relay){ 
+			return;
+		}
 		float aspect = 1.0f * bmp.getWidth() / bmp.getHeight();
 		if (Math.abs(this.aspect - aspect) > 0.01) {
 			this.aspect = aspect;

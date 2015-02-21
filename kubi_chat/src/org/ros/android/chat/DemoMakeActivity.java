@@ -8,7 +8,12 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.view.View;
@@ -104,10 +109,22 @@ public class DemoMakeActivity extends Activity {
 								BitmapDrawable bd = (BitmapDrawable) ib
 										.getDrawable();
 								Bitmap bm = bd.getBitmap();
+								String txt = DemoMakeActivity.this.demo_title_edit.getText().toString();
+								if ( txt.length() > 0 ){
+									Bitmap mutableBitmap = bm.copy(Config.ARGB_8888, true);
+									bm.recycle();
+									bm = mutableBitmap;
+									Canvas cv = new Canvas(bm);  
+									Paint paint = new Paint();
+									paint.setColor(Color.BLACK);
+									setTextSizeForWidth(paint, bm.getWidth(), txt + "  ");
+									cv.drawText(txt, 1, bm.getHeight() - 1, paint);  
+								}
 								ByteArrayOutputStream baos = new ByteArrayOutputStream();
 								bm.compress(CompressFormat.PNG, 50, baos);
 								icon = baos.toByteArray();
 							} catch (Exception e) {
+								e.printStackTrace();
 							}
 							String voice_text = DemoMakeActivity.this.voice_text_edit
 									.getText().toString();
@@ -223,6 +240,16 @@ public class DemoMakeActivity extends Activity {
 				});
 			}
 		}
+	}
+	
+	public void setTextSizeForWidth(Paint paint, float desiredWidth,
+	        String text) {
+	    final float testTextSize = 48f;
+	    paint.setTextSize(testTextSize);
+	    Rect bounds = new Rect();
+	    paint.getTextBounds(text, 0, text.length(), bounds);
+	    float desiredTextSize = testTextSize * desiredWidth / bounds.width();
+	    paint.setTextSize(desiredTextSize);
 	}
 
 	public void updateMotionIcons() {

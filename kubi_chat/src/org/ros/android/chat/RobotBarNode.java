@@ -193,7 +193,9 @@ public class RobotBarNode extends AbstractNodeMain {
 				data = this.rosparam.getString(head + "/" + tag
 						+ "/icon");
 				byte[] icon = Base64.decode(data);
-				img = BitmapFactory.decodeByteArray(icon, 0, icon.length);
+				BitmapFactory.Options options = new  BitmapFactory.Options();
+				// options.inMutable = true;
+				img = BitmapFactory.decodeByteArray(icon, 0, icon.length,options);
 			}
 			if (this.rosparam.has(head + "/" + tag + "/name")) {
 				name = this.rosparam.getString(head + "/" + tag

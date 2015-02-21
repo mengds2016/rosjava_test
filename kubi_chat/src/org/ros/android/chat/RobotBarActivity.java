@@ -175,7 +175,8 @@ public class RobotBarActivity extends RosDialogActivity implements
 		image_view_small.setMessageType(sensor_msgs.CompressedImage._TYPE);
 		image_view_small.setNodeName(node_name
 				+ "/compressed_image_view_small");
-
+		image_view_small.relay = true;
+		
 		this.audio_node = new AudioPubSubNode(node_name);
 
 		this.bottom_notf = (TextView) findViewById(R.id.bottom_notification_text);
