@@ -1,0 +1,11 @@
+<package>
+  <description brief="USBSerial">
+    USBSerial
+  </description>
+  <author>noda</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/USBSerial</url>
+</package>
+
+
