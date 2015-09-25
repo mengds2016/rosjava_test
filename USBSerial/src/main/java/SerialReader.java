@@ -91,14 +91,38 @@ public class SerialReader {
 	}
 
 	public static void main(String[] args) {
-		SerialReader ti = new SerialReader("/dev/ttyUSB1", 9600);
+		final SerialReader t1 = new SerialReader("/dev/ttyUSB0", 9600);
+		final SerialReader t2 = new SerialReader("/dev/ttyUSB1", 9600);
+//		new Thread(new Runnable(){
+//			@Override
+//			public void run(){
+//				while (true) {
+//					try {
+//						System.out.println(":read " + t1.in.read());
+//						Thread.sleep(2);
+//					} catch (InterruptedException e) {
+//						e.printStackTrace();
+//					} catch (IOException e) {
+//						e.printStackTrace();
+//					}
+//				}
+//			}
+//		}).start() ;
+		byte[] buf = new byte[1];
 		while (true) {
 			try {
-				System.out.println(":" + ti.in.read());
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
+				// System.out.println(":write");
+				t1.out.write(0);
+				//t1.out.write('\n');
+				//t1.out.flush();
+				Thread.sleep(1);
+				t1.out.write(1);
+				//t1.out.write('\n');
+				//t1.out.flush();
+				Thread.sleep(1);
+				t1.in.read(buf);
+				System.out.println(":read " + buf[0]);
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
