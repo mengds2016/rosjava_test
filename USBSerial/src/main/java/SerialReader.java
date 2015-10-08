@@ -14,6 +14,8 @@ public class SerialReader {
 	private CommPort cp;
 	private InputStream in;
 	private OutputStream out;
+	private boolean running;
+	private int bit;
 
 	public SerialReader(String id, int rate) {
 		try {
@@ -27,6 +29,8 @@ public class SerialReader {
 			sp.setRTS(false);
 			this.in = sp.getInputStream();
 			this.out = sp.getOutputStream();
+			this.running = true;
+			this.bit = 0;
 			System.out.println(" --- intialized");
 		} catch (NoSuchPortException e) {
 			e.printStackTrace();
@@ -39,6 +43,23 @@ public class SerialReader {
 		}
 	}
 
+	public void putBit(int bit) {
+		try {
+			synchronized (this.out) {
+				this.bit = bit;
+				this.out.write(bit);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public int getBit(){
+		synchronized (this.out) {
+			return this.bit;
+		}
+	}
+	
 	@Override
 	protected void finalize() throws Throwable {
 		try {
@@ -49,13 +70,16 @@ public class SerialReader {
 	}
 
 	public void _finalize() throws IOException {
+		this.running = false;
 		if (this.cp != null) {
 			this.cp.close();
 			this.cp = null;
 		}
-		if (this.in != null) {
-			this.in.close();
-			this.in = null;
+		synchronized (this.in) {
+			if (this.in != null) {
+				this.in.close();
+				this.in = null;
+			}
 		}
 		if (this.out != null) {
 			this.out.close();
@@ -92,36 +116,32 @@ public class SerialReader {
 
 	public static void main(String[] args) {
 		final SerialReader t1 = new SerialReader("/dev/ttyUSB0", 9600);
-		final SerialReader t2 = new SerialReader("/dev/ttyUSB1", 9600);
-//		new Thread(new Runnable(){
-//			@Override
-//			public void run(){
-//				while (true) {
-//					try {
-//						System.out.println(":read " + t1.in.read());
-//						Thread.sleep(2);
-//					} catch (InterruptedException e) {
-//						e.printStackTrace();
-//					} catch (IOException e) {
-//						e.printStackTrace();
-//					}
-//				}
-//			}
-//		}).start() ;
+		// final SerialReader t2 = new SerialReader("/dev/ttyUSB1", 9600);
+		//
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while (t1.running) {
+					try {
+						synchronized (t1.in) {
+							if (t1.in != null)
+								System.out.println(t1.getBit() + " -- " + t1.in.read());
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}).start();
+		//
 		byte[] buf = new byte[1];
+		int ret;
 		while (true) {
 			try {
-				// System.out.println(":write");
-				t1.out.write(0);
-				//t1.out.write('\n');
-				//t1.out.flush();
-				Thread.sleep(1);
-				t1.out.write(1);
-				//t1.out.write('\n');
-				//t1.out.flush();
-				Thread.sleep(1);
-				t1.in.read(buf);
-				System.out.println(":read " + buf[0]);
+				t1.putBit(0x00);
+				Thread.sleep(0, 200);
+				t1.putBit(0x01);
+				Thread.sleep(0, 200);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
