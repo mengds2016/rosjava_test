@@ -86,10 +86,11 @@ public class MouseControlNode extends AbstractNodeMain implements Runnable {
 			this.y = pt.y;
 			this.x0 = val[0];
 			this.y0 = val[1];
-			this.robot.mouseMove(this.x, this.y);
 			//
-			if ( this.last_mouse_time - this.last_down_time < 100 ){
+			if ( this.last_mouse_time - this.last_down_time < 300 ){
 				this.robot.mousePress(InputEvent.BUTTON1_MASK);
+			} else {
+				this.robot.mouseMove(this.x, this.y);
 			}
 			this.last_down_time = this.last_mouse_time;
 			this.release = false;
@@ -103,7 +104,9 @@ public class MouseControlNode extends AbstractNodeMain implements Runnable {
 		if ( event == MouseControlNode.UP || event == MouseControlNode.TP ){
 			this.release = true;
 			this.last_up_time = this.last_mouse_time;
-			if ( event == MouseControlNode.TP ) this.last_down_time = this.last_mouse_time;
+			if ( event == MouseControlNode.TP ) {
+				this.last_down_time = this.last_mouse_time;
+			}
 			this.robot.mouseRelease(InputEvent.BUTTON1_MASK);
 		}
 	}
@@ -120,18 +123,18 @@ public class MouseControlNode extends AbstractNodeMain implements Runnable {
 
 	@Override
 	public void run() {
-		while (this.thr != null) {
-			try {
-				Thread.sleep(10);
-				if (System.currentTimeMillis() - this.last_mouse_time >= 100) {
-					this.robot.mouseRelease(InputEvent.BUTTON1_MASK);
-					this.last_up_time = this.last_mouse_time;
-					this.release = true;
-				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+//		while (this.thr != null) {
+//			try {
+//				Thread.sleep(10);
+//				if (System.currentTimeMillis() - this.last_mouse_time >= 100) {
+//					this.robot.mouseRelease(InputEvent.BUTTON1_MASK);
+//					this.last_up_time = this.last_mouse_time;
+//					this.release = true;
+//				}
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+//		}
 	}
 
 }
