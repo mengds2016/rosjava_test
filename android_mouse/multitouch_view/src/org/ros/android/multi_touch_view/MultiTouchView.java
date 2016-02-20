@@ -9,7 +9,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -117,13 +116,14 @@ public class MultiTouchView extends SurfaceView implements NodeMain, Runnable,
 	@Override
 	public boolean onTouchEvent(MotionEvent e) {
 		myTouchEvent[] touch_events = new myTouchEvent[e.getPointerCount()];
-		System.out.println("[TouchEvent]") ;
+		// System.out.println("[TouchEvent]") ;
 		for (int i = 0; i < touch_events.length; i++) {
 			touch_events[i] = new myTouchEvent(e.getX(i), e.getY(i),
-					e.getPressure(i));
-			System.out.printf("  [%d]: %f %f %f\n", i, e.getX(i), e.getY(i), e.getPressure(i) ) ;
+					e.getPressure(i), e.getAction());
+			// System.out.printf("  [%d]: %f %f %f\n", i, e.getX(i), e.getY(i), e.getPressure(i) ) ;
 		}
 		this.touch_events = touch_events ;
+		this.talker.publish( MultiTouchView.floatArray(this.touch_events) ) ;
 		return true;
 	}
 
@@ -173,20 +173,31 @@ public class MultiTouchView extends SurfaceView implements NodeMain, Runnable,
 	class myTouchEvent {
 		public float x, y;
 		public float pressure;
+		private int event;
+		
+		final static int DN = 0, MV = 1, UP = 2, TP = 3, NG = 4;
 
-		public myTouchEvent(float x, float y, float pressure) {
+		public myTouchEvent(float x, float y, float pressure, int event) {
 			this.x = x;
 			this.y = y;
 			this.pressure = pressure;
+			switch ( event ){
+			case MotionEvent.ACTION_DOWN: this.event = DN ; break;
+			case MotionEvent.ACTION_MOVE: this.event = MV ; break;
+			case MotionEvent.ACTION_UP: this.event = UP ; break;
+			case MotionEvent.ACTION_CANCEL: this.event = TP ; break;			
+			default: this.event = NG ; break;			
+			}
 		}
 	}
 	
 	public static float[] floatArray( myTouchEvent[] elist ){
-		float[] ret = new float[ elist.length * 3 ];
+		float[] ret = new float[ elist.length * 4 ];
 		for ( int i=0 ; i<elist.length ; i++ ){
-			ret[3*i] = elist[i].x ;
-			ret[3*i+1] = elist[i].y ;
-			ret[3*i+2] = elist[i].pressure ;
+			ret[4*i] = elist[i].x ;
+			ret[4*i+1] = elist[i].y ;
+			ret[4*i+2] = elist[i].pressure ;
+			ret[4*i+3] = elist[i].event ;
 		}
 		return ret ;
 	}
@@ -200,7 +211,6 @@ public class MultiTouchView extends SurfaceView implements NodeMain, Runnable,
 			start_time = System.currentTimeMillis() ;
 			
 			if ( this.prev_touch_event != this.touch_events ){
-				this.talker.publish( MultiTouchView.floatArray(this.touch_events) ) ;
 				this.prev_touch_event = this.touch_events ;
 				for (int i = 0; i < this.prev_touch_event.length; i++) {
 					int x = (int) (this.prev_touch_event[i].x / this.pixel_step);
@@ -220,15 +230,15 @@ public class MultiTouchView extends SurfaceView implements NodeMain, Runnable,
 					}
 				}
 			} else {
+			}
+			
+			if ( start_time - this.last_anime_time > this.animation_time_step ) {
+				this.last_anime_time = start_time;
 				for (int w = 0; w < this.presure_map[0].length; w++) {
 					for (int h = 0; h < this.presure_map.length; h++) {
 						this.presure_map[h][w] *= 0.8f ;
 					}
 				}
-			}
-			
-			if ( start_time - this.last_anime_time > this.animation_time_step ) {
-				this.last_anime_time = start_time;
 				this.pressure_draw(this.presure_map);
 			}
 			
@@ -240,10 +250,10 @@ public class MultiTouchView extends SurfaceView implements NodeMain, Runnable,
 					e.printStackTrace();
 				}
 			}
-			System.out.println("[FRAME RATE] "
-					+ (1e+3 / (System.currentTimeMillis() - start_time)) + "[fps]"
-					+ " >> " + (end_time - start_time) + "[ms] vs "
-					+ (1e+3 / this.max_frame_rate) + "[ms]");
+//			System.out.println("[FRAME RATE] "
+//					+ (1e+3 / (System.currentTimeMillis() - start_time)) + "[fps]"
+//					+ " >> " + (end_time - start_time) + "[ms] vs "
+//					+ (1e+3 / this.max_frame_rate) + "[ms]");
 		}
 	}
 }
